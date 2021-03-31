@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <RootNamespace>Reductech.Utilities.SCLEditor</RootNamespace>
+    <AssemblyName>Reductech.Utilities.SCLEditor</AssemblyName>
+    <Version>0.5.0$(VersionSuffix)</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Reductech.Utilities.SCLEditor</PackageId>
+    <Title></Title>
+    <Description></Description>
+    <Product></Product>
+    <PackageTags></PackageTags>
+
+    <PackageProjectUrl>https://gitlab.com/reductech/edr/scl-editor</PackageProjectUrl>
+    <RepositoryUrl>https://gitlab.com/reductech/edr/scl-editor</RepositoryUrl>
+    <PackageReleaseNotes>Please see https://gitlab.com/reductech/edr/scl-editor/-/releases</PackageReleaseNotes>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    
+    <Authors>Reductech</Authors>
+    <Company>Reductech</Company>
+    <Copyright>Copyright (c) 2020 Reductech Ltd</Copyright>
+  </PropertyGroup>
+
+</Project>

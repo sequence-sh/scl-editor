@@ -1,4 +1,4 @@
-namespace Reductech.Templates.DotNetLibrary
+namespace Reductech.Utilities.SCLEditor
 {
 
 public interface IMessageStream
