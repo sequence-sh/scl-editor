@@ -1,0 +1,96 @@
+﻿@using System.IO
+@using System.Text
+<FileSelectList @ref="FileSelectList" IsMultiple="true" FilesSelected="FilesSelectedHandler"></FileSelectList>
+
+<div>
+    <div>
+        <div>
+            <MudButton @onclick="@SelectFiles">Select Files</MudButton>
+        </div>
+        @if (_errorMessage != null)
+        {
+            <div>
+                @_errorMessage
+                <MudButton Icon="@Icons.Filled.Close" @onclick="@CloseErrorAlert">
+                    <span aria-hidden="true">&times;</span>
+                </MudButton>
+            </div>
+        }
+    </div>
+</div>
+
+@if (FileSelectList?.HasSelectedFiles == true)
+{
+    <hr/>
+    <MudTable Items="@FileSelectList.SelectedFiles">
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh>Last Modified</MudTh>
+            <MudTh>Size</MudTh>
+            <MudTh>Length</MudTh>
+            <MudTh>Text</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            @{ var text = FileTextDictionary.TryGetValue(@context.Name, out var t) ? t : ""; }
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+            <MudTd DataLabel="Last Modified">@context.LastModified.ToLocalTime()</MudTd>
+            <MudTd DataLabel="Size">@context.Size</MudTd>
+            <MudTd DataLabel="Length">@text.Length</MudTd>
+            <MudTd DataLabel="Text">@text</MudTd>
+            <MudTd DataLabel="Actions">
+                <MudButton @onclick="@(() => RemoveFile(context.Name))">Remove File</MudButton>
+
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+
+@code {
+
+
+    public FileSelectList FileSelectList;
+
+    public readonly Dictionary<string, string> FileTextDictionary = new(StringComparer.OrdinalIgnoreCase);
+
+    string _errorMessage;
+
+    void SelectFiles()
+    {
+        ResetErrorState();
+
+    // Trigger the file selection dialog
+        FileSelectList.SelectFiles();
+    }
+
+    async Task FilesSelectedHandler(SelectedFile[] selectedFiles)
+    {
+        foreach (var selectedFile in selectedFiles)
+        {
+            await using var fileStream = await FileSelectList.OpenFileStreamAsync(selectedFile.Name);
+            var buffer = new MemoryStream();
+            await fileStream.CopyToAsync(buffer);
+            var text = Encoding.UTF8.GetString(buffer.ToArray());
+
+            FileTextDictionary[selectedFile.Name] = text;
+        }
+    }
+
+    void RemoveFile(string fileName)
+    {
+        FileSelectList.RemoveFile(fileName);
+        FileTextDictionary.Remove(fileName);
+    }
+
+    void CloseErrorAlert()
+    {
+        ResetErrorState();
+    }
+
+    void ResetErrorState()
+    {
+        _errorMessage = null;
+    }
+
+}

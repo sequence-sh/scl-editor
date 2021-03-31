@@ -19,7 +19,7 @@
     <RepositoryUrl>https://gitlab.com/reductech/edr/scl-editor</RepositoryUrl>
     <PackageReleaseNotes>Please see https://gitlab.com/reductech/edr/scl-editor/-/releases</PackageReleaseNotes>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    
+
     <Authors>Reductech</Authors>
     <Company>Reductech</Company>
     <Copyright>Copyright (c) 2020 Reductech Ltd</Copyright>

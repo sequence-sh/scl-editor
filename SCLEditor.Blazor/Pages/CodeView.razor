@@ -1,0 +1,43 @@
+﻿@using Reductech.EDR.Core.Internal.Serialization
+@using Microsoft.Extensions.Logging.Abstractions
+@using Reductech.EDR.Core.ExternalProcesses
+@using Reductech.EDR.Core.Internal
+@using System.Threading
+@using CSharpFunctionalExtensions
+@using JetBrains.Annotations
+@using Microsoft.Extensions.Logging
+@using Reductech.EDR.Core.Internal.Parser
+@using System.IO
+
+
+<MudTabs>
+    <MudTabPanel Text="SCL">
+        <MudTextField T="string"
+                      Variant="Variant.Text"
+                      Placeholder="Type Code Here"
+                      Lines="10"
+                      @bind-Value="SCLText"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.PlayArrow"
+                      OnAdornmentClick="@Run"/>
+
+        @if (CancellationTokenSource != null)
+        {
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+        }
+        <MudDivider/>
+
+        <MudTextField
+            Value="@consoleStringBuilder.ToString()"
+            Label="Output"
+            ReadOnly="true"
+            Variant="Variant.Outlined"
+            Lines="10"
+            AdornmentIcon="@Icons.Material.Filled.Clear"
+            Adornment="Adornment.End"
+            OnAdornmentClick="() => consoleStringBuilder.Clear()"/>
+    </MudTabPanel>
+    <MudTabPanel Text="Files">
+        <FileSelection @ref="FileSelection"/>
+    </MudTabPanel>
+</MudTabs>
