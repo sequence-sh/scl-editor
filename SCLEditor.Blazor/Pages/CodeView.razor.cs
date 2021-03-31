@@ -23,7 +23,8 @@ public partial class CodeView
 {
     public string SCLText { get; set; } = "";
 
-    private FileSelection FileSelection;
+    private Dictionary<string, BrowserFile> FileDictionary =
+        new(StringComparer.OrdinalIgnoreCase);
 
     private StringBuilder consoleStringBuilder = new();
 
@@ -44,13 +45,18 @@ public partial class CodeView
 
     public IExternalContext GetExternalContext()
     {
-        var fileSystem = new FileSelectionFileSystem(FileSelection);
+        var fileSystem = new FileSelectionFileSystem(FileDictionary);
 
         return new ExternalContext(
             fileSystem,
             ExternalContext.Default.ExternalProcessRunner,
             ExternalContext.Default.Console
         );
+    }
+
+    public void SetSCL(string s)
+    {
+        SCLText = s;
     }
 
     public async Task Run()

@@ -38,6 +38,6 @@
             OnAdornmentClick="() => consoleStringBuilder.Clear()"/>
     </MudTabPanel>
     <MudTabPanel Text="Files">
-        <FileSelection @ref="FileSelection"/>
+        <FileSelection Files='@FileDictionary' SetSCLAction='@SetSCL'/>
     </MudTabPanel>
 </MudTabs>

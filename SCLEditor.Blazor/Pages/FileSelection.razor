@@ -1,96 +1,90 @@
-﻿@using System.IO
-@using System.Text
-<FileSelectList @ref="FileSelectList" IsMultiple="true" FilesSelected="FilesSelectedHandler"></FileSelectList>
+﻿@using JetBrains.Annotations
+@using System.IO
+<style>
+  .drag-drop-zone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .4s;
+    min-height: 400px;
+  }
 
-<div>
-    <div>
-        <div>
-            <MudButton @onclick="@SelectFiles">Select Files</MudButton>
-        </div>
-        @if (_errorMessage != null)
-        {
-            <div>
-                @_errorMessage
-                <MudButton Icon="@Icons.Filled.Close" @onclick="@CloseErrorAlert">
-                    <span aria-hidden="true">&times;</span>
-                </MudButton>
-            </div>
-        }
-    </div>
-</div>
+  .drag-drop-input {
+    position: absolute;
+    width: 100%;
+    height: 90%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+  }
 
-@if (FileSelectList?.HasSelectedFiles == true)
-{
-    <hr/>
-    <MudTable Items="@FileSelectList.SelectedFiles">
-        <HeaderContent>
-            <MudTh>Name</MudTh>
-            <MudTh>Last Modified</MudTh>
-            <MudTh>Size</MudTh>
-            <MudTh>Length</MudTh>
-            <MudTh>Text</MudTh>
-            <MudTh>Actions</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            @{ var text = FileTextDictionary.TryGetValue(@context.Name, out var t) ? t : ""; }
-            <MudTd DataLabel="Name">@context.Name</MudTd>
-            <MudTd DataLabel="Last Modified">@context.LastModified.ToLocalTime()</MudTd>
-            <MudTd DataLabel="Size">@context.Size</MudTd>
-            <MudTd DataLabel="Length">@text.Length</MudTd>
-            <MudTd DataLabel="Text">@text</MudTd>
-            <MudTd DataLabel="Actions">
-                <MudButton @onclick="@(() => RemoveFile(context.Name))">Remove File</MudButton>
+  .drag-enter { box-shadow: var(--mud-elevation-10); }
 
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-}
+  .list {
+    padding: 2em;
+    min-width: 100%;
+  }
+</style>
 
+<MudPaper @ondragenter="@(() => _dragEnterStyle = "drag-enter")"
+           @ondragleave="@(() => _dragEnterStyle = null)"
+           @ondragend="@(() => _dragEnterStyle = null)"
+           Class=@("drag-drop-zone " + _dragEnterStyle)>
+
+  <InputFile OnChange="OnInputFileChanged" multiple class="drag-drop-input"/>
+
+  <MudIcon Icon='@Icons.Material.Filled.UploadFile'></MudIcon>
+</MudPaper>
+
+<MudList Style="padding: 2em; width: 100%;" Dense="true">
+  @foreach (var file in Files)
+  {
+    <MudListItem @key="@file.Key">
+      <MudMenu Label="@file.Key">
+        <MudMenuItem OnClick='() => Files.Remove(file.Key)'>Remove</MudMenuItem>
+        <MudMenuItem OnClick='() => SetSCL(file.Key)'>SetSCL</MudMenuItem>
+      </MudMenu>
+    </MudListItem>
+  }
+</MudList>
+
+<MudGrid Justify="Justify.Center" Spacing="4">
+  <MudItem>
+    <MudButton OnClick="@Files.Clear" Disabled="@(!Files.Any())" Color="Color.Error" Variant="Variant.Filled">Clear</MudButton>
+  </MudItem>
+</MudGrid>
 
 @code {
+  string _dragEnterStyle;
+
+  [Parameter]
+  public IDictionary<string, BrowserFile> Files { get; set; }
+
+  [Parameter]
+  public Action<string> SetSCLAction { get; set; }
+
+  void SetSCL(string fileName)
+  {
+    var file = Files[fileName];
+    SetSCLAction(file.Text);
+  }
 
 
-    public FileSelectList FileSelectList;
 
-    public readonly Dictionary<string, string> FileTextDictionary = new(StringComparer.OrdinalIgnoreCase);
+  async Task OnInputFileChanged(InputFileChangeEventArgs e)
+  {
+    var files = e.GetMultipleFiles();
 
-    string _errorMessage;
-
-    void SelectFiles()
+    foreach (var browserFile in files)
     {
-        ResetErrorState();
+      using var reader = new StreamReader(browserFile.OpenReadStream());
 
-    // Trigger the file selection dialog
-        FileSelectList.SelectFiles();
+      var text = await reader.ReadToEndAsync();
+      var bf = new BrowserFile(browserFile.Name, text, browserFile.ContentType, browserFile.LastModified, browserFile.Size);
+      Files[browserFile.Name] = bf;
     }
 
-    async Task FilesSelectedHandler(SelectedFile[] selectedFiles)
-    {
-        foreach (var selectedFile in selectedFiles)
-        {
-            await using var fileStream = await FileSelectList.OpenFileStreamAsync(selectedFile.Name);
-            var buffer = new MemoryStream();
-            await fileStream.CopyToAsync(buffer);
-            var text = Encoding.UTF8.GetString(buffer.ToArray());
 
-            FileTextDictionary[selectedFile.Name] = text;
-        }
-    }
-
-    void RemoveFile(string fileName)
-    {
-        FileSelectList.RemoveFile(fileName);
-        FileTextDictionary.Remove(fileName);
-    }
-
-    void CloseErrorAlert()
-    {
-        ResetErrorState();
-    }
-
-    void ResetErrorState()
-    {
-        _errorMessage = null;
-    }
+  }
 
 }
