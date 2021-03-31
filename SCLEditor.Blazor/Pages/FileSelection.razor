@@ -61,12 +61,12 @@
   public IDictionary<string, BrowserFile> Files { get; set; }
 
   [Parameter]
-  public Action<string> SetSCLAction { get; set; }
+  public Func<string, Task> SetSCLAction { get; set; }
 
-  void SetSCL(string fileName)
+  async Task SetSCL(string fileName)
   {
     var file = Files[fileName];
-    SetSCLAction(file.Text);
+    await SetSCLAction(file.Text);
   }
 
 

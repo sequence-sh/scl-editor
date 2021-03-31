@@ -5,10 +5,13 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using BlazorMonaco;
 using CSharpFunctionalExtensions;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.JSInterop;
 using Reductech.EDR.Core;
 using Reductech.EDR.Core.Abstractions;
 using Reductech.EDR.Core.Internal;
@@ -21,18 +24,40 @@ namespace Reductech.Utilities.SCLEditor.Blazor.Pages
 
 public partial class CodeView
 {
-    public string SCLText { get; set; } = "";
+    //public string SCLText { get; set; } = "";
 
-    private Dictionary<string, BrowserFile> FileDictionary =
+    [Inject] public IJSRuntime Runtime { get; set; }
+
+    private MonacoEditor _editor;
+
+    private readonly Dictionary<string, BrowserFile> _fileDictionary =
         new(StringComparer.OrdinalIgnoreCase);
 
-    private StringBuilder consoleStringBuilder = new();
+    private StringBuilder _consoleStringBuilder = new();
 
     /// <inheritdoc />
     protected override void OnInitialized()
     {
-        Console.SetOut(new StringWriter(consoleStringBuilder));
+        Console.SetOut(new StringWriter(_consoleStringBuilder));
         base.OnInitialized();
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await MonacoEditorBase.SetTheme("vs-dark");
+
+            await Runtime.InvokeVoidAsync(
+                "registerSCL"
+            ); // The function in index.html is called that
+
+            var model = await _editor.GetModel();
+            await MonacoEditorBase.SetModelLanguage(model, "scl");
+        }
+
+        await base.OnInitializedAsync();
     }
 
     [CanBeNull] public CancellationTokenSource? CancellationTokenSource { get; set; }
@@ -45,7 +70,7 @@ public partial class CodeView
 
     public IExternalContext GetExternalContext()
     {
-        var fileSystem = new FileSelectionFileSystem(FileDictionary);
+        var fileSystem = new FileSelectionFileSystem(_fileDictionary);
 
         return new ExternalContext(
             fileSystem,
@@ -54,20 +79,21 @@ public partial class CodeView
         );
     }
 
-    public void SetSCL(string s)
+    public async Task SetSCL(string s)
     {
-        SCLText = s;
+        await _editor.SetValue(s);
     }
 
     public async Task Run()
     {
-        //Output = "";
+        var sclText = await _editor.GetValue();
+
         CancellationTokenSource?.Cancel();
         var cts = new CancellationTokenSource();
         CancellationTokenSource = cts;
 
         var result = await RunSequenceFromTextAsync(
-            SCLText,
+            sclText,
             SCLSettings.EmptySettings,
             GetExternalContext(),
             NullLogger.Instance,
@@ -78,15 +104,15 @@ public partial class CodeView
         CancellationTokenSource = null;
 
         if (result is Unit)
-            consoleStringBuilder.AppendLine("Sequence Completed Successfully");
+            _consoleStringBuilder.AppendLine("Sequence Completed Successfully");
         else
         {
-            consoleStringBuilder.AppendLine(
+            _consoleStringBuilder.AppendLine(
                 $"Sequence Completed Successfully with result: '{result}'"
             );
         }
 
-        consoleStringBuilder.AppendLine();
+        _consoleStringBuilder.AppendLine();
     }
 
     public async Task<object> RunSequenceFromTextAsync(
@@ -117,6 +143,14 @@ public partial class CodeView
             return runResult.Error.AsString;
 
         return runResult.Value;
+    }
+
+    private StandaloneEditorConstructionOptions EditorConstructionOptions(MonacoEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+        {
+            AutomaticLayout = true, Language = "scl", Value = "print 123"
+        };
     }
 }
 
