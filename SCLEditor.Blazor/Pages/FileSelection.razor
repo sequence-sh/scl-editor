@@ -1,0 +1,102 @@
+﻿@using JetBrains.Annotations
+@using System.IO
+@using System.Threading
+@using BlazorDownloadFile
+
+
+<InputFile id='fileInput112' OnChange="OnInputFileChanged" hidden multiple/>
+
+<MudButton HtmlTag="label"
+           Variant="Variant.Filled"
+           Color="Color.Primary"
+           StartIcon="@Icons.Filled.CloudUpload"
+           for="fileInput112">
+  Upload File
+</MudButton>
+
+
+<MudTable Items="@Files.Values" Hover="true" Breakpoint="Breakpoint.Sm">
+  <HeaderContent>
+    <MudTh>Name</MudTh>
+    <MudTh>Text</MudTh>
+    <MudTh>ContentType</MudTh>
+    <MudTh>LastModified</MudTh>
+    <MudTh>Size</MudTh>
+    <MudTh>Open</MudTh>
+    <MudTh>Download</MudTh>
+    <MudTh>Remove</MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd DataLabel="Name">@context.Name</MudTd>
+    <MudTd DataLabel="Text">@Truncate(context.Text.GetString(), 100)</MudTd>
+    <MudTd DataLabel="ContentType">@context.MimeType</MudTd>
+    <MudTd DataLabel="LastModified">@context.Modified.ToLocalTime()</MudTd>
+    <MudTd DataLabel="Size">@context.Size</MudTd>
+    <MudTd DataLabel="Open">
+      <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' OnClick='() => SetSCL(context.Name)'/>
+    </MudTd>
+    <MudTd DataLabel="Download">
+      <MudIconButton Icon='@Icons.Material.Filled.FileDownload' OnClick='() => Download(context.Name)'/>
+    </MudTd>
+    <MudTd DataLabel="Remove">
+      <MudIconButton Icon='@Icons.Material.Filled.Delete' OnClick='() => Files.Remove(context.Name)'/>
+    </MudTd>
+  </RowTemplate>
+</MudTable>
+
+<MudGrid Justify="Justify.Center" Spacing="4">
+  <MudItem>
+    <MudButton OnClick="@Files.Clear" Disabled="@(!Files.Any())" Color="Color.Error" Variant="Variant.Filled">Clear</MudButton>
+  </MudItem>
+</MudGrid>
+
+@code {
+  string _dragEnterStyle;
+
+  [Parameter]
+  public IDictionary<string, BrowserFile> Files { get; set; }
+
+  [Parameter]
+  public Func<string, Task> SetSCLAction { get; set; }
+
+  [Inject]
+  IBlazorDownloadFileService BlazorDownloadFileService { get; set; }
+
+  async Task Download(string fileName)
+  {
+    var file = Files[fileName];
+    await BlazorDownloadFileService.DownloadFileFromText(fileName, await file.Text.GetStringAsync(), "text/plain");
+  }
+
+  async Task SetSCL(string fileName)
+  {
+    var file = Files[fileName];
+    await SetSCLAction(await file.Text.GetStringAsync());
+  }
+
+  public static string Truncate(string value, int maxLength)
+  {
+    if (string.IsNullOrEmpty(value))
+      return value;
+
+    if (value.Length <= maxLength)
+      return value;
+    else
+      return value.Substring(0, maxLength) + "...";
+  }
+
+  async Task OnInputFileChanged(InputFileChangeEventArgs e)
+  {
+    var files = e.GetMultipleFiles();
+
+    foreach (var browserFile in files)
+    {
+      using var reader = new StreamReader(browserFile.OpenReadStream());
+
+      var text = await reader.ReadToEndAsync();
+      var bf = new BrowserFile(browserFile.Name, text, browserFile.ContentType, browserFile.LastModified, browserFile.Size);
+      Files[browserFile.Name] = bf;
+    }
+  }
+
+}

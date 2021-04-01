@@ -1,0 +1,53 @@
+﻿@using Reductech.EDR.Core.Internal.Serialization
+@using Microsoft.Extensions.Logging.Abstractions
+@using Reductech.EDR.Core.ExternalProcesses
+@using Reductech.EDR.Core.Internal
+@using System.Threading
+@using CSharpFunctionalExtensions
+@using JetBrains.Annotations
+@using Microsoft.Extensions.Logging
+@using Reductech.EDR.Core.Internal.Parser
+@using System.IO
+
+<MonacoEditor Id="scl-monaco" @ref="_editor" ConstructionOptions="EditorConstructionOptions"/>
+@if (CancellationTokenSource != null)
+{
+  <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="Cancel"/>
+}
+else
+{
+  <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
+}
+
+<MudTextField
+  Value="@_consoleStringBuilder.ToString()"
+  Label="Output"
+  ReadOnly="true"
+  Variant="Variant.Outlined"
+  Lines="10"
+  AdornmentIcon="@Icons.Material.Filled.Clear"
+  Adornment="Adornment.End"
+  OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
+
+<MudTextField
+  Value="@LogText()"
+  Label="Log"
+  ReadOnly="true"
+  Variant="Variant.Outlined"
+  Lines="10"
+  AdornmentIcon="@Icons.Material.Filled.Clear"
+  Adornment="Adornment.End"
+  OnAdornmentClick="@ClearLogs"/>
+
+<MudExpansionPanels>
+  <MudExpansionPanel Text='Files'>
+    <FileSelection Files='@_fileDictionary' SetSCLAction='@SetSCL'/>
+  </MudExpansionPanel>
+</MudExpansionPanels>
+
+
+<style>
+  .monaco-editor-container { height: 500px; }
+
+
+</style>
