@@ -6,11 +6,11 @@
     align-items: center;
     justify-content: center;
     transition: all .4s;
-    min-height: 400px;
+    min-height: 100px;
   }
 
   .drag-drop-input {
-    position: absolute;
+    position: relative;
     width: 100%;
     height: 90%;
     opacity: 0;
@@ -36,17 +36,28 @@
   <MudIcon Icon='@Icons.Material.Filled.UploadFile'></MudIcon>
 </MudPaper>
 
-<MudList Style="padding: 2em; width: 100%;" Dense="true">
-  @foreach (var file in Files)
-  {
-    <MudListItem @key="@file.Key">
-      <MudMenu Label="@file.Key">
-        <MudMenuItem OnClick='() => Files.Remove(file.Key)'>Remove</MudMenuItem>
-        <MudMenuItem OnClick='() => SetSCL(file.Key)'>SetSCL</MudMenuItem>
-      </MudMenu>
-    </MudListItem>
-  }
-</MudList>
+
+<MudTable Items="@Files.Values" Hover="true" Breakpoint="Breakpoint.Sm">
+  <HeaderContent>
+    <MudTh>Name</MudTh>
+    <MudTh>Text</MudTh>
+    <MudTh>ContentType</MudTh>
+    <MudTh>LastModified</MudTh>
+    <MudTh>Size</MudTh>
+    <MudTh>Actions</MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd DataLabel="Name">@context.Name</MudTd>
+    <MudTd DataLabel="Text">@Truncate( context.Text, 100)</MudTd>
+    <MudTd DataLabel="ContentType">@context.MimeType</MudTd>
+    <MudTd DataLabel="LastModified">@context.Modified.ToLocalTime()</MudTd>
+    <MudTd DataLabel="Size">@context.Size</MudTd>
+    <MudTd DataLabel="Actions">
+      <MudIconButton Icon='@Icons.Material.Filled.Remove' OnClick='() => Files.Remove(context.Name)'/>
+      <MudIconButton Icon='@Icons.Material.Filled.Usb' OnClick='() => SetSCL(context.Name)'/>
+    </MudTd>
+  </RowTemplate>
+</MudTable>
 
 <MudGrid Justify="Justify.Center" Spacing="4">
   <MudItem>
@@ -69,7 +80,16 @@
     await SetSCLAction(file.Text);
   }
 
+  public static string Truncate(string value, int maxLength)
+  {
+    if (string.IsNullOrEmpty(value))
+      return value;
 
+    if (value.Length <= maxLength)
+      return value;
+    else
+      return value.Substring(0, maxLength) + "...";
+  }
 
   async Task OnInputFileChanged(InputFileChangeEventArgs e)
   {
@@ -83,8 +103,6 @@
       var bf = new BrowserFile(browserFile.Name, text, browserFile.ContentType, browserFile.LastModified, browserFile.Size);
       Files[browserFile.Name] = bf;
     }
-
-
   }
 
 }
