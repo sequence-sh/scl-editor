@@ -1,40 +1,18 @@
 ﻿@using JetBrains.Annotations
 @using System.IO
-<style>
-  .drag-drop-zone {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all .4s;
-    min-height: 100px;
-  }
+@using System.Threading
+@using BlazorDownloadFile
 
-  .drag-drop-input {
-    position: relative;
-    width: 100%;
-    height: 90%;
-    opacity: 0;
-    cursor: pointer;
-    z-index: 2;
-  }
 
-  .drag-enter { box-shadow: var(--mud-elevation-10); }
+<InputFile id='fileInput112' OnChange="OnInputFileChanged" hidden multiple/>
 
-  .list {
-    padding: 2em;
-    min-width: 100%;
-  }
-</style>
-
-<MudPaper @ondragenter="@(() => _dragEnterStyle = "drag-enter")"
-           @ondragleave="@(() => _dragEnterStyle = null)"
-           @ondragend="@(() => _dragEnterStyle = null)"
-           Class=@("drag-drop-zone " + _dragEnterStyle)>
-
-  <InputFile OnChange="OnInputFileChanged" multiple class="drag-drop-input"/>
-
-  <MudIcon Icon='@Icons.Material.Filled.UploadFile'></MudIcon>
-</MudPaper>
+<MudButton HtmlTag="label"
+           Variant="Variant.Filled"
+           Color="Color.Primary"
+           StartIcon="@Icons.Filled.CloudUpload"
+           for="fileInput112">
+  Upload File
+</MudButton>
 
 
 <MudTable Items="@Files.Values" Hover="true" Breakpoint="Breakpoint.Sm">
@@ -44,17 +22,24 @@
     <MudTh>ContentType</MudTh>
     <MudTh>LastModified</MudTh>
     <MudTh>Size</MudTh>
-    <MudTh>Actions</MudTh>
+    <MudTh>Open</MudTh>
+    <MudTh>Download</MudTh>
+    <MudTh>Remove</MudTh>
   </HeaderContent>
   <RowTemplate>
     <MudTd DataLabel="Name">@context.Name</MudTd>
-    <MudTd DataLabel="Text">@Truncate( context.Text, 100)</MudTd>
+    <MudTd DataLabel="Text">@Truncate(context.Text.GetString(), 100)</MudTd>
     <MudTd DataLabel="ContentType">@context.MimeType</MudTd>
     <MudTd DataLabel="LastModified">@context.Modified.ToLocalTime()</MudTd>
     <MudTd DataLabel="Size">@context.Size</MudTd>
-    <MudTd DataLabel="Actions">
-      <MudIconButton Icon='@Icons.Material.Filled.Remove' OnClick='() => Files.Remove(context.Name)'/>
-      <MudIconButton Icon='@Icons.Material.Filled.Usb' OnClick='() => SetSCL(context.Name)'/>
+    <MudTd DataLabel="Open">
+      <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' OnClick='() => SetSCL(context.Name)'/>
+    </MudTd>
+    <MudTd DataLabel="Download">
+      <MudIconButton Icon='@Icons.Material.Filled.FileDownload' OnClick='() => Download(context.Name)'/>
+    </MudTd>
+    <MudTd DataLabel="Remove">
+      <MudIconButton Icon='@Icons.Material.Filled.Delete' OnClick='() => Files.Remove(context.Name)'/>
     </MudTd>
   </RowTemplate>
 </MudTable>
@@ -74,10 +59,19 @@
   [Parameter]
   public Func<string, Task> SetSCLAction { get; set; }
 
+  [Inject]
+  IBlazorDownloadFileService BlazorDownloadFileService { get; set; }
+
+  async Task Download(string fileName)
+  {
+    var file = Files[fileName];
+    await BlazorDownloadFileService.DownloadFileFromText(fileName, await file.Text.GetStringAsync(), "text/plain");
+  }
+
   async Task SetSCL(string fileName)
   {
     var file = Files[fileName];
-    await SetSCLAction(file.Text);
+    await SetSCLAction(await file.Text.GetStringAsync());
   }
 
   public static string Truncate(string value, int maxLength)

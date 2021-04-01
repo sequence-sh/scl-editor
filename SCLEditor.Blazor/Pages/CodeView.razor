@@ -8,62 +8,46 @@
 @using Microsoft.Extensions.Logging
 @using Reductech.EDR.Core.Internal.Parser
 @using System.IO
-@using System.Drawing
 
+<MonacoEditor Id="scl-monaco" @ref="_editor" ConstructionOptions="EditorConstructionOptions"/>
+@if (CancellationTokenSource != null)
+{
+  <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="Cancel"/>
+}
+else
+{
+  <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
+}
 
+<MudTextField
+  Value="@_consoleStringBuilder.ToString()"
+  Label="Output"
+  ReadOnly="true"
+  Variant="Variant.Outlined"
+  Lines="10"
+  AdornmentIcon="@Icons.Material.Filled.Clear"
+  Adornment="Adornment.End"
+  OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
 
+<MudTextField
+  Value="@LogText()"
+  Label="Log"
+  ReadOnly="true"
+  Variant="Variant.Outlined"
+  Lines="10"
+  AdornmentIcon="@Icons.Material.Filled.Clear"
+  Adornment="Adornment.End"
+  OnAdornmentClick="@ClearLogs"/>
 
-<MudTabs>
-
-  <MudTabPanel Text='Monaco'>
-    <MonacoEditor Id="scl-monaco" @ref="_editor"  ConstructionOptions="EditorConstructionOptions"/>
-
-    <MudDivider/>
-
-    @if (CancellationTokenSource != null)
-    {
-      <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="Cancel"/>
-    }
-    else
-    {
-      <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
-    }
-    <MudDivider/>
-
-    <MudTextField
-      Value="@_consoleStringBuilder.ToString()"
-      Label="Output"
-      ReadOnly="true"
-      Variant="Variant.Outlined"
-      Lines="10"
-      AdornmentIcon="@Icons.Material.Filled.Clear"
-      Adornment="Adornment.End"
-      OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
-
-  </MudTabPanel>
-  <!--<MudTabPanel Text="SCL">-->
-    @*<MudTextField T="string"
-                  Variant="Variant.Text"
-                  Placeholder="Type Code Here"
-                  Lines="10"
-                  @bind-Value="SCLText"
-                  Adornment="Adornment.Start"
-                  AdornmentIcon="@Icons.Material.Filled.PlayArrow"
-                  OnAdornmentClick="@Run"/>*@
-
-
-  <!--</MudTabPanel>-->
-
-
-
-  <MudTabPanel Text="Files">
+<MudExpansionPanels>
+  <MudExpansionPanel Text='Files'>
     <FileSelection Files='@_fileDictionary' SetSCLAction='@SetSCL'/>
-  </MudTabPanel>
-</MudTabs>
+  </MudExpansionPanel>
+</MudExpansionPanels>
 
 
 <style>
-  .monaco-editor-container { height:500px; }
+  .monaco-editor-container { height: 500px; }
 
 
 </style>

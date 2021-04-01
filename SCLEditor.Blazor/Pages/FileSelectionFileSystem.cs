@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components.Forms;
+using System.Xml.Schema;
+using Reductech.EDR.Core;
 using Reductech.EDR.Core.Abstractions;
+using Reductech.EDR.Core.Enums;
 using Reductech.EDR.Core.ExternalProcesses;
 using Thinktecture;
 using Thinktecture.IO;
@@ -16,13 +20,13 @@ namespace Reductech.Utilities.SCLEditor.Blazor.Pages
 
 public record BrowserFile(
     string Name,
-    string Text,
+    StringStream Text,
     string MimeType,
     DateTimeOffset Modified,
     long Size);
 
 public record FileSelectionFileSystem
-    (Dictionary<string, BrowserFile> Dictionary) : IFileSystem, IDirectory, IFile
+    (ConcurrentDictionary<string, BrowserFile> Dictionary) : IFileSystem, IDirectory, IFile
 {
     /// <inheritdoc />
     public IDirectory Directory => this;
@@ -279,19 +283,117 @@ public record FileSelectionFileSystem
     /// <inheritdoc />
     public IFileStream Create(string path)
     {
-        throw new NotImplementedException();
+        return Create(path, 4096);
     }
 
     /// <inheritdoc />
     public IFileStream Create(string path, int bufferSize)
     {
-        throw new NotImplementedException();
+        return Create(path, bufferSize, FileOptions.None);
     }
 
     /// <inheritdoc />
     public IFileStream Create(string path, int bufferSize, FileOptions options)
     {
-        throw new NotImplementedException();
+        var stream1    = new MemoryStream();
+        var fileStream = new FakeFileStreamAdapter(stream1);
+        var stream2    = new MemoryStream();
+
+        var copier = new AsyncStreamCopier(stream1, stream2, bufferSize);
+
+        copier.Completed += (s, e) =>
+
+        {
+            Dictionary[path] = new BrowserFile(
+                path,
+                new StringStream(stream2, EncodingEnum.UTF8),
+                "text/plain",
+                DateTimeOffset.Now,
+                stream2.Length
+            );
+        };
+
+        copier.Start();
+
+        return fileStream;
+    }
+
+    private class AsyncStreamCopier
+    {
+        public event EventHandler Completed;
+
+        private readonly Stream _input;
+        private readonly Stream _output;
+
+        private readonly byte[] _buffer;
+
+        public AsyncStreamCopier(Stream input, Stream output, int bufferSize)
+        {
+            _input  = input;
+            _output = output;
+            _buffer = new byte[bufferSize];
+        }
+
+        public void Start()
+        {
+            GetNextChunk();
+        }
+
+        private void GetNextChunk()
+        {
+            _input.BeginRead(_buffer, 0, _buffer.Length, InputReadComplete, null);
+        }
+
+        private void InputReadComplete(IAsyncResult ar)
+        {
+            if (!_input.CanRead)
+            {
+                var bufferField =
+                    _input.GetType()
+                        .GetField(
+                            "_buffer",
+                            BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance
+                        );
+
+                var lengthField =
+                    _input.GetType()
+                        .GetField(
+                            "_length",
+                            BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance
+                        );
+
+                byte[] dBuffer = (byte[])bufferField.GetValue(_input);
+                int    len     = (int)lengthField.GetValue(_input);
+
+                _output.Write(dBuffer, 0, len);
+
+                RaiseCompleted();
+                return;
+            }
+
+            // input read asynchronously completed
+            var bytesRead = _input.EndRead(ar);
+
+            if (bytesRead == 0)
+            {
+                RaiseCompleted();
+                return;
+            }
+
+            // write synchronously
+            _output.Write(_buffer, 0, bytesRead);
+
+            // get next
+            GetNextChunk();
+        }
+
+        private void RaiseCompleted()
+        {
+            if (Completed != null)
+            {
+                Completed(this, EventArgs.Empty);
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -387,7 +489,7 @@ public record FileSelectionFileSystem
     /// <inheritdoc />
     public IFileStream Open(string path, FileMode mode, FileAccess access, FileShare share)
     {
-        return new FakeFileStreamAdapter(Dictionary[path].Text);
+        return new FakeFileStreamAdapter(Dictionary[path].Text.GetString());
     }
 
     /// <inheritdoc />
@@ -441,7 +543,7 @@ public record FileSelectionFileSystem
     /// <inheritdoc />
     public string ReadAllText(string path, IEncoding encoding)
     {
-        return Dictionary[path].Text;
+        return Dictionary[path].Text.GetString();
     }
 
     /// <inheritdoc />
