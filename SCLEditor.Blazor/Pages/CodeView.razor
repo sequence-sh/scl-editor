@@ -14,7 +14,15 @@
   <MudItem xs='12' lg='6'>
     
     <MudPaper Class="pa-16 ma-2" Square="true">
-      <MonacoEditor Id="scl-monaco" @ref="_editor" ConstructionOptions="EditorConstructionOptions"/>
+      
+      <MudMenu Label='Examples' s>
+        @foreach (var example in SCLExample.All)
+        {
+          <MudMenuItem OnClick='_ => SetSCL(example.Text)' >@example.Name</MudMenuItem>
+        }
+
+      </MudMenu>
+      <MonacoEditor Id="scl-monaco" @ref="_sclEditor" ConstructionOptions="SCLEditorConstructionOptions"/>
       @if (CancellationTokenSource != null)
       {
         <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="Cancel"/>
@@ -30,53 +38,66 @@
   </MudItem>
   
   <MudItem xs='12' lg='6'>
-    <MudTextField FullWidth='true'
-                  Value="@_consoleStringBuilder.ToString()"
-                  Label="Output"
-                  ReadOnly="true"
-                  Variant="Variant.Outlined"
-                  Lines="10"
-                  AdornmentIcon="@Icons.Material.Filled.Clear"
-                  Adornment="Adornment.End"
-                  Style='width:100%'
-                  OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
+    
+    <MudExpansionPanels MultiExpansion='true'>
       
-    <MudTextField FullWidth='true'
-                  Value="@LogText()"
-                  Label="Log"
-                  ReadOnly="true"
-                  Variant="Variant.Outlined"
-                  Lines="10"
-                  AdornmentIcon="@Icons.Material.Filled.Clear"
-                  Adornment="Adornment.End"
-                  Style='width:100%'
-                  OnAdornmentClick="@ClearLogs"/>
+      <MudExpansionPanel @bind-IsExpanded='InputFileExpanded'>
+        @if(_fileSelection?.SelectedFile is not null)
+                {
+                  <MonacoEditor Id='file-monaco' @ref="_fileEditor" ConstructionOptions='FileEditorConstructionOptions' />
+                }
+            </MudExpansionPanel>
 
-  </MudItem>
-  
+      <MudExpansionPanel @bind-IsExpanded='OutputExpanded'>
+        <MudTextField FullWidth='true'
+                      Value="@_consoleStringBuilder.ToString()"
+                      Label="Output"
+                      ReadOnly="true"
+                      Variant="Variant.Outlined"
+                      Lines="10"
+                      AdornmentIcon="@Icons.Material.Filled.Clear"
+                      Adornment="Adornment.End"
+                      Style='width: 100%'
+                      OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
+      </MudExpansionPanel>
 
-  
-  <MudItem xs='12'>
-    <MudExpansionPanels>
-      <MudExpansionPanel Text='Files'>
-        <FileSelection FileSystem='@_fileSystem' SetSCLAction='@SetSCL'/>
+      <MudExpansionPanel @bind-IsExpanded='@LogExpanded'>
+        <MudTextField FullWidth='true'
+                      Value="@LogText()"
+                      Label="Log"
+                      ReadOnly="true"
+                      Variant="Variant.Outlined"
+                      Lines="10"
+                      AdornmentIcon="@Icons.Material.Filled.Clear"
+                      Adornment="Adornment.End"
+                      Style='width: 100%'
+                      OnAdornmentClick="@ClearLogs"/>
       </MudExpansionPanel>
     </MudExpansionPanels>
+
+  </MudItem>
+
+  <MudItem xs='12'>
+    <FileSelection @ref="_fileSelection" FileSystem='@_fileSystem' SetSCLAction='@SetSCL'/>
   </MudItem>
 
 </MudGrid>
 
+@code{
 
+  private FileSelection _fileSelection;
 
+  private MonacoEditor _sclEditor;
 
+  private MonacoEditor _fileEditor;
 
+  bool OutputExpanded { get; set; } = true;
+  bool LogExpanded { get; set; } = true;
 
+  bool InputFileExpanded { get; set; } = false;
 
-
-
+}
 
 <style>
   .monaco-editor-container { height: 500px; }
-
-
 </style>

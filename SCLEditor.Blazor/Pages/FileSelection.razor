@@ -17,7 +17,7 @@
 </MudButton>
 
 
-<MudTable Items="GetFileData()" Hover="true" Breakpoint="Breakpoint.Sm">
+<MudTable Items="GetFileData()" Hover="true" Breakpoint="Breakpoint.Sm" @bind-SelectedItem='SelectedFile'>
   <HeaderContent>
     <MudTh>Path</MudTh>
     <MudTh>Text</MudTh>
@@ -30,8 +30,8 @@
   <RowTemplate>
     <MudTd DataLabel="Path">@context.Path</MudTd>
     <MudTd DataLabel="Text">@context.TruncatedText</MudTd>
-    <MudTd DataLabel="LastModified">@context.LastWriteTime</MudTd>
-    <MudTd DataLabel="Size">@context.ByteCount</MudTd>
+    <MudTd DataLabel="LastModified">@context.Data.LastWriteTime</MudTd>
+    <MudTd DataLabel="Size">@context.SizeString</MudTd>
     <MudTd DataLabel="Open">
       <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' OnClick='() => SetSCL(context.Path)'/>
     </MudTd>
@@ -51,7 +51,6 @@
 </MudGrid>
 
 @code {
-  string _dragEnterStyle;
 
   [Parameter]
   public MockFileSystem FileSystem { get; set; }
@@ -61,6 +60,8 @@
 
   [Inject]
   IBlazorDownloadFileService BlazorDownloadFileService { get; set; }
+
+  public FileData? SelectedFile { get; set; }
 
   async Task Download(string fileName)
   {
@@ -75,17 +76,6 @@
     await SetSCLAction(text);
   }
 
-  public static string Truncate(string value, int maxLength)
-  {
-    if (string.IsNullOrEmpty(value))
-      return value;
-
-    if (value.Length <= maxLength)
-      return value;
-    else
-      return value.Substring(0, maxLength) + "...";
-  }
-
   async Task OnInputFileChanged(InputFileChangeEventArgs e)
   {
     var files = e.GetMultipleFiles();
@@ -97,8 +87,13 @@
       var text = await reader.ReadToEndAsync();
       var mfd = new MockFileData(text);
 
-      FileSystem.AddFile(browserFile.Name,mfd);
+      FileSystem.AddFile(browserFile.Name, mfd);
     }
+  }
+
+  void UpdateFile(FileData data, string newText)
+  {
+    FileSystem.AddFile(data.Path, new MockFileData(newText));
   }
 
   bool FilesExist()
@@ -115,25 +110,20 @@
   {
     foreach (var file in FileSystem.AllFiles.ToList())
     {
-        FileSystem.RemoveFile(file);
+      FileSystem.RemoveFile(file);
     }
   }
 
   IEnumerable<FileData> GetFileData()
   {
-
     foreach (var file in FileSystem.AllFiles)
     {
-      var mfd =  FileSystem.GetFile(file);
+      var mfd = FileSystem.GetFile(file);
 
-      var byteCount = System.Text.Encoding.Unicode.GetByteCount(mfd.TextContents);
-
-      var truncatedText = Truncate(mfd.TextContents, 100);
-      yield return new FileData(file, mfd.LastWriteTime, truncatedText, byteCount);
+      yield return new FileData(file, mfd);
     }
   }
 
-  record FileData(string Path, DateTimeOffset LastWriteTime, string TruncatedText, int ByteCount);
+
 
 }
-

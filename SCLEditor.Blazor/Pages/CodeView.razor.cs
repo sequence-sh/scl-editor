@@ -24,7 +24,6 @@ using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Parser;
 using Reductech.EDR.Core.Internal.Serialization;
 using Reductech.EDR.Core.Util;
-using TypeReference = Reductech.EDR.Core.Internal.TypeReference;
 
 namespace Reductech.Utilities.SCLEditor.Blazor.Pages
 {
@@ -32,8 +31,6 @@ namespace Reductech.Utilities.SCLEditor.Blazor.Pages
 public partial class CodeView
 {
     [Inject] public IJSRuntime Runtime { get; set; } = null!;
-
-    private MonacoEditor _editor;
 
     private ITestLoggerFactory _testLoggerFactory =
         TestLoggerFactory.Create(x => x.FilterByMinimumLevel(LogLevel.Information));
@@ -78,7 +75,7 @@ public partial class CodeView
                 "registerSCL"
             ); // The function in index.html is called that
 
-            var model = await _editor.GetModel();
+            var model = await _sclEditor.GetModel();
             await MonacoEditorBase.SetModelLanguage(model, "scl");
         }
 
@@ -108,12 +105,12 @@ public partial class CodeView
 
     public async Task SetSCL(string s)
     {
-        await _editor.SetValue(s);
+        await _sclEditor.SetValue(s);
     }
 
     public async Task Run()
     {
-        var sclText = await _editor.GetValue();
+        var sclText = await _sclEditor.GetValue();
 
         CancellationTokenSource?.Cancel();
         var cts = new CancellationTokenSource();
@@ -164,9 +161,7 @@ public partial class CodeView
                 _consoleStringBuilder.AppendLine("Sequence Completed Successfully");
             else
             {
-                _consoleStringBuilder.AppendLine(
-                    $"Sequence Completed Successfully with result: '{runResult.Value}'"
-                );
+                _consoleStringBuilder.AppendLine(runResult.Value.ToString());
             }
         }
 
@@ -175,9 +170,41 @@ public partial class CodeView
         _consoleStringBuilder.AppendLine();
     }
 
-    private StandaloneEditorConstructionOptions EditorConstructionOptions(MonacoEditor editor)
+    private StandaloneEditorConstructionOptions SCLEditorConstructionOptions(MonacoEditor _)
     {
         return new() { AutomaticLayout = true, Language = "scl", Value = "print 123" };
+    }
+
+    private StandaloneEditorConstructionOptions FileEditorConstructionOptions(MonacoEditor _)
+    {
+        if (_fileSelection?.SelectedFile is not null)
+        {
+            var extension = GetLanguageFromFileExtension(
+                _fileSystem.Path.GetExtension(_fileSelection.SelectedFile.Path)
+            );
+
+            return new()
+            {
+                AutomaticLayout = true,
+                Language        = extension,
+                Value           = _fileSelection.SelectedFile.Data.TextContents
+            };
+        }
+
+        return new() { AutomaticLayout = true };
+    }
+
+    private string GetLanguageFromFileExtension(string extension)
+    {
+        return extension?.ToLowerInvariant() switch
+
+        {
+            "yml"  => "yaml",
+            "yaml" => "yaml",
+            "json" => "json",
+            "cs"   => "csharp",
+            _      => ""
+        };
     }
 }
 
