@@ -9,104 +9,80 @@ function registerSCL() {
 
   monaco.languages.setMonarchTokensProvider('scl',
     {
-      // Set defaultToken to invalid to see what you do not tokenize yet
-      // defaultToken: 'invalid',
-      keywords: [
-        'abstract', 'continue', 'for', 'new', 'switch', 'assert', 'goto', 'do',
-        'if', 'private', 'this', 'break', 'protected', 'throw', 'else', 'public',
-        'enum', 'return', 'catch', 'try', 'interface', 'static', 'class',
-        'finally', 'const', 'super', 'while', 'true', 'false'
-      ],
+  // Set defaultToken to invalid to see what you do not tokenize yet
 
-      typeKeywords: [
-        'boolean', 'double', 'byte', 'int', 'short', 'char', 'void', 'long', 'float'
-      ],
+  ignoreCase: 'true',
+  defaultToken: 'invalid',
 
-      operators: [
-        '=', '>', '<', '!', '~', '?', ':', '==', '<=', '>=', '!=',
-        '&&', '||', '++', '--', '+', '-', '*', '/', '&', '|', '^', '%',
-        '<<', '>>', '>>>', '+=', '-=', '*=', '/=', '&=', '|=', '^=',
-        '%=', '<<=', '>>=', '>>>='
-      ],
 
-      // we include these common regular expressions
-      symbols: /[=><!~?:&|+\-*\/\^%]+/,
+  operators: [
+    '=', '>', '<',    '==', '<=', '>=', '!=',
+    '&&', '||',  '+', '-', '*', '/', '&', '|', '^', '%'
+  ],
 
-      // C# style strings
-      escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
+  // we include these common regular expressions
+  symbols:  /[=><!~?:&|+\-*\/\^%]+/,
 
-      // The main tokenizer for our languages
-      tokenizer: {
-        root: [
-          // identifiers and keywords
-          [
-            /[a-z_$][\w$]*/, {
-              cases: {
-                '@typeKeywords': 'keyword',
-                '@keywords': 'keyword',
-                '@default': 'identifier'
-              }
-            }
-          ],
-          [/[A-Z][\w\$]*/, 'type.identifier'], // to show class names nicely
+  // C# style strings
+  escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
 
-          // whitespace
-          { include: '@whitespace' },
+  // The main tokenizer for our languages
+  tokenizer: {
+    root: [
+      // identifiers and keywords
+      [/[Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee]/, 'constant.boolean'],
 
-          // delimiters and operators
-          [/[{}()\[\]]/, '@brackets'],
-          [/[<>](?!@symbols)/, '@brackets'],
-          [
-            /@symbols/, {
-              cases: {
-                '@operators': 'operator',
-                '@default': ''
-              }
-            }
-          ],
+      [/<[A-Za-z0-9_-]+>/, 'variable.name' ],
+      [/[A-Za-z_\.-]+:/, 'type.identifier' ],
+      [/[A-Za-z_-]+\.[A-Za-z_-]+/, 'constant.enum'],
+      [/\b[A-Za-z_-]+\b/, 'keyword' ],
+      [/\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?/, 'number.date'],
 
-          // @ annotations.
-          // As an example, we emit a debugging log message on these tokens.
-          // Note: message are supressed during the first load -- change some lines to see them.
-          [/@\s*[a-zA-Z_\$][\w\$]*/, { token: 'annotation', log: 'annotation token: $0' }],
 
-          // numbers
-          [/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
-          [/0[xX][0-9a-fA-F]+/, 'number.hex'],
-          [/\d+/, 'number'],
+      // whitespace
+      { include: '@whitespace' },
 
-          // delimiter: after number because of .\d floats
-          [/[;,.]/, 'delimiter'],
+      // delimiters and operators
+      [/[{}()\[\]]/, '@brackets'],
+      [/[<>](?!@symbols)/, '@brackets'],
+      [/@symbols/, { cases: { '@operators': 'operator',
+                              '@default'  : '' } } ],
 
-          // strings
-          [/"([^"\\]|\\.)*$/, 'string.invalid'], // non-teminated string
-          [/"/, { token: 'string.quote', bracket: '@open', next: '@string' }],
 
-          // characters
-          [/'[^\\']'/, 'string'],
-          [/(')(@escapes)(')/, ['string', 'string.escape', 'string']],
-          [/'/, 'string.invalid']
-        ],
+      // numbers
+      [/-?\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
+      [/-?\d+/, 'number'],
 
-        comment: [
-          [/[^\/*]+/, 'comment'],
-          [/\/\*/, 'comment', '@push'], // nested comment
-          ["\\*/", 'comment', '@pop'],
-          [/[\/*]/, 'comment']
-        ],
+      // delimiter: after number because of .\d floats
+      [/[;,.]/, 'delimiter'],
 
-        string: [
-          [/[^\\"]+/, 'string'],
-          [/@escapes/, 'string.escape'],
-          [/\\./, 'string.escape.invalid'],
-          [/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }]
-        ],
+      // strings
+      [/"([^"\\]|\\.)*$/, 'string.invalid' ],  // non-teminated string
+      [/"/,  { token: 'string.dquote', bracket: '@open', next: '@string' } ],
+      [/'/,  { token: 'string.squote', bracket: '@open', next: '@string' } ],
 
-        whitespace: [
-          [/[ \t\r\n]+/, 'white'],
-          [/\/\*/, 'comment', '@comment'],
-          [/\/\/.*$/, 'comment']
-        ]
-      }
-    });
+    ],
+
+    comment: [
+      [/[^\/*]+/, 'comment' ],
+      [/\/\*/,    'comment', '@push' ],    // nested comment
+      ["\\*/",    'comment', '@pop'  ],
+      [/[\/*]/,   'comment' ]
+    ],
+
+    string: [
+      [/[^\\"'']+/,  'string'],
+      [/@escapes/, 'string.escape'],
+      [/\\./,      'string.escape.invalid'],
+      [/"/,        { token: 'string.dquote', bracket: '@close', next: '@pop' } ],
+      [/'/,        { token: 'string.squote', bracket: '@close', next: '@pop' } ]
+    ],
+
+    whitespace: [
+      [/[ \t\r\n]+/, 'white'],
+      [/\/\*/,       'comment', '@comment' ],
+      [/#.*$/,    'comment'],
+    ],
+  },
+});
 }
