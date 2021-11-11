@@ -9,41 +9,70 @@
 @using Reductech.EDR.Core.Internal.Parser
 @using System.IO
 
-<MonacoEditor Id="scl-monaco" @ref="_editor" ConstructionOptions="EditorConstructionOptions"/>
-@if (CancellationTokenSource != null)
-{
-  <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="Cancel"/>
-}
-else
-{
-  <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
-}
+<MudGrid>
+  
+  <MudItem xs='12' lg='6'>
+    
+    <MudPaper Class="pa-16 ma-2" Square="true">
+      <MonacoEditor Id="scl-monaco" @ref="_editor" ConstructionOptions="EditorConstructionOptions"/>
+      @if (CancellationTokenSource != null)
+      {
+        <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="Cancel"/>
+      }
+      else
+      {
+        <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
+      }
 
-<MudTextField
-  Value="@_consoleStringBuilder.ToString()"
-  Label="Output"
-  ReadOnly="true"
-  Variant="Variant.Outlined"
-  Lines="10"
-  AdornmentIcon="@Icons.Material.Filled.Clear"
-  Adornment="Adornment.End"
-  OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
+    </MudPaper>
 
-<MudTextField
-  Value="@LogText()"
-  Label="Log"
-  ReadOnly="true"
-  Variant="Variant.Outlined"
-  Lines="10"
-  AdornmentIcon="@Icons.Material.Filled.Clear"
-  Adornment="Adornment.End"
-  OnAdornmentClick="@ClearLogs"/>
+    
+  </MudItem>
+  
+  <MudItem xs='12' lg='6'>
+    <MudTextField FullWidth='true'
+                  Value="@_consoleStringBuilder.ToString()"
+                  Label="Output"
+                  ReadOnly="true"
+                  Variant="Variant.Outlined"
+                  Lines="10"
+                  AdornmentIcon="@Icons.Material.Filled.Clear"
+                  Adornment="Adornment.End"
+                  Style='width:100%'
+                  OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
+      
+    <MudTextField FullWidth='true'
+                  Value="@LogText()"
+                  Label="Log"
+                  ReadOnly="true"
+                  Variant="Variant.Outlined"
+                  Lines="10"
+                  AdornmentIcon="@Icons.Material.Filled.Clear"
+                  Adornment="Adornment.End"
+                  Style='width:100%'
+                  OnAdornmentClick="@ClearLogs"/>
 
-<MudExpansionPanels>
-  <MudExpansionPanel Text='Files'>
-    <FileSelection Files='@_fileDictionary' SetSCLAction='@SetSCL'/>
-  </MudExpansionPanel>
-</MudExpansionPanels>
+  </MudItem>
+  
+
+  
+  <MudItem xs='12'>
+    <MudExpansionPanels>
+      <MudExpansionPanel Text='Files'>
+        <FileSelection FileSystem='@_fileSystem' SetSCLAction='@SetSCL'/>
+      </MudExpansionPanel>
+    </MudExpansionPanels>
+  </MudItem>
+
+</MudGrid>
+
+
+
+
+
+
+
+
 
 
 <style>

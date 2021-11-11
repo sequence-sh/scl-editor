@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <RootNamespace>Reductech.Utilities.SCLEditor</RootNamespace>
     <AssemblyName>Reductech.Utilities.SCLEditor</AssemblyName>
-    <Version>0.5.0$(VersionSuffix)</Version>
+    <Version>0.13.0$(VersionSuffix)</Version>
   </PropertyGroup>
 
   <PropertyGroup>

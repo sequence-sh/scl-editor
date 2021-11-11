@@ -1,5 +1,7 @@
 ﻿@using JetBrains.Annotations
 @using System.IO
+@using System.IO.Abstractions
+@using System.IO.Abstractions.TestingHelpers
 @using System.Threading
 @using BlazorDownloadFile
 
@@ -15,11 +17,10 @@
 </MudButton>
 
 
-<MudTable Items="@Files.Values" Hover="true" Breakpoint="Breakpoint.Sm">
+<MudTable Items="GetFileData()" Hover="true" Breakpoint="Breakpoint.Sm">
   <HeaderContent>
-    <MudTh>Name</MudTh>
+    <MudTh>Path</MudTh>
     <MudTh>Text</MudTh>
-    <MudTh>ContentType</MudTh>
     <MudTh>LastModified</MudTh>
     <MudTh>Size</MudTh>
     <MudTh>Open</MudTh>
@@ -27,26 +28,25 @@
     <MudTh>Remove</MudTh>
   </HeaderContent>
   <RowTemplate>
-    <MudTd DataLabel="Name">@context.Name</MudTd>
-    <MudTd DataLabel="Text">@Truncate(context.Text.GetString(), 100)</MudTd>
-    <MudTd DataLabel="ContentType">@context.MimeType</MudTd>
-    <MudTd DataLabel="LastModified">@context.Modified.ToLocalTime()</MudTd>
-    <MudTd DataLabel="Size">@context.Size</MudTd>
+    <MudTd DataLabel="Path">@context.Path</MudTd>
+    <MudTd DataLabel="Text">@context.TruncatedText</MudTd>
+    <MudTd DataLabel="LastModified">@context.LastWriteTime</MudTd>
+    <MudTd DataLabel="Size">@context.ByteCount</MudTd>
     <MudTd DataLabel="Open">
-      <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' OnClick='() => SetSCL(context.Name)'/>
+      <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' OnClick='() => SetSCL(context.Path)'/>
     </MudTd>
     <MudTd DataLabel="Download">
-      <MudIconButton Icon='@Icons.Material.Filled.FileDownload' OnClick='() => Download(context.Name)'/>
+      <MudIconButton Icon='@Icons.Material.Filled.FileDownload' OnClick='() => Download(context.Path)'/>
     </MudTd>
     <MudTd DataLabel="Remove">
-      <MudIconButton Icon='@Icons.Material.Filled.Delete' OnClick='() => Files.Remove(context.Name)'/>
+      <MudIconButton Icon='@Icons.Material.Filled.Delete' OnClick='() => DeleteFile(context.Path)'/>
     </MudTd>
   </RowTemplate>
 </MudTable>
 
 <MudGrid Justify="Justify.Center" Spacing="4">
   <MudItem>
-    <MudButton OnClick="@Files.Clear" Disabled="@(!Files.Any())" Color="Color.Error" Variant="Variant.Filled">Clear</MudButton>
+    <MudButton OnClick="@ClearFiles" Disabled="@(!FilesExist())" Color="Color.Error" Variant="Variant.Filled">Clear</MudButton>
   </MudItem>
 </MudGrid>
 
@@ -54,7 +54,7 @@
   string _dragEnterStyle;
 
   [Parameter]
-  public IDictionary<string, BrowserFile> Files { get; set; }
+  public MockFileSystem FileSystem { get; set; }
 
   [Parameter]
   public Func<string, Task> SetSCLAction { get; set; }
@@ -64,14 +64,15 @@
 
   async Task Download(string fileName)
   {
-    var file = Files[fileName];
-    await BlazorDownloadFileService.DownloadFileFromText(fileName, await file.Text.GetStringAsync(), "text/plain");
+    var text = FileSystem.GetFile(fileName).TextContents;
+  //var file = Files[fileName];
+    await BlazorDownloadFileService.DownloadFileFromText(fileName, text, "text/plain");
   }
 
   async Task SetSCL(string fileName)
   {
-    var file = Files[fileName];
-    await SetSCLAction(await file.Text.GetStringAsync());
+    var text = FileSystem.GetFile(fileName).TextContents;
+    await SetSCLAction(text);
   }
 
   public static string Truncate(string value, int maxLength)
@@ -94,9 +95,45 @@
       using var reader = new StreamReader(browserFile.OpenReadStream());
 
       var text = await reader.ReadToEndAsync();
-      var bf = new BrowserFile(browserFile.Name, text, browserFile.ContentType, browserFile.LastModified, browserFile.Size);
-      Files[browserFile.Name] = bf;
+      var mfd = new MockFileData(text);
+
+      FileSystem.AddFile(browserFile.Name,mfd);
     }
   }
 
+  bool FilesExist()
+  {
+    return FileSystem.AllFiles.Any();
+  }
+
+  void DeleteFile(string path)
+  {
+    FileSystem.RemoveFile(path);
+  }
+
+  void ClearFiles()
+  {
+    foreach (var file in FileSystem.AllFiles.ToList())
+    {
+        FileSystem.RemoveFile(file);
+    }
+  }
+
+  IEnumerable<FileData> GetFileData()
+  {
+
+    foreach (var file in FileSystem.AllFiles)
+    {
+      var mfd =  FileSystem.GetFile(file);
+
+      var byteCount = System.Text.Encoding.Unicode.GetByteCount(mfd.TextContents);
+
+      var truncatedText = Truncate(mfd.TextContents, 100);
+      yield return new FileData(file, mfd.LastWriteTime, truncatedText, byteCount);
+    }
+  }
+
+  record FileData(string Path, DateTimeOffset LastWriteTime, string TruncatedText, int ByteCount);
+
 }
+

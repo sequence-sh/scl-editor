@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -13,10 +15,14 @@ using MELT;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
+using Reductech.EDR.Connectors.FileSystem;
+using Reductech.EDR.Connectors.StructuredData;
 using Reductech.EDR.Core;
 using Reductech.EDR.Core.Abstractions;
+using Reductech.EDR.Core.ExternalProcesses;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Parser;
+using Reductech.EDR.Core.Internal.Serialization;
 using Reductech.EDR.Core.Util;
 using TypeReference = Reductech.EDR.Core.Internal.TypeReference;
 
@@ -32,8 +38,9 @@ public partial class CodeView
     private ITestLoggerFactory _testLoggerFactory =
         TestLoggerFactory.Create(x => x.FilterByMinimumLevel(LogLevel.Information));
 
-    private readonly ConcurrentDictionary<string, BrowserFile> _fileDictionary =
-        new(StringComparer.OrdinalIgnoreCase);
+    private readonly MockFileSystem _fileSystem = new();
+
+    private readonly ICompression _compression = new CompressionAdapter();
 
     private StringBuilder _consoleStringBuilder = new();
 
@@ -78,7 +85,7 @@ public partial class CodeView
         await base.OnInitializedAsync();
     }
 
-    [CanBeNull] public CancellationTokenSource? CancellationTokenSource { get; set; }
+    public CancellationTokenSource? CancellationTokenSource { get; set; }
 
     public void Cancel()
     {
@@ -88,13 +95,15 @@ public partial class CodeView
 
     public IExternalContext GetExternalContext()
     {
-        var fileSystem = new FileSelectionFileSystem(_fileDictionary);
+        //var fileSystem = new FileSelectionFileSystem(_fileDictionary);
 
         return new ExternalContext(
-            fileSystem,
-            ExternalContext.Default.ExternalProcessRunner,
-            ExternalContext.Default.Console
-        );
+            ExternalProcessRunner.Instance,
+            DefaultRestClientFactory.Instance,
+            ConsoleAdapter.Instance,
+            (ConnectorInjection.FileSystemKey, _fileSystem),
+            (ConnectorInjection.CompressionKey, _compression)
+        ); //TODO add file system connector
     }
 
     public async Task SetSCL(string s)
@@ -110,13 +119,25 @@ public partial class CodeView
         var cts = new CancellationTokenSource();
         CancellationTokenSource = cts;
 
-        var logger           = _testLoggerFactory.CreateLogger("SCL");
-        var stepFactoryStore = StepFactoryStore.CreateUsingReflection();
-        var settings         = SCLSettings.EmptySettings;
-        var externalContext  = GetExternalContext();
+        var logger          = _testLoggerFactory.CreateLogger("SCL");
+        var externalContext = GetExternalContext();
 
-        var stepResult = SCLParsing.ParseSequence(sclText)
-            .Bind(x => x.TryFreeze(TypeReference.Any.Instance, stepFactoryStore));
+        var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
+            externalContext,
+            typeof(FileRead).Assembly,
+            typeof(ToCSV).Assembly
+        );
+
+        if (stepFactoryStoreResult.IsFailure)
+        {
+            _consoleStringBuilder.AppendLine(stepFactoryStoreResult.Error.AsString);
+            CancellationTokenSource = null;
+            _consoleStringBuilder.AppendLine();
+            return;
+        }
+
+        var stepResult = SCLParsing.TryParseStep(sclText)
+            .Bind(x => x.TryFreeze(SCLRunner.RootCallerMetadata, stepFactoryStoreResult.Value));
 
         if (stepResult.IsFailure)
         {
@@ -126,8 +147,7 @@ public partial class CodeView
         {
             await using var stateMonad = new StateMonad(
                 logger,
-                settings,
-                stepFactoryStore,
+                stepFactoryStoreResult.Value,
                 externalContext,
                 new Dictionary<string, object>()
             );
