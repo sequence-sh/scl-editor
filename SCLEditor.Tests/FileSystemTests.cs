@@ -1,13 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Abstractions.TestingHelpers;
+﻿using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FluentAssertions;
+using Reductech.Utilities.SCLEditor;
 using Xunit;
 
 namespace SCLEditor.Tests
 {
+
+public class ResourceTests
+{
+    [Fact]
+    public void TestSCLExamples()
+    {
+        var examples = SCLExample.All.ToList();
+
+        examples.Count.Should().BeGreaterOrEqualTo(2);
+    }
+}
 
 public class FileSystemTests
 {
