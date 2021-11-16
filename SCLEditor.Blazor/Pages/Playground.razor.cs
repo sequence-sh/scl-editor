@@ -28,24 +28,73 @@ using Reductech.EDR.Core.Util;
 namespace Reductech.Utilities.SCLEditor.Blazor.Pages
 {
 
-public partial class CodeView
+public partial class Playground
 {
     [Inject] public IJSRuntime Runtime { get; set; } = null!;
 
-    private ITestLoggerFactory _testLoggerFactory =
+    private FileSelection _fileSelection;
+
+    private MonacoEditor _sclEditor;
+
+    private MonacoEditor _fileEditor;
+
+    bool OutputExpanded { get; set; } = true;
+    bool LogExpanded { get; set; } = true;
+
+    private readonly ITestLoggerFactory _testLoggerFactory =
         TestLoggerFactory.Create(x => x.FilterByMinimumLevel(LogLevel.Information));
 
     private readonly MockFileSystem _fileSystem = new();
 
     private readonly ICompression _compression = new CompressionAdapter();
 
-    private StringBuilder _consoleStringBuilder = new();
+    private readonly StringBuilder _consoleStringBuilder = new();
+
+    private StepFactoryStore _stepFactoryStore;
+    private IExternalContext _externalContext;
+
+    public CancellationTokenSource? CancellationTokenSource { get; set; }
 
     /// <inheritdoc />
     protected override void OnInitialized()
     {
         Console.SetOut(new StringWriter(_consoleStringBuilder));
+
+        _externalContext = new ExternalContext(
+            ExternalProcessRunner.Instance,
+            DefaultRestClientFactory.Instance,
+            ConsoleAdapter.Instance,
+            (ConnectorInjection.FileSystemKey, _fileSystem),
+            (ConnectorInjection.CompressionKey, _compression)
+        );
+
+        var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
+            _externalContext,
+            typeof(FileRead).Assembly,
+            typeof(ToCSV).Assembly
+        );
+
+        _stepFactoryStore = stepFactoryStoreResult.Value;
+
         base.OnInitialized();
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            //await MonacoEditorBase.SetTheme("vs-dark");
+
+            await Runtime.InvokeVoidAsync(
+                "registerSCL"
+            ); // The function in index.html is called that
+
+            var model = await _sclEditor.GetModel();
+            await MonacoEditorBase.SetModelLanguage(model, "scl");
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     public void ClearLogs()
@@ -64,43 +113,12 @@ public partial class CodeView
         return text;
     }
 
-    /// <inheritdoc />
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await MonacoEditorBase.SetTheme("vs-dark");
-
-            await Runtime.InvokeVoidAsync(
-                "registerSCL"
-            ); // The function in index.html is called that
-
-            var model = await _sclEditor.GetModel();
-            await MonacoEditorBase.SetModelLanguage(model, "scl");
-        }
-
-        await base.OnInitializedAsync();
-    }
-
-    public CancellationTokenSource? CancellationTokenSource { get; set; }
+    private void OnModelChanged(ModelChangedEvent obj) { }
 
     public void Cancel()
     {
         CancellationTokenSource?.Cancel();
         CancellationTokenSource = null;
-    }
-
-    public IExternalContext GetExternalContext()
-    {
-        //var fileSystem = new FileSelectionFileSystem(_fileDictionary);
-
-        return new ExternalContext(
-            ExternalProcessRunner.Instance,
-            DefaultRestClientFactory.Instance,
-            ConsoleAdapter.Instance,
-            (ConnectorInjection.FileSystemKey, _fileSystem),
-            (ConnectorInjection.CompressionKey, _compression)
-        ); //TODO add file system connector
     }
 
     public async Task SetSCL(string s)
@@ -116,25 +134,10 @@ public partial class CodeView
         var cts = new CancellationTokenSource();
         CancellationTokenSource = cts;
 
-        var logger          = _testLoggerFactory.CreateLogger("SCL");
-        var externalContext = GetExternalContext();
-
-        var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
-            externalContext,
-            typeof(FileRead).Assembly,
-            typeof(ToCSV).Assembly
-        );
-
-        if (stepFactoryStoreResult.IsFailure)
-        {
-            _consoleStringBuilder.AppendLine(stepFactoryStoreResult.Error.AsString);
-            CancellationTokenSource = null;
-            _consoleStringBuilder.AppendLine();
-            return;
-        }
+        var logger = _testLoggerFactory.CreateLogger("SCL");
 
         var stepResult = SCLParsing.TryParseStep(sclText)
-            .Bind(x => x.TryFreeze(SCLRunner.RootCallerMetadata, stepFactoryStoreResult.Value));
+            .Bind(x => x.TryFreeze(SCLRunner.RootCallerMetadata, _stepFactoryStore));
 
         if (stepResult.IsFailure)
         {
@@ -144,8 +147,8 @@ public partial class CodeView
         {
             await using var stateMonad = new StateMonad(
                 logger,
-                stepFactoryStoreResult.Value,
-                externalContext,
+                _stepFactoryStore,
+                _externalContext,
                 new Dictionary<string, object>()
             );
 

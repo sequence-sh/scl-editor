@@ -1,0 +1,138 @@
+﻿@using Microsoft.Extensions.Logging.Abstractions
+@using Reductech.EDR.Core.ExternalProcesses
+@using Reductech.EDR.Core.Internal
+@using System.Threading
+@using CSharpFunctionalExtensions
+@using System.IO.Abstractions.TestingHelpers
+@using Reductech.EDR.Connectors.FileSystem
+@using Reductech.EDR.Connectors.StructuredData
+@using Reductech.EDR.Core.Abstractions
+@page "/convertjsontocsv"
+
+<MudGrid>
+  <MudItem xs='12' lg='6'>
+    <MudPaper Class="ma-2" Square="true">
+
+      <MonacoEditor
+        Id="convert-json-to-csv-input-monaco"
+        @ref="_inputEditor"
+        OnDidBlurEditorText='UpdateOutput'
+        ConstructionOptions="InputEditorConstructionOptions"/>
+    </MudPaper>
+  </MudItem>
+
+  <MudItem xs='12' lg='6'>
+    <MudPaper Class="ma-2" Square="true">
+
+      <MonacoEditor
+        Id="convert-json-to-csv-output-monaco"
+        @ref="_outputEditor"
+        OnDidInit='UpdateOutput'
+        ConstructionOptions="OutputEditorConstructionOptions"/>
+    </MudPaper>
+  </MudItem>
+
+</MudGrid>
+
+<style>
+  .monaco-editor-container { height: 500px; }
+</style>
+
+@code {
+  private MonacoEditor _inputEditor;
+  private MonacoEditor _outputEditor;
+
+  private StepFactoryStore _stepFactoryStore;
+  private IExternalContext _externalContext;
+
+  private readonly MockFileSystem _fileSystem = new();
+
+  private readonly ICompression _compression = new CompressionAdapter();
+
+  /// <inheritdoc />
+  protected override async Task OnInitializedAsync()
+  {
+    await base.OnInitializedAsync();
+
+    _externalContext = new ExternalContext(
+      ExternalProcessRunner.Instance,
+      DefaultRestClientFactory.Instance,
+      ConsoleAdapter.Instance,
+      (ConnectorInjection.FileSystemKey, _fileSystem),
+      (ConnectorInjection.CompressionKey, _compression)
+      );
+
+    var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
+      _externalContext,
+      typeof(FileRead).Assembly,
+      typeof(ToCSV).Assembly
+      );
+
+    _stepFactoryStore = stepFactoryStoreResult.Value;
+  }
+
+  public CancellationTokenSource? CancellationTokenSource { get; set; }
+
+  private StandaloneEditorConstructionOptions InputEditorConstructionOptions(MonacoEditor _)
+  {
+    return new() 
+    { 
+      AutomaticLayout = true,
+      Language = "json", 
+      Value = "[{\"a\": true}]",
+
+    };
+  }
+
+  private StandaloneEditorConstructionOptions OutputEditorConstructionOptions(MonacoEditor _)
+  {
+    return new()
+    {
+      AutomaticLayout = true,
+      Language = "csv",
+      Value = "",
+      ReadOnly = true,
+      RenderControlCharacters = true,
+    };
+  }
+
+  private CancellationTokenSource? _cancellationTokenSource = null;
+
+  private async Task UpdateOutput()
+  {
+    _cancellationTokenSource?.Cancel();
+    _cancellationTokenSource = new CancellationTokenSource();
+
+    var jsonText = await _inputEditor.GetValue();
+
+    _fileSystem.AddFile("input.json", jsonText);
+
+    var state = new StateMonad(NullLogger.Instance, _stepFactoryStore, _externalContext, new Dictionary<string, object>());
+
+    var result = await ConvertCSVToJsonSCL.Run(state, _cancellationTokenSource.Token).Map(x => x.GetStringAsync());
+
+    if (result.IsSuccess)
+    {
+      await _outputEditor.SetValue(result.Value);
+    }
+    else
+    {
+      await _outputEditor.SetValue(result.Error.AsString);
+    }
+  }
+
+  private static readonly IStep<StringStream> ConvertCSVToJsonSCL =
+    new ToCSV()
+    {
+      Entities = new FromJsonArray()
+      {
+        Stream = new FileRead()
+        {
+          Path = new StringConstant("input.json")
+        },
+        
+      },
+      Delimiter = new StringConstant("\t"),
+    };
+
+}
