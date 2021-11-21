@@ -1,3 +1,0 @@
-﻿- fromFile 'input.txt'
-| tojsonarray
-| fromcsv

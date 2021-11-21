@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>SCLEditor.Blazor</AssemblyName>
     <RootNamespace>Reductech.Utilities.SCLEditor.Blazor</RootNamespace>
+    <nullable>enable</nullable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -12,7 +12,7 @@ public class ResourceTests
     [Fact]
     public void TestSCLExamples()
     {
-        var examples = SCLExample.All.ToList();
+        var examples = ExampleHelpers.AllExamples.ToList();
 
         examples.Count.Should().BeGreaterOrEqualTo(2);
     }
