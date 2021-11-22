@@ -272,8 +272,10 @@ public static class ExampleHelpers
                                     ErrorBehavior =
                                         new EnumConstant<ErrorBehavior>(ErrorBehavior.Error)
                                 },
-                                Action = new LambdaFunction<Entity, Unit>(null,
-                                    new DoNothing())
+                                Action = new LambdaFunction<Entity, Unit>(
+                                    null,
+                                    new DoNothing()
+                                )
                             }
                         )
                     }
