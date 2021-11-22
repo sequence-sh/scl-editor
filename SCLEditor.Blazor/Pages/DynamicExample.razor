@@ -1,59 +1,72 @@
-﻿@using Reductech.EDR.Core.Internal.Parser
-@using Reductech.EDR.Core.Internal.Serialization
-@using OneOf
-@using System.Text
-@page "/example/{exampleName}"
+﻿@page "/example/{exampleName}"
 
 
 <MudGrid>
 
 
-
-  @foreach (var input in example.Inputs)
+  @foreach (var group in example.ExampleComponent.GetInputs(_choiceData).GroupBy(x => x.Group))
   {
-    <MudItem xs='12' md='6' lg='4' @key='@(ExampleName + input.Name + "MudItem")'>
+    <MudItem xs='12' md='6' lg='4' @key='@(ExampleName + group.Key + "MudItem")'>
       <MudPaper Class="ma-2" Square="true">
-        @if (input is ExampleInput.ExampleFileInput fileInput)
-        {
-          var options = GetOptions(fileInput);
 
-          <MudText Typo="Typo.h6">@input.Name</MudText>
+        @foreach (var input in group)
+        {
+          var id = (input.Name);
 
-          <MonacoEditor
-            Id="@(ExampleName + input.Name)"
-            @key="@(ExampleName + input.Name)"
-            @ref="InputEditorRef"
-            OnDidBlurEditorText='UpdateOutput'
-            ConstructionOptions="_ => options"/>
-        }
-        else if (input is ExampleInput.ExampleStringVariableInput stringVariableInput)
-        {
-          <MudTextField T='string'
-                        Label='@stringVariableInput.Name'
-                        @onchange="UpdateOutput"
-                        @bind-Value='stringVariableInput.BValue.Value'/>
-        }
-        else if (input is ExampleInput.ExampleEnumVariableInput enumVariableInput)
-        {
-          <MudSelect T='string'
-                     Label='@enumVariableInput.Name'
-                     @onchange="UpdateOutput"
-                     @bind-Value='enumVariableInput.BValue.Value'>
-            @foreach (var val in enumVariableInput.PossibleValues)
-            {
-              <MudSelectItem Value="@(val)"/>
-            }
-          </MudSelect>
-        }
-        else if (input is ExampleInput.ExampleIntVariableInput intVariableInput)
-        {
-          <MudNumericField T='int'
-                           Label='@intVariableInput.Name'
-                           @onchange="UpdateOutput"
-                           @bind-Value='intVariableInput.BValue.Value'
-                           Min='@(intVariableInput.Minimum ?? 0)'
-                           Max='@(intVariableInput.Maximum ?? int.MaxValue)'
-                           Step='@(intVariableInput.Step ?? 1)'/>
+          @if (input is ExampleInput.ExampleFileInput fileInput)
+          {
+            var options = GetOptions(fileInput);
+
+            <MudText Typo="Typo.h6">@input.Name</MudText>
+
+            <MonacoEditor
+              Id="@id"
+              @key="@id"
+              @ref="_choiceData.Editors[id]"
+              OnDidBlurEditorText='UpdateOutput'
+              ConstructionOptions="_ => options"/>
+          }
+          else if (input is ExampleInput.ExampleStringVariableInput stringVariableInput)
+          {
+            <MudTextField T='string'
+                          Label='@stringVariableInput.Name'
+                          @onchange="UpdateOutput"
+                          @bind-Value='_choiceData.StringValues[id]'/>
+          }
+          else if (input is ExampleInput.ExampleEnumVariableInput enumVariableInput)
+          {
+            <MudSelect T='string'
+                       Label='@enumVariableInput.Name'
+                       @onchange="UpdateOutput"
+                       @bind-Value='_choiceData.StringValues[id]'>
+              @foreach (var val in enumVariableInput.PossibleValues)
+              {
+                <MudSelectItem Value="@(val)"/>
+              }
+            </MudSelect>
+          }
+          else if (input is ExampleInput.ExampleIntVariableInput intVariableInput)
+          {
+            <MudNumericField T='int'
+                             Label='@intVariableInput.Name'
+                             @onchange="UpdateOutput"
+                             @bind-Value='_choiceData.IntValues[id]'
+                             Min='@(intVariableInput.Minimum ?? 0)'
+                             Max='@(intVariableInput.Maximum ?? int.MaxValue)'
+                             Step='@(intVariableInput.Step ?? 1)'/>
+          }
+          else if (input is ExampleInput.ExampleChoice choice)
+          {
+            <MudSelect T='ExampleComponent'
+                       Label='@choice.Name'
+                       @onchange="UpdateOutput"
+                       @bind-Value='_choiceData.ChoiceValues[id]'>
+              @foreach (var val in choice.Options)
+              {
+                <MudSelectItem Value="@(val)">@val.Name </MudSelectItem>
+              }
+            </MudSelect>
+          }
         }
 
       </MudPaper>
@@ -88,11 +101,7 @@
 
   private MonacoEditor _outputEditor;
 
-  readonly List<MonacoEditor> InputControls = new();
-
-  MonacoEditor InputEditorRef
-  {
-    set => InputControls.Add(value); }
+  private ExampleChoiceData _choiceData = new();
 
   private StepFactoryStore _stepFactoryStore;
 
@@ -106,15 +115,7 @@
   protected override async Task OnParametersSetAsync()
   {
     await base.OnParametersSetAsync();
-
-    foreach (var editor in InputControls)
-    {
-      editor.Dispose();
-    }
-
-    InputControls.Clear();
     _outputEditor?.Dispose();
-    
 
     var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
       ExternalContext.Default,
@@ -125,6 +126,8 @@
     _stepFactoryStore = stepFactoryStoreResult.Value;
 
     example = ExampleHelpers.AllExamples.Single(x => x.Url.Equals(ExampleName));
+
+    _choiceData = ExampleChoiceData.Create(example.ExampleComponent);
   }
 
   private StandaloneEditorConstructionOptions GetOptions(ExampleInput.ExampleFileInput input)
@@ -149,7 +152,7 @@
 
   public async Task FormatAll()
   {
-    foreach (var editor in InputControls)
+    foreach (var editor in _choiceData.Editors.Values.OfType<MonacoEditor>())
     {
       await editor.Trigger("anyString", "editor.action.formatDocument");
     }
@@ -162,34 +165,11 @@
 
     var fileSystem = new MockFileSystem();
 
-    var prefixStringBuilder = new StringBuilder();
-
-    foreach (var (input,editor) in example.Inputs.OfType<ExampleInput.ExampleFileInput>().Zip(InputControls))
+    foreach (var fileInput in example.ExampleComponent.GetInputs(_choiceData).OfType<ExampleInput.ExampleFileInput>())
     {
+      var editor = (MonacoEditor)_choiceData.Editors[fileInput.Name];
       var text = await editor.GetValue();
-      fileSystem.AddFile(input.Name, text);
-    }
-
-    foreach (var evi in example.Inputs.OfType<ExampleInput.ExampleVariableInput>())
-    {
-      var prefixLine = evi.GetPrefixLine();
-      prefixStringBuilder.AppendLine(prefixLine);
-    }
-
-    string scl;
-
-    if (prefixStringBuilder.Length > 0)
-    {
-      if (example.Scl.StartsWith("- "))
-        scl = prefixStringBuilder + example.Scl;
-      else
-      {
-        scl = prefixStringBuilder + "- " + example.Scl;
-      }
-    }
-    else
-    {
-      scl = example.Scl;
+      fileSystem.AddFile(fileInput.Name, text);
     }
 
     var externalContext = new ExternalContext(ExternalProcessRunner.Instance,
@@ -201,10 +181,11 @@
 
     var state = new StateMonad(NullLogger.Instance, _stepFactoryStore, externalContext, new Dictionary<string, object>());
 
-    var result = await SCLParsing.TryParseStep(scl)
-      .Bind(x => x.TryFreeze(SCLRunner.RootCallerMetadata, _stepFactoryStore))
-      .Bind(x => x.Run<object>(state, _cancellationTokenSource.Token))
-      .Map(SerializationMethods.GetString);
+    var sequence = example.GetSequence(_choiceData);
+    var result = await sequence.Run<StringStream>(state, _cancellationTokenSource.Token).Map(x => x.GetStringAsync());
+
+    var scl = sequence.Serialize();
+    Console.WriteLine(scl);
 
     if (result.IsSuccess)
     {

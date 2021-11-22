@@ -9,31 +9,31 @@ public static class DefaultInputs
     public static readonly ExampleInput.ExampleFileInput InputJson
         = new(
             "input.json",
+            "Json",
             "json",
-            "[{\"a\": true, \"b\": 1}]",
-            null
+            "[{\"a\": true, \"b\": 1}]"
         );
 
     public static readonly ExampleInput.ExampleFileInput InputCSV
         = new(
             "input.csv",
+            "CSV",
             "csv",
-            "string,number,bool\r\nhello,1,true\r\nworld,2,false",
-            null
+            "string,number,bool\r\nhello,1,true\r\nworld,2,false"
         );
 
     public static readonly ExampleInput.ExampleVariableInput CSVDelimiter =
         new ExampleInput.ExampleEnumVariableInput(
             "delimiter",
-            null,
+            "CSV",
             ",",
-            new ExampleInput.BoundValue<string>(),
-            new List<string>() { ",", "\t" }
+            new List<string> { ",", "\t" }
         );
 
     public static readonly ExampleInput.ExampleFileInput SchemaJson =
         new(
             "schema.json",
+            "Schema",
             "json",
             JsonSerializer.Serialize(
                 new JsonSchemaBuilder()
@@ -45,7 +45,6 @@ public static class DefaultInputs
                         ("b", new JsonSchemaBuilder().Type(SchemaValueType.Integer))
                     )
                     .Build()
-            ),
-            null
+            )
         );
 }

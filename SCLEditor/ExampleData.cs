@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Generator.Equals;
-using Reductech.EDR.Connectors.FileSystem;
+using Reductech.EDR.Core;
 using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Internal.Parser;
 using Reductech.EDR.Core.Steps;
+using Reductech.EDR.Core.Util;
 
 namespace Reductech.Utilities.SCLEditor
 {
@@ -13,104 +13,36 @@ namespace Reductech.Utilities.SCLEditor
 public partial record ExampleData(
     string Name,
     string Url,
-    string Scl,
-    ExampleOutput ExampleOutput,
-    [property: OrderedEquality] IReadOnlyList<ExampleInput> Inputs)
+    ExampleComponent ExampleComponent,
+    ExampleOutput ExampleOutput)
 {
-    public static ExampleData Create(
-        string name,
-        string url,
-        string scl,
-        ExampleOutput exampleOutput,
-        params ExampleInput[] inputs)
+    public CompoundStep<StringStream> GetSequence(ExampleChoiceData choiceData)
     {
-        var fs = SCLParsing.TryParseStep(scl);
+        var initialSequence = ExampleComponent.GetSequence(choiceData);
+        var finalSequence   = ExampleOutput.FinalStep;
 
-        var realInputs = GetInputs(fs.Value, inputs).ToList();
+        var fullSequence = new Sequence<StringStream>()
+        {
+            InitialSteps = Flatten(initialSequence).ToList(), FinalStep = finalSequence
+        };
 
-        var exampleData = new ExampleData(name, url, scl, exampleOutput, realInputs);
-        return exampleData;
+        return fullSequence;
     }
 
-    static IEnumerable<ExampleInput> GetInputs(
-        IFreezableStep step,
-        IReadOnlyList<ExampleInput> inputs)
+    public IEnumerable<IStep<Unit>> Flatten(IStep<Unit> step)
     {
-        if (step is CompoundFreezableStep cfs)
+        if (step is Sequence<Unit> sequence)
         {
-            if (step.StepName == nameof(GetVariable<object>))
+            foreach (var initial in sequence.InitialSteps)
             {
-                var vn = cfs.FreezableStepData.TryGetVariableName(
-                    nameof(GetVariable<object>.Variable),
-                    typeof(GetVariable<object>)
-                );
-
-                if (vn.IsSuccess)
-                {
-                    var input = ExampleInput.ExampleVariableInput.Create(
-                        vn.Value.Name,
-                        step.TextLocation,
-                        inputs
-                    );
-
-                    yield return input;
-                }
-            }
-            else if (step.StepName == nameof(SetVariable<object>))
-            {
-                var valueStep = cfs
-                    .FreezableStepData
-                    .TryGetStep(nameof(SetVariable<object>.Value), typeof(SetVariable<>));
-
-                if (valueStep.IsSuccess)
-                {
-                    foreach (var exampleInput in GetInputs(valueStep.Value, inputs))
-                    {
-                        yield return exampleInput;
-                    }
-                }
+                yield return initial;
             }
 
-            else if (step.StepName == nameof(FileRead))
-            {
-                var pathStep = cfs
-                    .FreezableStepData
-                    .TryGetStep(nameof(FileRead.Path), typeof(FileRead));
-
-                if (pathStep.IsSuccess && pathStep.Value is StringConstantFreezable scf)
-                {
-                    var efi = ExampleInput.ExampleFileInput.Create(
-                        scf.Value.GetString(),
-                        scf.TextLocation,
-                        inputs
-                    );
-
-                    yield return efi;
-                }
-            }
-            else
-            {
-                foreach (var fsp in cfs.FreezableStepData.StepProperties)
-                {
-                    if (fsp.Value is FreezableStepProperty.StepList stepList)
-                    {
-                        foreach (var freezableStep in stepList.List)
-                        {
-                            foreach (var exampleInput in GetInputs(freezableStep, inputs))
-                            {
-                                yield return exampleInput;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var childStep = fsp.Value.ConvertToStep();
-
-                        foreach (var sclInput in GetInputs(childStep, inputs))
-                            yield return sclInput;
-                    }
-                }
-            }
+            yield return sequence.FinalStep;
+        }
+        else
+        {
+            yield return step;
         }
     }
 }

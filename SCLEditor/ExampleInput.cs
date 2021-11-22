@@ -1,151 +1,127 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Generator.Equals;
+using Reductech.EDR.Core;
 using Reductech.EDR.Core.Internal;
+using Reductech.EDR.Core.Steps;
+using Reductech.EDR.Core.Util;
 
 namespace Reductech.Utilities.SCLEditor;
 
 [Equatable]
-public abstract partial record ExampleInput(string Name, TextLocation? TextLocation)
+public abstract partial record ExampleInput(string Name, string Group)
 {
+    public abstract void SetInitialValue(ExampleChoiceData exampleChoiceData);
+
+    public record ExampleChoice
+    (
+        string Name,
+        string Group,
+        IReadOnlyList<ExampleComponent> Options) : ExampleInput(Name, Group)
+    {
+        /// <inheritdoc />
+        public override void SetInitialValue(ExampleChoiceData exampleChoiceData)
+        {
+            exampleChoiceData.ChoiceValues[Name] = Options.First();
+        }
+    }
+
     public record ExampleFileInput(
             string Name,
+            string Group,
             string Language,
-            string InitialValue,
-            TextLocation TextLocation)
-        : ExampleInput(Name, TextLocation)
+            string InitialValue)
+        : ExampleInput(Name, Group)
     {
-        public static ExampleFileInput Create(
-            string fileName,
-            TextLocation? textLocation,
-            IReadOnlyList<ExampleInput> providedInputs)
+        /// <inheritdoc />
+        public override void SetInitialValue(ExampleChoiceData exampleChoiceData)
         {
-            var pi = providedInputs
-                .OfType<ExampleFileInput>()
-                .FirstOrDefault(x => x.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase));
-
-            if (pi is not null)
-                return pi with { TextLocation = textLocation };
-
-            string language;
-            string initialValue;
-
-            {
-                language     = "";
-                initialValue = "";
-            }
-
-            return new ExampleFileInput(fileName, language, initialValue, textLocation);
+            exampleChoiceData.Editors[Name] = null!;
         }
     }
 
     public record ExampleIntVariableInput(
         string Name,
-        TextLocation? TextLocation,
+        string Group,
         int InitialValue,
         int? Minimum,
         int? Maximum,
-        int? Step,
-        BoundValue<int> BValue) : ExampleVariableInput(Name, TextLocation)
+        int? Step) : ExampleVariableInput(Name, Group)
     {
         /// <inheritdoc />
-        public override string GetValueSCL()
+        public override void SetInitialValue(ExampleChoiceData exampleChoiceData)
         {
-            return BValue.Value.ToString();
+            exampleChoiceData.IntValues[Name] = InitialValue;
         }
 
         /// <inheritdoc />
-        public override ExampleVariableInput WithNewBoundValue()
+        public override IStep<Unit> GetStep(ExampleChoiceData exampleChoiceData)
         {
-            return this with { BValue = new BoundValue<int>() { Value = InitialValue } };
+            var value = exampleChoiceData.IntValues[Name];
+
+            return new SetVariable<int>()
+            {
+                Variable = VariableName, Value = new IntConstant(value)
+            };
         }
     }
 
     public record ExampleStringVariableInput(
         string Name,
-        TextLocation? TextLocation,
-        string InitialValue,
-        BoundValue<string> BValue) : ExampleVariableInput(Name, TextLocation)
+        string Group,
+        string InitialValue) : ExampleVariableInput(Name, Group)
     {
         /// <inheritdoc />
-        public override string GetValueSCL()
+        public override void SetInitialValue(ExampleChoiceData exampleChoiceData)
         {
-            return $"'{BValue.Value}'"; //TODO escape string SCLParsing.UnescapeDoubleQuoted
+            exampleChoiceData.StringValues[Name] = InitialValue;
         }
 
         /// <inheritdoc />
-        public override ExampleVariableInput WithNewBoundValue()
+        public override IStep<Unit> GetStep(ExampleChoiceData exampleChoiceData)
         {
-            return this with { BValue = new BoundValue<string>() { Value = InitialValue } };
+            var value = exampleChoiceData.StringValues[Name];
+
+            return new SetVariable<StringStream>()
+            {
+                Variable = VariableName, Value = new StringConstant(value)
+            };
         }
     }
 
     [Equatable]
     public partial record ExampleEnumVariableInput(
         string Name,
-        TextLocation? TextLocation,
+        string Group,
         string InitialValue,
-        BoundValue<string> BValue,
         [property: OrderedEquality] IReadOnlyList<string> PossibleValues) : ExampleVariableInput(
         Name,
-        TextLocation
+        Group
     )
     {
         /// <inheritdoc />
-        public override string GetValueSCL()
+        public override void SetInitialValue(ExampleChoiceData exampleChoiceData)
         {
-            return $"'{BValue.Value}'"; //TODO escape string SCLParsing.UnescapeDoubleQuoted
+            exampleChoiceData.StringValues[Name] = InitialValue;
         }
 
         /// <inheritdoc />
-        public override ExampleVariableInput WithNewBoundValue()
+        public override IStep<Unit> GetStep(ExampleChoiceData exampleChoiceData)
         {
-            return this with { BValue = new BoundValue<string>() { Value = InitialValue } };
-        }
-    }
+            var value = exampleChoiceData.StringValues[Name];
 
-    public abstract partial record ExampleVariableInput(
-            string Name,
-            TextLocation? TextLocation)
-        : ExampleInput(Name, TextLocation)
-    {
-        public static ExampleVariableInput Create(
-            string variableName,
-            TextLocation? textLocation,
-            IReadOnlyList<ExampleInput> providedInputs)
-        {
-            var pi = providedInputs
-                .OfType<ExampleVariableInput>()
-                .FirstOrDefault(
-                    x => x.Name.Equals(variableName, StringComparison.OrdinalIgnoreCase)
-                );
-
-            if (pi is not null)
+            return new SetVariable<StringStream>()
             {
-                var newPi = pi with { TextLocation = textLocation };
-                return newPi.WithNewBoundValue();
-            }
-
-            return new ExampleStringVariableInput(
-                variableName,
-                textLocation,
-                "",
-                new BoundValue<string>() { Value = "" }
-            );
-        }
-
-        public abstract string GetValueSCL();
-        public abstract ExampleVariableInput WithNewBoundValue();
-
-        public string GetPrefixLine()
-        {
-            return $"- <{Name}> = {GetValueSCL()}";
+                Variable = VariableName, Value = new StringConstant(value)
+            };
         }
     }
 
-    public class BoundValue<T>
+    public abstract partial record ExampleVariableInput(string Name, string Group)
+        : ExampleInput(Name, Group)
     {
-        public T Value { get; set; } = default;
+        public abstract IStep<Unit> GetStep(ExampleChoiceData exampleChoiceData);
+
+        public VariableName VariableName => new(Name);
     }
 }

@@ -6,13 +6,13 @@
 
     <MudPaper Class="ma-2" Square="true">
 
-      <MudMenu Label='Examples' s>
+      @*<MudMenu Label='Examples' s>
         @foreach (var example in ExampleHelpers.AllExamples)
         {
-          <MudMenuItem OnClick='_ => SetSCL(example.Scl)'>@example.Name</MudMenuItem>
+          <MudMenuItem OnClick='_ => SetSCL(example.ExampleComponent.)'>@example.Name</MudMenuItem>
         }
 
-      </MudMenu>
+      </MudMenu>*@
       <MonacoEditor Id="scl-monaco" @ref="_sclEditor" OnDidChangeModel='OnModelChanged' ConstructionOptions="SCLEditorConstructionOptions"/>
       @if (CancellationTokenSource != null)
       {
