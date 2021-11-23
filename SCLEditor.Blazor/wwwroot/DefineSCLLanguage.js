@@ -7,7 +7,7 @@ function registerSCL(sclHelper) {
 
   window.monaco.languages.registerCompletionItemProvider("scl",
     {
-      triggerCharacters: ["."],
+      triggerCharacters: [' '],
 
       resolveCompletionItem: (item, token) => {
         return this.resolveCompletionItem(item, sclHelper)
@@ -18,6 +18,13 @@ function registerSCL(sclHelper) {
 
     }
   );
+
+  window.monaco.languages.registerSignatureHelpProvider("scl", {
+    signatureHelpTriggerCharacters: [' '],
+    provideSignatureHelp: (model, position) => {
+      return this.provideSignatureHelp(model, position, sclHelper)
+    }
+  });
 
   window.monaco.languages.registerHoverProvider("scl", {
     provideHover: (model, position) => {
@@ -202,6 +209,54 @@ function _createRequest(position) {
     });
 
     window.monaco.editor.setModelMarkers(model, "owner", diagnostics);
+  }
+
+  async function provideSignatureHelp(model, position, sclHelper) {
+
+    let req = this._createRequest(position);
+
+    try {
+      let code = model.getValue();
+      let res = await sclHelper.invokeMethodAsync("GetSignatureHelpAsync", code, req);
+
+      if (!res) {
+        return undefined;
+      }
+
+      let ret = {
+        signatures: [],
+        activeSignature: res.activeSignature,
+        activeParameter: res.activeParameter
+      }
+
+      for (let signature of res.signatures) {
+
+        let signatureInfo = {
+          label: signature.label,
+          documentation: signature.structuredDocumentation.summaryText,
+          parameters: []
+        }
+
+        ret.signatures.push(signatureInfo);
+
+        for (let parameter of signature.parameters) {
+          let parameterInfo = {
+            label: parameter.label,
+            documentation: this._getParameterDocumentation(parameter)
+          }
+
+          signatureInfo.parameters.push(parameterInfo);
+        }
+      }
+
+      return {
+        value: ret,
+        dispose: () => { }
+      }
+    }
+    catch (error) {
+      return undefined;
+    }
   }
 
   function _convertToVscodeCompletionItem(sclCompletion) {
