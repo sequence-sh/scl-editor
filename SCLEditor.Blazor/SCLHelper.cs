@@ -51,6 +51,8 @@ public class LinePositionSpanTextChange
         $"StartLine={StartLine}, StartColumn={StartColumn}, EndLine={EndLine}, EndColumn={EndColumn}, NewText='{(NewText.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t"))}'";
 }
 
+public class QuickInfoRequest : Request { }
+
 public class Request : SimpleFileRequest
 {
     [JsonConverter(typeof(ZeroBasedIndexConverter))]
@@ -91,6 +93,11 @@ public class CompletionResponse
     public bool IsIncomplete { get; set; }
 
     public IReadOnlyList<CompletionItem> Items { get; set; }
+}
+
+public class QuickInfoResponse
+{
+    public string Markdown { get; set; } = string.Empty;
 }
 
 public class CompletionItem
@@ -262,6 +269,62 @@ public class SCLHelper
         CompletionResolveRequest completionResolveRequest)
     {
         return new CompletionResolveResponse { Item = completionResolveRequest.Item };
+    }
+
+    [JSInvokable]
+    public async Task<QuickInfoResponse> GetQuickInfoAsync(
+        string code,
+        QuickInfoRequest quickInfoRequest)
+    {
+        var lazyTypeResolver = HoverVisitor.CreateLazyTypeResolver(code, StepFactoryStore);
+
+        var position = new Position(quickInfoRequest.Line, quickInfoRequest.Column);
+
+        var command = Helpers.GetCommand(code, position);
+
+        if (command is null)
+            return new QuickInfoResponse() { };
+
+        var visitor2 = new HoverVisitor(
+            command.Value.newPosition,
+            command.Value.positionOffset,
+            StepFactoryStore,
+            lazyTypeResolver
+        );
+
+        var errorListener = new ErrorErrorListener();
+
+        var hover = visitor2.LexParseAndVisit(
+            command.Value.command,
+            x => { x.RemoveErrorListeners(); },
+            x =>
+            {
+                x.RemoveErrorListeners();
+                x.AddErrorListener(errorListener);
+            }
+        );
+
+        if (hover is not null)
+        {
+            if (hover.Contents.HasMarkupContent)
+                return new QuickInfoResponse() { Markdown = hover.Contents.MarkupContent?.Value };
+            else if (hover.Contents.MarkedStrings is not null)
+                return new QuickInfoResponse()
+                {
+                    Markdown = string.Join(
+                        "\r\n",
+                        hover.Contents.MarkedStrings.Select(x => x.Value)
+                    )
+                };
+        }
+
+        if (errorListener.Errors.Any())
+        {
+            var error = errorListener.Errors.First();
+            return new QuickInfoResponse() { Markdown = error.Message };
+        }
+
+        return new QuickInfoResponse();
     }
 }
 

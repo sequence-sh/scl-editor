@@ -6,8 +6,7 @@ using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Steps;
 using Reductech.EDR.Core.Util;
 
-namespace Reductech.Utilities.SCLEditor
-{
+namespace Reductech.Utilities.SCLEditor;
 
 [Equatable]
 public partial record ExampleData(
@@ -45,6 +44,4 @@ public partial record ExampleData(
             yield return step;
         }
     }
-}
-
 }

@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
 
-namespace Reductech.Utilities.SCLEditor
-{
+namespace Reductech.Utilities.SCLEditor;
 
 public record FileData(
     string Path,
@@ -40,6 +39,4 @@ public record FileData(
             return bc + "b";
         }
     }
-}
-
 }

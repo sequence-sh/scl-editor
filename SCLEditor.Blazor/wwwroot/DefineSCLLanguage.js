@@ -19,6 +19,13 @@ function registerSCL(sclHelper) {
     }
   );
 
+  window.monaco.languages.registerHoverProvider("scl", {
+    provideHover: (model, position) => {
+      return this.provideHover(model, position, sclHelper)
+    }
+  });
+
+
   window.monaco.languages.setMonarchTokensProvider('scl',
     {
   // Set defaultToken to invalid to see what you do not tokenize yet
@@ -97,6 +104,29 @@ function registerSCL(sclHelper) {
     ],
   },
 });
+}
+
+async function provideHover(model, position, sclHelper) {
+  let request = this._createRequest(position);
+  const code = model.getValue();
+
+  try {
+    const response = await sclHelper.invokeMethodAsync("GetQuickInfoAsync", code, request);
+    if (!response || !response.markdown) {
+      return undefined;
+    }
+
+    return {
+      contents: [
+        {
+          value: response.markdown
+        }
+      ]
+    }
+  }
+  catch (error) {
+    return undefined;
+  }
 }
 
 

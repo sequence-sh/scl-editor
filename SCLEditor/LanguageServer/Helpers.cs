@@ -10,8 +10,7 @@ using Reductech.EDR.Core.Internal.Documentation;
 using Reductech.EDR.Core.Internal.Parser;
 using Range = OmniSharp.Extensions.LanguageServer.Protocol.Models.Range;
 
-namespace Reductech.Utilities.SCLEditor.LanguageServer
-{
+namespace Reductech.Utilities.SCLEditor.LanguageServer;
 
 /// <summary>
 /// General helper methods for the Language Server
@@ -357,6 +356,4 @@ public static class Helpers
             return e.Message;
         }
     }
-}
-
 }

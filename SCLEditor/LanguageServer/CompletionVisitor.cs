@@ -8,8 +8,7 @@ using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Parser;
 using Range = OmniSharp.Extensions.LanguageServer.Protocol.Models.Range;
 
-namespace Reductech.Utilities.SCLEditor.LanguageServer
-{
+namespace Reductech.Utilities.SCLEditor.LanguageServer;
 
 /// <summary>
 /// Visits SCL for completion
@@ -236,6 +235,4 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
 
         return new CompletionList(options);
     }
-}
-
 }
