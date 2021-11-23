@@ -21,6 +21,7 @@ using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Parser;
 using Reductech.EDR.Core.Internal.Serialization;
 using Reductech.EDR.Core.Util;
+using Range = BlazorMonaco.Range;
 
 namespace Reductech.Utilities.SCLEditor.Blazor.Pages
 {
@@ -81,11 +82,14 @@ public partial class Playground
     {
         if (firstRender)
         {
+            var helper  = new SCLHelper(_stepFactoryStore);
+            var _objRef = DotNetObjectReference.Create(helper);
             //await MonacoEditorBase.SetTheme("vs-dark");
 
             await Runtime.InvokeVoidAsync(
-                "registerSCL"
-            ); // The function in index.html is called that
+                "registerSCL",
+                _objRef
+            ); //Function Defined in DefineSCLLanguage.js
 
             var model = await _sclEditor.GetModel();
             await MonacoEditorBase.SetModelLanguage(model, "scl");
@@ -170,29 +174,59 @@ public partial class Playground
         _consoleStringBuilder.AppendLine();
     }
 
+    //private async Task DeltaDecorations()
+    //{
+    //    var text = await _sclEditor.GetValue();
+
+    //    await _sclEditor.DeltaDecorations(
+    //        new string[0],
+    //        new ModelDeltaDecoration[]
+    //        {
+    //            new ModelDeltaDecoration()
+    //            {
+    //                Options = new ModelDecorationOptions()
+    //                {
+    //                    HoverMessage = new MarkdownString[]
+    //                    {
+    //                        new MarkdownString() { Value = "abcdefgh" }
+    //                    },
+    //                    ClassName = "scl-error"
+    //                },
+    //                Range = new Range()
+    //                {
+    //                    StartLineNumber = 1,
+    //                    StartColumn     = 2,
+    //                    EndColumn       = 10,
+    //                    EndLineNumber   = 8
+    //                }
+    //            }
+    //        }
+    //    );
+    //}
+
     private StandaloneEditorConstructionOptions SCLEditorConstructionOptions(MonacoEditor _)
     {
         return new() { AutomaticLayout = true, Language = "scl", Value = "print 123" };
     }
 
-    private StandaloneEditorConstructionOptions FileEditorConstructionOptions(MonacoEditor _)
-    {
-        if (_fileSelection?.SelectedFile is not null)
-        {
-            var extension = GetLanguageFromFileExtension(
-                _fileSystem.Path.GetExtension(_fileSelection.SelectedFile.Path)
-            );
+    //    private StandaloneEditorConstructionOptions FileEditorConstructionOptions(MonacoEditor _)
+    //{
+    //    if (_fileSelection?.SelectedFile is not null)
+    //    {
+    //        var extension = GetLanguageFromFileExtension(
+    //            _fileSystem.Path.GetExtension(_fileSelection.SelectedFile.Path)
+    //        );
 
-            return new()
-            {
-                AutomaticLayout = true,
-                Language        = extension,
-                Value           = _fileSelection.SelectedFile.Data.TextContents
-            };
-        }
+    //        return new()
+    //        {
+    //            AutomaticLayout = true,
+    //            Language        = extension,
+    //            Value           = _fileSelection.SelectedFile.Data.TextContents
+    //        };
+    //    }
 
-        return new() { AutomaticLayout = true };
-    }
+    //    return new() { AutomaticLayout = true };
+    //}
 
     private string GetLanguageFromFileExtension(string extension)
     {

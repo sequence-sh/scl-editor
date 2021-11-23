@@ -27,6 +27,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="OmniSharp.Extensions.LanguageServer.Shared" Version="0.19.5" />
     <PackageReference Include="Reductech.EDR.Connectors.FileSystem" Version="0.11.0-a.master.2109032032" />
     <PackageReference Include="Reductech.EDR.Connectors.StructuredData" Version="0.12.0-a.main.2111181604" />
     <PackageReference Include="Reductech.EDR.Core" Version="0.12.0-a.main.2111181519" />
@@ -34,6 +35,7 @@
     <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="13.2.47" />
 
   </ItemGroup>
+
 
   <ItemGroup>
     <EmbeddedResource Include="**/*.scl">

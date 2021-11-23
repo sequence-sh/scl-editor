@@ -5,15 +5,13 @@
   <MudItem xs='12' lg='6'>
 
     <MudPaper Class="ma-2" Square="true">
-
-      @*<MudMenu Label='Examples' s>
-        @foreach (var example in ExampleHelpers.AllExamples)
-        {
-          <MudMenuItem OnClick='_ => SetSCL(example.ExampleComponent.)'>@example.Name</MudMenuItem>
-        }
-
-      </MudMenu>*@
-      <MonacoEditor Id="scl-monaco" @ref="_sclEditor" OnDidChangeModel='OnModelChanged' ConstructionOptions="SCLEditorConstructionOptions"/>
+      
+      <MonacoEditor 
+        Id="scl-monaco" 
+        @ref="_sclEditor" 
+        OnDidChangeModel='OnModelChanged' 
+        ConstructionOptions="SCLEditorConstructionOptions"
+      />
       @if (CancellationTokenSource != null)
       {
         <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="Cancel"/>
@@ -30,13 +28,6 @@
   <MudItem xs='12' lg='6'>
 
     <MudExpansionPanels MultiExpansion='true'>
-
-      @*<MudExpansionPanel @bind-IsExpanded='InputFileExpanded'>
-        @if(_fileSelection?.SelectedFile is not null)
-                {
-                  <MonacoEditor Id='file-monaco' @ref="_fileEditor" ConstructionOptions='FileEditorConstructionOptions' />
-                }
-            </MudExpansionPanel>*@
 
       <MudExpansionPanel @bind-IsExpanded='OutputExpanded'>
         <MudTextField FullWidth='true'
@@ -76,4 +67,7 @@
 
 <style>
   .monaco-editor-container { height: 500px; }
+  .monaco-editor .scl-error {
+    text-decoration: underline red;
+  }
 </style>
