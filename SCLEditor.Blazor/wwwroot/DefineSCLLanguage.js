@@ -189,6 +189,21 @@ function _createRequest(position) {
     return request;
   }
 
+  function setDiagnostics(diagnostics, uri) {
+
+    var model = window.monaco.editor.getModel(uri)
+
+    diagnostics.forEach(diagnostic => {
+      diagnostic.startLineNumber = diagnostic.start.line + 1;
+      diagnostic.startColumn = diagnostic.start.character + 1;
+
+      diagnostic.endLineNumber = diagnostic.end.line + 1;
+      diagnostic.endColumn = diagnostic.end.character + 1;
+    });
+
+    window.monaco.editor.setModelMarkers(model, "owner", diagnostics);
+  }
+
   function _convertToVscodeCompletionItem(sclCompletion) {
     const docs = sclCompletion.documentation;
 

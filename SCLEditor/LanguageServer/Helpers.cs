@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Antlr4.Runtime;
@@ -101,7 +102,7 @@ public static class Helpers
     public static IReadOnlyList<(string text, Position position)> SplitIntoCommands(string text)
     {
         var inputStream = new AntlrInputStream(text);
-        var lexer       = new SCLLexer(inputStream);
+        var lexer       = new SCLLexer(inputStream, TextWriter.Null, TextWriter.Null);
 
         var tokens = lexer.GetAllTokens();
 
@@ -201,7 +202,7 @@ public static class Helpers
     public static string RemoveToken(string text, Position tokenPosition)
     {
         var inputStream = new AntlrInputStream(text);
-        var lexer       = new SCLLexer(inputStream);
+        var lexer       = new SCLLexer(inputStream, TextWriter.Null, TextWriter.Null);
 
         StringBuilder sb = new();
 
@@ -315,9 +316,9 @@ public static class Helpers
         Action<SCLParser> setupParser)
     {
         var inputStream       = new AntlrInputStream(text);
-        var lexer             = new SCLLexer(inputStream);
+        var lexer             = new SCLLexer(inputStream, TextWriter.Null, TextWriter.Null);
         var commonTokenStream = new CommonTokenStream(lexer);
-        var parser            = new SCLParser(commonTokenStream);
+        var parser            = new SCLParser(commonTokenStream, TextWriter.Null, TextWriter.Null);
 
         setupLexer(lexer);
         setupParser(parser);

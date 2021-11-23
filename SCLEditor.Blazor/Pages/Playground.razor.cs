@@ -21,6 +21,7 @@ using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Parser;
 using Reductech.EDR.Core.Internal.Serialization;
 using Reductech.EDR.Core.Util;
+using Reductech.Utilities.SCLEditor.LanguageServer;
 using Range = BlazorMonaco.Range;
 
 namespace Reductech.Utilities.SCLEditor.Blazor.Pages
@@ -114,7 +115,18 @@ public partial class Playground
         return text;
     }
 
-    private void OnModelChanged(ModelChangedEvent obj) { }
+    //private CancellationTokenSource _modelChangeThrottle = new();
+
+    private async Task OnDidChangeModelContent()
+    {
+        var uri  = (await _sclEditor.GetModel()).Uri;
+        var code = await _sclEditor.GetValue();
+
+        var diagnostics = DiagnosticsHelper.GetDiagnostics(code, _stepFactoryStore);
+
+        await JS.InvokeAsync<string>("setDiagnostics", diagnostics, uri);
+        //await this.InvokeAsync(this.StateHasChanged);
+    }
 
     public void Cancel()
     {
@@ -173,36 +185,6 @@ public partial class Playground
 
         _consoleStringBuilder.AppendLine();
     }
-
-    //private async Task DeltaDecorations()
-    //{
-    //    var text = await _sclEditor.GetValue();
-
-    //    await _sclEditor.DeltaDecorations(
-    //        new string[0],
-    //        new ModelDeltaDecoration[]
-    //        {
-    //            new ModelDeltaDecoration()
-    //            {
-    //                Options = new ModelDecorationOptions()
-    //                {
-    //                    HoverMessage = new MarkdownString[]
-    //                    {
-    //                        new MarkdownString() { Value = "abcdefgh" }
-    //                    },
-    //                    ClassName = "scl-error"
-    //                },
-    //                Range = new Range()
-    //                {
-    //                    StartLineNumber = 1,
-    //                    StartColumn     = 2,
-    //                    EndColumn       = 10,
-    //                    EndLineNumber   = 8
-    //                }
-    //            }
-    //        }
-    //    );
-    //}
 
     private StandaloneEditorConstructionOptions SCLEditorConstructionOptions(MonacoEditor _)
     {

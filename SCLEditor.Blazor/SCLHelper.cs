@@ -1,18 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
+using CSharpFunctionalExtensions;
 using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using Reductech.EDR.Core;
 using Reductech.EDR.Core.Internal;
+using Reductech.EDR.Core.Internal.Errors;
+using Reductech.EDR.Core.Internal.Parser;
+using Reductech.EDR.Core.Internal.Serialization;
+using Reductech.EDR.Core.Util;
 using Reductech.Utilities.SCLEditor.LanguageServer;
 using Range = OmniSharp.Extensions.LanguageServer.Protocol.Models.Range;
 
-namespace Reductech.Utilities.SCLEditor.Blazor
-{
+namespace Reductech.Utilities.SCLEditor.Blazor;
 
 public class CompletionRequest : Request
 {
@@ -20,6 +27,13 @@ public class CompletionRequest : Request
 
     public char? TriggerCharacter { get; set; }
 }
+
+public readonly record struct LinePosition(int Line, int Character)
+{
+    public static LinePosition Zero => new();
+}
+
+public record Diagnostic(LinePosition Start, LinePosition End, string Message, int Severity);
 
 public class LinePositionSpanTextChange
 {
@@ -328,4 +342,86 @@ public class SCLHelper
     }
 }
 
+public static class DiagnosticsHelper
+{
+    public static IReadOnlyList<Diagnostic> GetDiagnostics(
+        string text,
+        StepFactoryStore stepFactoryStore)
+    {
+        List<Diagnostic> diagnostics;
+
+        Result<IFreezableStep, IError> initialParseResult;
+
+        initialParseResult = SCLParsing2.TryParseStep(text);
+
+        if (initialParseResult.IsSuccess)
+        {
+            var freezeResult = initialParseResult.Value.TryFreeze(
+                SCLRunner.RootCallerMetadata,
+                stepFactoryStore
+            );
+
+            if (freezeResult.IsSuccess)
+            {
+                diagnostics = new List<Diagnostic>();
+            }
+
+            else
+            {
+                diagnostics = freezeResult.Error.GetAllErrors()
+                    .Select(x => ToDiagnostic(x, new Position(0, 0)))
+                    .WhereNotNull()
+                    .ToList();
+            }
+        }
+        else
+        {
+            var commands = Helpers.SplitIntoCommands(text);
+            diagnostics = new List<Diagnostic>();
+
+            foreach (var (commandText, commandPosition) in commands)
+            {
+                var visitor  = new DiagnosticsVisitor();
+                var listener = new ErrorErrorListener();
+
+                var parseResult = visitor.LexParseAndVisit(
+                    commandText,
+                    _ => { },
+                    x => { x.AddErrorListener(listener); }
+                );
+
+                IList<Diagnostic> newDiagnostics = listener.Errors
+                    .Select(x => ToDiagnostic(x, commandPosition))
+                    .WhereNotNull()
+                    .ToList();
+
+                if (!newDiagnostics.Any())
+                    newDiagnostics = parseResult.Select(x => ToDiagnostic(x, commandPosition))
+                        .WhereNotNull()
+                        .ToList();
+
+                diagnostics.AddRange(newDiagnostics);
+            }
+        }
+
+        return diagnostics;
+
+        static Diagnostic? ToDiagnostic(SingleError error, Position positionOffset)
+        {
+            if (error.Location.TextLocation is null)
+                return null;
+
+            var range = error.Location.TextLocation.GetRange(
+                positionOffset.Line,
+                positionOffset.Character
+            );
+
+            return new Diagnostic(
+                new LinePosition(range.Start.Line, range.Start.Character),
+                new LinePosition(range.End.Line,   range.End.Character),
+                error.Message,
+                3
+            );
+        }
+    }
 }

@@ -1,4 +1,5 @@
 ﻿@page "/playground"
+@inject IJSRuntime JS;
 
 <MudGrid>
 
@@ -8,8 +9,8 @@
       
       <MonacoEditor 
         Id="scl-monaco" 
-        @ref="_sclEditor" 
-        OnDidChangeModel='OnModelChanged' 
+        @ref="_sclEditor"
+        OnDidChangeModelContent='OnDidChangeModelContent'
         ConstructionOptions="SCLEditorConstructionOptions"
       />
       @if (CancellationTokenSource != null)
