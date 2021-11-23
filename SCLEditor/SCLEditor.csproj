@@ -1,11 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <RootNamespace>Reductech.Utilities.SCLEditor</RootNamespace>
     <AssemblyName>Reductech.Utilities.SCLEditor</AssemblyName>
-    <Version>0.5.0$(VersionSuffix)</Version>
+    <Version>0.13.0$(VersionSuffix)</Version>
+    <nullable>enable</nullable>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -24,5 +25,19 @@
     <Company>Reductech</Company>
     <Copyright>Copyright (c) 2020 Reductech Ltd</Copyright>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Reductech.EDR.Connectors.FileSystem" Version="0.11.0-a.master.2109032032" />
+    <PackageReference Include="Reductech.EDR.Connectors.StructuredData" Version="0.12.0-a.main.2111181604" />
+    <PackageReference Include="Reductech.EDR.Core" Version="0.12.0-a.main.2111181519" />
+    <PackageReference Include="System.IO.Abstractions" Version="13.2.47" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="13.2.47" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="**/*.scl">
+    </EmbeddedResource>
+  </ItemGroup>
 
 </Project>

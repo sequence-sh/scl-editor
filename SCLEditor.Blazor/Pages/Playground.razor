@@ -1,0 +1,79 @@
+﻿@page "/playground"
+
+<MudGrid>
+
+  <MudItem xs='12' lg='6'>
+
+    <MudPaper Class="ma-2" Square="true">
+
+      @*<MudMenu Label='Examples' s>
+        @foreach (var example in ExampleHelpers.AllExamples)
+        {
+          <MudMenuItem OnClick='_ => SetSCL(example.ExampleComponent.)'>@example.Name</MudMenuItem>
+        }
+
+      </MudMenu>*@
+      <MonacoEditor Id="scl-monaco" @ref="_sclEditor" OnDidChangeModel='OnModelChanged' ConstructionOptions="SCLEditorConstructionOptions"/>
+      @if (CancellationTokenSource != null)
+      {
+        <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="Cancel"/>
+      }
+      else
+      {
+        <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
+      }
+    </MudPaper>
+
+
+  </MudItem>
+
+  <MudItem xs='12' lg='6'>
+
+    <MudExpansionPanels MultiExpansion='true'>
+
+      @*<MudExpansionPanel @bind-IsExpanded='InputFileExpanded'>
+        @if(_fileSelection?.SelectedFile is not null)
+                {
+                  <MonacoEditor Id='file-monaco' @ref="_fileEditor" ConstructionOptions='FileEditorConstructionOptions' />
+                }
+            </MudExpansionPanel>*@
+
+      <MudExpansionPanel @bind-IsExpanded='OutputExpanded'>
+        <MudTextField FullWidth='true'
+                      Value="@_consoleStringBuilder.ToString()"
+                      Label="Output"
+                      ReadOnly="true"
+                      Variant="Variant.Outlined"
+                      Lines="10"
+                      AdornmentIcon="@Icons.Material.Filled.Clear"
+                      Adornment="Adornment.End"
+                      Style='width: 100%'
+                      OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
+      </MudExpansionPanel>
+
+      <MudExpansionPanel @bind-IsExpanded='@LogExpanded'>
+        <MudTextField FullWidth='true'
+                      Value="@LogText()"
+                      Label="Log"
+                      ReadOnly="true"
+                      Variant="Variant.Outlined"
+                      Lines="10"
+                      AdornmentIcon="@Icons.Material.Filled.Clear"
+                      Adornment="Adornment.End"
+                      Style='width: 100%'
+                      OnAdornmentClick="@ClearLogs"/>
+      </MudExpansionPanel>
+    </MudExpansionPanels>
+
+  </MudItem>
+
+  <MudItem xs='12'>
+    <FileSelection @ref="_fileSelection" FileSystem='@_fileSystem' SetSCLAction='@SetSCL'/>
+  </MudItem>
+
+</MudGrid>
+
+
+<style>
+  .monaco-editor-container { height: 500px; }
+</style>

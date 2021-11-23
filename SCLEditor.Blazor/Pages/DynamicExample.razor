@@ -1,0 +1,200 @@
+﻿@page "/example/{exampleName}"
+
+
+<MudGrid>
+
+
+  @foreach (var group in example.ExampleComponent.GetInputs(_choiceData).GroupBy(x => x.Group))
+  {
+    <MudItem xs='12' md='6' lg='4' @key='@(ExampleName + group.Key + "MudItem")'>
+      <MudPaper Class="ma-2" Square="true">
+
+        @foreach (var input in group)
+        {
+          var id = (input.Name);
+
+          @if (input is ExampleInput.ExampleFileInput fileInput)
+          {
+            var options = GetOptions(fileInput);
+
+            <MudText Typo="Typo.h6">@input.Name</MudText>
+
+            <MonacoEditor
+              Id="@id"
+              @key="@id"
+              @ref="_choiceData.Editors[id]"
+              OnDidBlurEditorText='UpdateOutput'
+              ConstructionOptions="_ => options"/>
+          }
+          else if (input is ExampleInput.ExampleStringVariableInput stringVariableInput)
+          {
+            <MudTextField T='string'
+                          Label='@stringVariableInput.Name'
+                          @onchange="UpdateOutput"
+                          @bind-Value='_choiceData.StringValues[id]'/>
+          }
+          else if (input is ExampleInput.ExampleEnumVariableInput enumVariableInput)
+          {
+            <MudSelect T='string'
+                       Label='@enumVariableInput.Name'
+                       @onchange="UpdateOutput"
+                       @bind-Value='_choiceData.StringValues[id]'>
+              @foreach (var val in enumVariableInput.PossibleValues)
+              {
+                <MudSelectItem Value="@(val)"/>
+              }
+            </MudSelect>
+          }
+          else if (input is ExampleInput.ExampleIntVariableInput intVariableInput)
+          {
+            <MudNumericField T='int'
+                             Label='@intVariableInput.Name'
+                             @onchange="UpdateOutput"
+                             @bind-Value='_choiceData.IntValues[id]'
+                             Min='@(intVariableInput.Minimum ?? 0)'
+                             Max='@(intVariableInput.Maximum ?? int.MaxValue)'
+                             Step='@(intVariableInput.Step ?? 1)'/>
+          }
+          else if (input is ExampleInput.ExampleChoice choice)
+          {
+            <MudSelect T='ExampleComponent'
+                       Label='@choice.Name'
+                       @onchange="UpdateOutput"
+                       @bind-Value='_choiceData.ChoiceValues[id]'>
+              @foreach (var val in choice.Options)
+              {
+                <MudSelectItem Value="@(val)">@val.Name </MudSelectItem>
+              }
+            </MudSelect>
+          }
+        }
+
+      </MudPaper>
+    </MudItem>
+  }
+
+
+  <MudItem xs='12' md='6' lg='4'>
+    <MudPaper Class="ma-2" Square="true">
+      <MudText Typo="Typo.h6">Output</MudText>
+
+      <MonacoEditor
+        Id="@(ExampleName + "Output")"
+        @ref="_outputEditor"
+        OnDidInit='UpdateOutput'
+        ConstructionOptions="_ => OutputEditorConstructionOptions"/>
+    </MudPaper>
+  </MudItem>
+
+</MudGrid>
+
+
+<style>
+  .monaco-editor-container { height: 500px; }
+</style>
+
+
+@code {
+
+  [Parameter]
+  public string ExampleName { get; set; }
+
+  private MonacoEditor _outputEditor;
+
+  private ExampleChoiceData _choiceData = new();
+
+  private StepFactoryStore _stepFactoryStore;
+
+  private readonly ICompression _compression = new CompressionAdapter();
+
+  public CancellationTokenSource? _cancellationTokenSource { get; set; }
+
+  private ExampleData example { get; set; }
+
+  /// <inheritdoc />
+  protected override async Task OnParametersSetAsync()
+  {
+    await base.OnParametersSetAsync();
+    _outputEditor?.Dispose();
+
+    var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
+      ExternalContext.Default,
+      typeof(FileRead).Assembly,
+      typeof(ToCSV).Assembly
+      );
+
+    _stepFactoryStore = stepFactoryStoreResult.Value;
+
+    example = ExampleHelpers.AllExamples.Single(x => x.Url.Equals(ExampleName));
+
+    _choiceData = ExampleChoiceData.Create(example.ExampleComponent);
+  }
+
+  private StandaloneEditorConstructionOptions GetOptions(ExampleInput.ExampleFileInput input)
+  {
+    return new()
+    {
+      AutomaticLayout = true,
+      Language = input.Language,
+      RenderControlCharacters = true,
+      Value = input.InitialValue,
+    };
+  }
+
+  private StandaloneEditorConstructionOptions OutputEditorConstructionOptions => new()
+  {
+    ReadOnly = true,
+    AutomaticLayout = true,
+    WordWrap = example.ExampleOutput.WordWrap,
+    Value = "",
+    Language = example.ExampleOutput.Language
+  };
+
+  public async Task FormatAll()
+  {
+    foreach (var editor in _choiceData.Editors.Values.OfType<MonacoEditor>())
+    {
+      await editor.Trigger("anyString", "editor.action.formatDocument");
+    }
+  }
+
+  private async Task UpdateOutput()
+  {
+    _cancellationTokenSource?.Cancel();
+    _cancellationTokenSource = new CancellationTokenSource();
+
+    var fileSystem = new MockFileSystem();
+
+    foreach (var fileInput in example.ExampleComponent.GetInputs(_choiceData).OfType<ExampleInput.ExampleFileInput>())
+    {
+      var editor = (MonacoEditor)_choiceData.Editors[fileInput.Name];
+      var text = await editor.GetValue();
+      fileSystem.AddFile(fileInput.Name, text);
+    }
+
+    var externalContext = new ExternalContext(ExternalProcessRunner.Instance,
+                                              DefaultRestClientFactory.Instance,
+                                              ConsoleAdapter.Instance,
+                                              (ConnectorInjection.FileSystemKey, fileSystem),
+                                              (ConnectorInjection.CompressionKey, new CompressionAdapter())
+      );
+
+    var state = new StateMonad(NullLogger.Instance, _stepFactoryStore, externalContext, new Dictionary<string, object>());
+
+    var sequence = example.GetSequence(_choiceData);
+    var result = await sequence.Run<StringStream>(state, _cancellationTokenSource.Token).Map(x => x.GetStringAsync());
+
+    var scl = sequence.Serialize();
+    Console.WriteLine(scl);
+
+    if (result.IsSuccess)
+    {
+      await _outputEditor.SetValue(result.Value);
+    }
+    else
+    {
+      await _outputEditor.SetValue(result.Error.AsString);
+    }
+  }
+
+}
