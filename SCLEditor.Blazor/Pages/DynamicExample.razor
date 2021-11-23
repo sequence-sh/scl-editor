@@ -23,21 +23,21 @@
               Id="@id"
               @key="@id"
               @ref="_choiceData.Editors[id]"
-              OnDidBlurEditorText='UpdateOutput'
+              OnDidChangeModelContent='UpdateOutput'
               ConstructionOptions="_ => options"/>
           }
           else if (input is ExampleInput.ExampleStringVariableInput stringVariableInput)
           {
             <MudTextField T='string'
+                          TextChanged='UpdateOutput'
                           Label='@stringVariableInput.Name'
-                          @onchange="UpdateOutput"
                           @bind-Value='_choiceData.StringValues[id]'/>
           }
           else if (input is ExampleInput.ExampleEnumVariableInput enumVariableInput)
           {
             <MudSelect T='string'
                        Label='@enumVariableInput.Name'
-                       @onchange="UpdateOutput"
+                       SelectedValuesChanged='UpdateOutput'
                        @bind-Value='_choiceData.StringValues[id]'>
               @foreach (var val in enumVariableInput.PossibleValues)
               {
@@ -48,8 +48,8 @@
           else if (input is ExampleInput.ExampleIntVariableInput intVariableInput)
           {
             <MudNumericField T='int'
+                             TextChanged='UpdateOutput'
                              Label='@intVariableInput.Name'
-                             @onchange="UpdateOutput"
                              @bind-Value='_choiceData.IntValues[id]'
                              Min='@(intVariableInput.Minimum ?? 0)'
                              Max='@(intVariableInput.Maximum ?? int.MaxValue)'
