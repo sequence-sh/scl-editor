@@ -12,6 +12,7 @@ using MELT;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
+using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using Reductech.EDR.Connectors.FileSystem;
 using Reductech.EDR.Connectors.StructuredData;
 using Reductech.EDR.Core;
@@ -94,6 +95,35 @@ public partial class Playground
 
             var model = await _sclEditor.GetModel();
             await MonacoEditorBase.SetModelLanguage(model, "scl");
+
+            await _sclEditor.AddAction(
+                "runSCL",
+                "Run SCL",
+                new int[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_R },
+                null,
+                null,
+                "SCL",
+                1.5,
+                async (editor, keycodes) =>
+                {
+                    await Run();
+                    StateHasChanged();
+                }
+            );
+
+            await _sclEditor.AddAction(
+                "formatscl",
+                "Format SCL",
+                new int[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_F },
+                null,
+                null,
+                "SCL",
+                1.5,
+                async (editor, keycodes) =>
+                {
+                    await FormatSCL();
+                }
+            );
         }
 
         await base.OnAfterRenderAsync(firstRender);
@@ -115,9 +145,7 @@ public partial class Playground
         return text;
     }
 
-    //private CancellationTokenSource _modelChangeThrottle = new();
-
-    private async Task OnDidChangeModelContent()
+    private async Task OnDidChangeModelContentAsync()
     {
         var uri  = (await _sclEditor.GetModel()).Uri;
         var code = await _sclEditor.GetValue();
@@ -125,10 +153,9 @@ public partial class Playground
         var diagnostics = DiagnosticsHelper.GetDiagnostics(code, _stepFactoryStore);
 
         await JS.InvokeAsync<string>("setDiagnostics", diagnostics, uri);
-        //await this.InvokeAsync(this.StateHasChanged);
     }
 
-    public void Cancel()
+    public void CancelRun()
     {
         CancellationTokenSource?.Cancel();
         CancellationTokenSource = null;
@@ -137,6 +164,37 @@ public partial class Playground
     public async Task SetSCL(string s)
     {
         await _sclEditor.SetValue(s);
+    }
+
+    public async Task FormatSCL()
+    {
+        var sclText = await _sclEditor.GetValue();
+
+        var selections = await _sclEditor.GetSelections();
+
+        var uri = (await _sclEditor.GetModel()).Uri;
+
+        var edits = Formatter
+            .FormatDocument(sclText, _stepFactoryStore)
+            .Select(Convert)
+            .ToList();
+
+        await _sclEditor.ExecuteEdits(uri, edits, selections);
+
+        IdentifiedSingleEditOperation Convert(TextEdit edit)
+        {
+            return new IdentifiedSingleEditOperation()
+            {
+                Range =
+                    new Range(
+                        edit.Range.Start.Line + 1,
+                        edit.Range.Start.Character + 1,
+                        edit.Range.End.Line + 1,
+                        edit.Range.End.Character + 1
+                    ),
+                Text = edit.NewText,
+            };
+        }
     }
 
     public async Task Run()

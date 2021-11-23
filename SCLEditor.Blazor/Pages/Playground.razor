@@ -10,17 +10,19 @@
       <MonacoEditor 
         Id="scl-monaco" 
         @ref="_sclEditor"
-        OnDidChangeModelContent='OnDidChangeModelContent'
+        OnDidChangeModelContent='OnDidChangeModelContentAsync'
         ConstructionOptions="SCLEditorConstructionOptions"
       />
       @if (CancellationTokenSource != null)
       {
-        <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="Cancel"/>
+        <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="CancelRun"/>
       }
       else
       {
         <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
       }
+      
+      <MudIconButton Icon='@Icons.Material.Filled.TextFormat' OnClick="FormatSCL"/>
     </MudPaper>
 
 
