@@ -11,7 +11,7 @@
         OnDidChangeModelContent='OnDidChangeModelContentAsync'
         ConstructionOptions="SCLEditorConstructionOptions"
       />
-      @if (CancellationTokenSource != null)
+      @if (RunCancellation != null)
       {
         <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="CancelRun"/>
       }
@@ -19,6 +19,9 @@
       {
         <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
       }
+      
+      
+
     </MudPaper>
 
 
@@ -53,6 +56,16 @@
                       Style='width: 100%'
                       OnAdornmentClick="@ClearLogs"/>
       </MudExpansionPanel>
+      
+      <MudExpansionPanel Icon='@Icons.Material.Filled.Settings'>
+        <MudCheckBox  @bind-Checked="_configuration.CompletionEnabled" Label='@nameof(_configuration.CompletionEnabled)'/>
+        <MudCheckBox  @bind-Checked="_configuration.DiagnosticsEnabled" Label='@nameof(_configuration.DiagnosticsEnabled)'/>
+        <MudCheckBox  @bind-Checked="_configuration.SignatureHelpEnabled" Label='@nameof(_configuration.SignatureHelpEnabled)'/>
+        <MudCheckBox  @bind-Checked="_configuration.QuickInfoEnabled" Label='@nameof(_configuration.QuickInfoEnabled)'/>
+
+      </MudExpansionPanel>
+      
+
     </MudExpansionPanels>
 
   </MudItem>

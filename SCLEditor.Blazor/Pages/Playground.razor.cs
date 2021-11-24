@@ -21,16 +21,25 @@ using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Parser;
 using Reductech.EDR.Core.Internal.Serialization;
 using Reductech.EDR.Core.Util;
+using Reductech.Utilities.SCLEditor.LanguageServer;
 
 namespace Reductech.Utilities.SCLEditor.Blazor.Pages;
 
+/// <summary>
+/// Playground for using SCL
+/// </summary>
 public partial class Playground
 {
-    [Inject] public IJSRuntime Runtime { get; set; } = null!;
+    /// <summary>
+    /// The JS runtime
+    /// </summary>
+    [Inject]
+    public IJSRuntime Runtime { get; set; } = null!;
 
-    //private FileSelection _fileSelection;
-
-    private MonacoEditor _sclEditor;
+    /// <summary>
+    /// The _scl editor to use
+    /// </summary>
+    private MonacoEditor _sclEditor = null!;
 
     //private MonacoEditor _fileEditor;
 
@@ -49,7 +58,11 @@ public partial class Playground
     private StepFactoryStore _stepFactoryStore = null!;
     private IExternalContext _externalContext = null!;
 
-    public CancellationTokenSource? CancellationTokenSource { get; set; }
+    private CancellationTokenSource? RunCancellation { get; set; }
+
+    private SCLCodeHelper _sclCodeHelper = null!;
+
+    private EditorConfiguration _configuration = new();
 
     /// <inheritdoc />
     protected override void OnInitialized()
@@ -72,6 +85,8 @@ public partial class Playground
 
         _stepFactoryStore = stepFactoryStoreResult.Value;
 
+        _sclCodeHelper = new SCLCodeHelper(_stepFactoryStore, _configuration);
+
         base.OnInitialized();
     }
 
@@ -80,9 +95,7 @@ public partial class Playground
     {
         if (firstRender)
         {
-            var helper = new SCLHelper(_stepFactoryStore);
-            var objRef = DotNetObjectReference.Create(helper);
-            //await MonacoEditorBase.SetTheme("vs-dark");
+            var objRef = DotNetObjectReference.Create(_sclCodeHelper);
 
             await Runtime.InvokeVoidAsync(
                 "registerSCL",
@@ -125,12 +138,12 @@ public partial class Playground
         await base.OnAfterRenderAsync(firstRender);
     }
 
-    public void ClearLogs()
+    private void ClearLogs()
     {
         _testLoggerFactory.Sink.Clear();
     }
 
-    public string LogText()
+    private string LogText()
     {
         var text =
             string.Join(
@@ -141,28 +154,21 @@ public partial class Playground
         return text;
     }
 
-    private async Task OnDidChangeModelContentAsync()
+    private Task OnDidChangeModelContentAsync() =>
+        _sclCodeHelper.SetDiagnostics(_sclEditor, Runtime);
+
+    private void CancelRun()
     {
-        var uri  = (await _sclEditor.GetModel()).Uri;
-        var code = await _sclEditor.GetValue();
-
-        var diagnostics = DiagnosticsHelper.GetDiagnostics(code, _stepFactoryStore);
-
-        await Runtime.InvokeAsync<string>("setDiagnostics", diagnostics, uri);
+        RunCancellation?.Cancel();
+        RunCancellation = null;
     }
 
-    public void CancelRun()
-    {
-        CancellationTokenSource?.Cancel();
-        CancellationTokenSource = null;
-    }
-
-    public async Task SetSCL(string s)
+    private async Task SetSCL(string s)
     {
         await _sclEditor.SetValue(s);
     }
 
-    public async Task FormatSCL()
+    private async Task FormatSCL()
     {
         var sclText = await _sclEditor.GetValue();
 
@@ -177,13 +183,13 @@ public partial class Playground
         await _sclEditor.ExecuteEdits(uri, edits, selections);
     }
 
-    public async Task Run()
+    private async Task Run()
     {
         var sclText = await _sclEditor.GetValue();
 
-        CancellationTokenSource?.Cancel();
+        RunCancellation?.Cancel();
         var cts = new CancellationTokenSource();
-        CancellationTokenSource = cts;
+        RunCancellation = cts;
 
         var logger = _testLoggerFactory.CreateLogger("SCL");
 
@@ -205,7 +211,7 @@ public partial class Playground
 
             var runResult = await stepResult.Value.Run<object>(
                 stateMonad,
-                CancellationTokenSource.Token
+                RunCancellation.Token
             );
 
             if (runResult.IsFailure)
@@ -219,7 +225,7 @@ public partial class Playground
             }
         }
 
-        CancellationTokenSource = null;
+        RunCancellation = null;
 
         _consoleStringBuilder.AppendLine();
     }
