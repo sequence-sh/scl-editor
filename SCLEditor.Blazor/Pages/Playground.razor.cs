@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Abstractions.TestingHelpers;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using BlazorMonaco;
 using CSharpFunctionalExtensions;
@@ -12,16 +6,9 @@ using MELT;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using Reductech.EDR.Connectors.FileSystem;
-using Reductech.EDR.Connectors.StructuredData;
-using Reductech.EDR.Core;
 using Reductech.EDR.Core.Abstractions;
 using Reductech.EDR.Core.ExternalProcesses;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Internal.Parser;
 using Reductech.EDR.Core.Internal.Serialization;
-using Reductech.EDR.Core.Util;
-using Reductech.Utilities.SCLEditor.LanguageServer;
 
 namespace Reductech.Utilities.SCLEditor.Blazor.Pages;
 
@@ -64,6 +51,11 @@ public partial class Playground
 
     private EditorConfiguration _configuration = new();
 
+    /// <summary>
+    /// The configuration key in local storage
+    /// </summary>
+    private const string ConfigurationKey = "SCLPlaygroundConfiguration";
+
     /// <inheritdoc />
     protected override void OnInitialized()
     {
@@ -85,9 +77,23 @@ public partial class Playground
 
         _stepFactoryStore = stepFactoryStoreResult.Value;
 
+        if (localStorage.ContainKey(ConfigurationKey))
+            _configuration = localStorage.GetItem<EditorConfiguration>(ConfigurationKey);
+        else
+            _configuration = new EditorConfiguration();
+
+        _configuration.PropertyChanged += _configuration_PropertyChanged;
+
         _sclCodeHelper = new SCLCodeHelper(_stepFactoryStore, _configuration);
 
         base.OnInitialized();
+    }
+
+    private void _configuration_PropertyChanged(
+        object? sender,
+        System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        localStorage.SetItem(ConfigurationKey, _configuration);
     }
 
     /// <inheritdoc />

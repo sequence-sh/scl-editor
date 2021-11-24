@@ -1,7 +1,7 @@
-using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using BlazorDownloadFile;
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
@@ -21,6 +21,7 @@ public class Program
         );
 
         builder.Services.AddBlazorDownloadFile();
+        builder.Services.AddBlazoredLocalStorage();
 
         builder.Services.AddMudBlazorJsApi().AddMudServices();
         await builder.Build().RunAsync();

@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Reductech.Utilities.SCLEditor.LanguageServer.Objects;
+﻿namespace Reductech.Utilities.SCLEditor.LanguageServer.Objects;
 
 public class SignatureHelpItem
 {

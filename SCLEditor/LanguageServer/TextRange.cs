@@ -1,6 +1,4 @@
-﻿using Reductech.Utilities.SCLEditor.LanguageServer.Objects;
-
-namespace Reductech.Utilities.SCLEditor.LanguageServer;
+﻿namespace Reductech.Utilities.SCLEditor.LanguageServer;
 
 public class TextRange
 {

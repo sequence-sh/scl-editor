@@ -1,10 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using Antlr4.Runtime;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Internal.Errors;
-
-namespace Reductech.Utilities.SCLEditor.LanguageServer;
+﻿namespace Reductech.Utilities.SCLEditor.LanguageServer;
 
 /// <summary>
 /// Listens for errors in the SCL

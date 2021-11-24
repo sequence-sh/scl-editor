@@ -1,10 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Internal.Errors;
-using Reductech.EDR.Core.Internal.Serialization;
-using Reductech.EDR.Core.Util;
-using Reductech.Utilities.SCLEditor.LanguageServer.Objects;
+﻿using Reductech.EDR.Core.Internal.Serialization;
 
 namespace Reductech.Utilities.SCLEditor.LanguageServer;
 

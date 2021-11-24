@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using Reductech.EDR.Core;
-using Reductech.EDR.Core.Internal;
-
-namespace Reductech.Utilities.SCLEditor;
+﻿namespace Reductech.Utilities.SCLEditor;
 
 /// <summary>
 /// The Output of an example

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Reductech.Utilities.SCLEditor.LanguageServer.Objects;
+﻿namespace Reductech.Utilities.SCLEditor.LanguageServer.Objects;
 
 public class CompletionItem
 {

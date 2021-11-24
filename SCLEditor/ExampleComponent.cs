@@ -1,13 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Generator.Equals;
-using Reductech.EDR.Connectors.FileSystem;
-using Reductech.EDR.Core;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Steps;
-using Reductech.EDR.Core.Util;
-
-namespace Reductech.Utilities.SCLEditor;
+﻿namespace Reductech.Utilities.SCLEditor;
 
 /// <summary>
 /// A component used in an example

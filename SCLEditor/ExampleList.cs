@@ -1,80 +1,33 @@
-﻿using System.Collections.Generic;
-using Reductech.EDR.Connectors.StructuredData;
-using Reductech.EDR.Core;
-using Reductech.EDR.Core.Enums;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Steps;
-using Reductech.EDR.Core.Util;
+﻿using Reductech.EDR.Core.Enums;
 
 namespace Reductech.Utilities.SCLEditor;
 
+/// <summary>
+/// List of SCL examples
+/// </summary>
 public static class ExampleList
 {
+    /// <summary>
+    /// All scl examples
+    /// </summary>
     public static IEnumerable<ExampleTemplate> AllExamples
     {
         get
         {
             yield return new ExampleTemplate(
-                "Convert CSV to Json",
-                "convertcsvtojson",
+                "Convert Data",
+                "convertdata",
                 new ExampleComponent.Sequence(
                     "Sequence",
                     new List<ExampleComponent>()
                     {
-                        new ExampleComponent.Variable(DefaultInputs.CSVDelimiter),
-                        new ExampleComponent.File(DefaultInputs.InputCSV)
+                        ExampleDefaults.InputEntities, ExampleDefaults.OutputEntities,
                     }
                 ),
                 new ExampleOutput(
-                    "json",
+                    null,
                     "off",
-                    new ToJsonArray()
-                    {
-                        Entities = new FromCSV()
-                        {
-                            Delimiter =
-                                new GetVariable<StringStream>()
-                                {
-                                    Variable = DefaultInputs.CSVDelimiter.VariableName
-                                },
-                            Stream = new GetVariable<StringStream>()
-                            {
-                                Variable = new VariableName("inputcsv")
-                            }
-                        }
-                    }
-                )
-            );
-
-            yield return new ExampleTemplate(
-                "Convert Json to CSV",
-                "convertjsontocsv",
-                new ExampleComponent.Sequence(
-                    "Sequence",
-                    new List<ExampleComponent>()
-                    {
-                        new ExampleComponent.Variable(DefaultInputs.CSVDelimiter),
-                        new ExampleComponent.File(DefaultInputs.InputJson)
-                    }
-                ),
-                new ExampleOutput(
-                    "csv",
-                    "off",
-                    new ToCSV()
-                    {
-                        Delimiter =
-                            new GetVariable<StringStream>()
-                            {
-                                Variable = DefaultInputs.CSVDelimiter.VariableName
-                            },
-                        Entities = new FromJsonArray()
-                        {
-                            Stream = new GetVariable<StringStream>()
-                            {
-                                Variable = new VariableName("inputjson")
-                            }
-                        }
-                    }
+                    new GetVariable<StringStream>() { Variable = new VariableName("data") }
                 )
             );
 
@@ -88,77 +41,11 @@ public static class ExampleList
                         new ExampleComponent.Variable(
                             new ExampleInput.ExampleStringVariableInput(
                                 "Schema Name",
-                                "Input",
+                                "input",
                                 "Schema"
                             )
                         ),
-                        new ExampleComponent.Choice(
-                            new ExampleInput.Mode(
-                                "Input",
-                                "Input",
-                                new List<ExampleComponent>()
-                                {
-                                    new ExampleComponent.Sequence(
-                                        "CSV",
-                                        new List<ExampleComponent>()
-                                        {
-                                            new ExampleComponent.Variable(
-                                                DefaultInputs.CSVDelimiter with { Group = "Input" }
-                                            ),
-                                            new ExampleComponent.File(
-                                                DefaultInputs.InputCSV with { Group = "Input" }
-                                            ),
-                                            new ExampleComponent.Constant(
-                                                "ReadCSV",
-                                                new SetVariable<Array<Entity>>()
-                                                {
-                                                    Variable = new VariableName("entities"),
-                                                    Value = new FromCSV()
-                                                    {
-                                                        Delimiter =
-                                                            new GetVariable<StringStream>()
-                                                            {
-                                                                Variable =
-                                                                    DefaultInputs.CSVDelimiter
-                                                                        .VariableName
-                                                            },
-                                                        Stream = new GetVariable<StringStream>()
-                                                        {
-                                                            Variable =
-                                                                new VariableName("inputcsv")
-                                                        }
-                                                    }
-                                                }
-                                            )
-                                        }
-                                    ),
-                                    new ExampleComponent.Sequence(
-                                        "Json",
-                                        new List<ExampleComponent>()
-                                        {
-                                            new ExampleComponent.File(
-                                                DefaultInputs.InputJson with { Group = "Input" }
-                                            ),
-                                            new ExampleComponent.Constant(
-                                                "ReadJson",
-                                                new SetVariable<Array<Entity>>()
-                                                {
-                                                    Variable = new VariableName("entities"),
-                                                    Value = new FromJsonArray()
-                                                    {
-                                                        Stream = new GetVariable<StringStream>()
-                                                        {
-                                                            Variable =
-                                                                new VariableName("inputjson")
-                                                        }
-                                                    }
-                                                }
-                                            )
-                                        }
-                                    )
-                                }
-                            )
-                        )
+                        ExampleDefaults.InputEntities
                     }
                 ),
                 new ExampleOutput(
@@ -191,74 +78,8 @@ public static class ExampleList
                     "Sequence",
                     new List<ExampleComponent>()
                     {
-                        new ExampleComponent.File(DefaultInputs.SchemaJson),
-                        new ExampleComponent.Choice(
-                            new ExampleInput.Mode(
-                                "Input",
-                                "Input",
-                                new List<ExampleComponent>()
-                                {
-                                    new ExampleComponent.Sequence(
-                                        "CSV",
-                                        new List<ExampleComponent>()
-                                        {
-                                            new ExampleComponent.Variable(
-                                                DefaultInputs.CSVDelimiter with { Group = "Input" }
-                                            ),
-                                            new ExampleComponent.File(
-                                                DefaultInputs.InputCSV with { Group = "Input" }
-                                            ),
-                                            new ExampleComponent.Constant(
-                                                "ReadCSV",
-                                                new SetVariable<Array<Entity>>()
-                                                {
-                                                    Variable = new VariableName("entities"),
-                                                    Value = new FromCSV()
-                                                    {
-                                                        Delimiter =
-                                                            new GetVariable<StringStream>()
-                                                            {
-                                                                Variable =
-                                                                    DefaultInputs.CSVDelimiter
-                                                                        .VariableName
-                                                            },
-                                                        Stream = new GetVariable<StringStream>()
-                                                        {
-                                                            Variable =
-                                                                new VariableName("inputcsv")
-                                                        }
-                                                    }
-                                                }
-                                            )
-                                        }
-                                    ),
-                                    new ExampleComponent.Sequence(
-                                        "Json",
-                                        new List<ExampleComponent>()
-                                        {
-                                            new ExampleComponent.File(
-                                                DefaultInputs.InputJson with { Group = "Input" }
-                                            ),
-                                            new ExampleComponent.Constant(
-                                                "ReadJson",
-                                                new SetVariable<Array<Entity>>()
-                                                {
-                                                    Variable = new VariableName("entities"),
-                                                    Value = new FromJsonArray()
-                                                    {
-                                                        Stream = new GetVariable<StringStream>()
-                                                        {
-                                                            Variable =
-                                                                new VariableName("inputjson")
-                                                        }
-                                                    }
-                                                }
-                                            )
-                                        }
-                                    )
-                                }
-                            )
-                        ),
+                        new ExampleComponent.File(ExampleDefaults.SchemaJson),
+                        ExampleDefaults.InputEntities,
                         new ExampleComponent.Constant(
                             "Validate Entities",
                             new ForEach<Entity>()

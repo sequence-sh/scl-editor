@@ -1,25 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Abstractions.TestingHelpers;
-using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using BlazorMonaco;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging.Abstractions;
-using Reductech.EDR.Connectors.FileSystem;
-using Reductech.EDR.Connectors.StructuredData;
-using Reductech.EDR.Core;
 using Reductech.EDR.Core.Abstractions;
 using Reductech.EDR.Core.ExternalProcesses;
-using Reductech.EDR.Core.Internal;
 
 namespace Reductech.Utilities.SCLEditor.Blazor.Pages;
 
+/// <summary>
+/// A page containing a dynamic scl example
+/// </summary>
 public partial class DynamicExample
 {
-    [Parameter] public string ExampleName { get; set; }
+    /// <summary>
+    /// The name of the Example (from the uri)
+    /// </summary>
+    [Parameter]
+    public string ExampleName { get; set; }
 
     private MonacoEditor? _outputEditor = null!;
 
@@ -62,6 +61,8 @@ public partial class DynamicExample
             Language                = input.Language,
             RenderControlCharacters = true,
             Value                   = input.InitialValue,
+            TabSize                 = 8,
+            UseTabStops             = true,
         };
     }
 
@@ -71,7 +72,9 @@ public partial class DynamicExample
         AutomaticLayout = true,
         WordWrap        = ExampleTemplate.ExampleOutput.WordWrap,
         Value           = "",
-        Language        = ExampleTemplate.ExampleOutput.Language
+        Language        = ExampleTemplate.ExampleOutput.Language,
+        TabSize         = 8,
+        UseTabStops     = true,
     };
 
     private StandaloneEditorConstructionOptions SCLEditorConstructionOptions => new()
@@ -110,6 +113,10 @@ public partial class DynamicExample
             {
                 var text = await editor.GetValue();
                 fileSystem.AddFile(fileInput.Name, text);
+            }
+            else
+            {
+                fileSystem.AddFile(fileInput.Name, fileInput.InitialValue);
             }
         }
 

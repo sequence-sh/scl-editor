@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Antlr4.Runtime;
-using Antlr4.Runtime.Tree;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Internal.Parser;
-using Reductech.Utilities.SCLEditor.LanguageServer.Objects;
-
-namespace Reductech.Utilities.SCLEditor.LanguageServer;
+﻿namespace Reductech.Utilities.SCLEditor.LanguageServer;
 
 /// <summary>
 /// Visits SCL for completion

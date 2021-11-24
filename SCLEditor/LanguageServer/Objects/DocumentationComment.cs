@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml;
-
-namespace Reductech.Utilities.SCLEditor.LanguageServer.Objects;
+﻿namespace Reductech.Utilities.SCLEditor.LanguageServer.Objects;
 
 public class DocumentationComment
 {

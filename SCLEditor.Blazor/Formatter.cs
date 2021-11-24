@@ -1,15 +1,6 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using Antlr4.Runtime;
-using BlazorMonaco;
+﻿using BlazorMonaco;
 using CSharpFunctionalExtensions;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Internal.Errors;
-using Reductech.EDR.Core.Internal.Parser;
 using Reductech.EDR.Core.Internal.Serialization;
-using Reductech.EDR.Core.Steps;
 using Reductech.Utilities.SCLEditor.LanguageServer;
 
 namespace Reductech.Utilities.SCLEditor.Blazor

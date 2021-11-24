@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Antlr4.Runtime;
-using Antlr4.Runtime.Tree;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using Namotion.Reflection;
-using Reductech.EDR.Core;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Internal.Errors;
-using Reductech.EDR.Core.Internal.Parser;
 using Reductech.EDR.Core.Internal.Serialization;
-using Reductech.EDR.Core.Steps;
-using Reductech.Utilities.SCLEditor.LanguageServer.Objects;
 using Entity = CSharpFunctionalExtensions.Entity;
 
 namespace Reductech.Utilities.SCLEditor.LanguageServer;

@@ -1,10 +1,4 @@
-﻿using System.Collections.Immutable;
-using Antlr4.Runtime.Tree;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Internal.Errors;
-using Reductech.EDR.Core.Internal.Parser;
-
-namespace Reductech.Utilities.SCLEditor.LanguageServer;
+﻿namespace Reductech.Utilities.SCLEditor.LanguageServer;
 
 /// <summary>
 /// Visits SCL to find errors
