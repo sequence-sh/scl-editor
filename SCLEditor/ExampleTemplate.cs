@@ -44,12 +44,15 @@ public partial record ExampleTemplate(
             {
                 foreach (var step1 in Flatten(initial))
                 {
-                    yield return step1;
+                    if (step1 is not DoNothing)
+                        yield return step1;
                 }
             }
 
-            yield return sequence.FinalStep;
+            if (sequence.FinalStep is not DoNothing)
+                yield return sequence.FinalStep;
         }
+        else if (step is DoNothing) { }
         else
         {
             yield return step;
