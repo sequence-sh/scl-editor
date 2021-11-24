@@ -59,7 +59,7 @@
           {
             <MudSelect T='ExampleComponent'
                        Label='@choice.Name'
-                       @onchange="UpdateOutput"
+                       SelectedValuesChanged="UpdateOutput"
                        @bind-Value='_choiceData.ChoiceValues[id]'>
               @foreach (var val in choice.Options)
               {

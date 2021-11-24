@@ -60,7 +60,7 @@ function registerSCL(sclHelper) {
 
       [/<[A-Za-z0-9_-]+>/, 'variable.name' ],
       [/[A-Za-z_\.-]+:/, 'type.identifier' ],
-      [/[A-Za-z_-]+\.[A-Za-z_-]+/, 'constant.enum'],
+      [/[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/, 'constant.enum'],
       [/\b[A-Za-z_-]+\b/, 'keyword' ],
       [/\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?/, 'number.date'],
 

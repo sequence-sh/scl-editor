@@ -278,7 +278,7 @@ public static class ExampleList
                                         }
                                     },
                                     ErrorBehavior =
-                                        new EnumConstant<ErrorBehavior>(ErrorBehavior.Error)
+                                        new EnumConstant<ErrorBehavior>(ErrorBehavior.Fail)
                                 },
                                 Action = new LambdaFunction<Entity, Unit>(
                                     null,
