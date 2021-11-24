@@ -3,15 +3,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Antlr4.Runtime;
+using BlazorMonaco;
 using CSharpFunctionalExtensions;
-using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Errors;
 using Reductech.EDR.Core.Internal.Parser;
 using Reductech.EDR.Core.Internal.Serialization;
 using Reductech.EDR.Core.Steps;
+using Reductech.Utilities.SCLEditor.LanguageServer;
 
-namespace Reductech.Utilities.SCLEditor.LanguageServer
+namespace Reductech.Utilities.SCLEditor.Blazor
 {
 
 public static class Formatter
@@ -19,13 +20,15 @@ public static class Formatter
     /// <summary>
     /// Format an SCL document
     /// </summary>
-    public static List<TextEdit> FormatDocument(string oldText, StepFactoryStore stepFactoryStore)
+    public static List<IdentifiedSingleEditOperation> FormatDocument(
+        string oldText,
+        StepFactoryStore stepFactoryStore)
     {
         var commands = Helpers.SplitIntoCommands(oldText);
 
         var typeResolver = HoverVisitor.CreateLazyTypeResolver(oldText, stepFactoryStore).Value;
 
-        var textEdits = new List<TextEdit>();
+        var textEdits = new List<IdentifiedSingleEditOperation>();
 
         var commandCallerMetadata = new CallerMetadata("Command", "", TypeReference.Any.Instance);
 
@@ -54,7 +57,7 @@ public static class Formatter
 
                 if (freezeResult.IsSuccess)
                 {
-                    var text = Formatter.Format(freezeResult.Value)
+                    var text = Format(freezeResult.Value)
                         .Trim(); // freezeResult.Value.Serialize().Trim();
 
                     var range = freezeResult.Value.TextLocation?.GetRange(
@@ -62,12 +65,21 @@ public static class Formatter
                         offset.Character
                     )!;
 
-                    var realRange = new OmniSharp.Extensions.LanguageServer.Protocol.Models.Range(
-                        offset,
-                        new Position(range.End.Line, range.End.Character + 1)
-                    ); //Need to end one character later
+                    var realRange = new Range(
+                        range.StartLineNumber + 1,
+                        range.StartColumn + 1,
+                        range.EndLineNumber + 1,
+                        range.EndColumn + 2
+                    );
 
-                    textEdits.Add(new TextEdit() { NewText = text, Range = realRange });
+                    //    new Range(
+                    //    offset,
+                    //    new Position(range.End.Line, range.End.Character + 1)
+                    //); //Need to end one character later
+
+                    textEdits.Add(
+                        new IdentifiedSingleEditOperation() { Text = text, Range = realRange }
+                    );
                 }
             }
         }

@@ -14,6 +14,7 @@ public class ExampleChoiceData
     public readonly Dictionary<string, object> Editors = new();
     public readonly Dictionary<string, int> IntValues = new();
     public readonly Dictionary<string, string> StringValues = new();
+    public readonly Dictionary<string, ExampleInput.EnumValue> EnumValues = new();
 
     public readonly Dictionary<string, ExampleComponent> ChoiceValues = new();
 

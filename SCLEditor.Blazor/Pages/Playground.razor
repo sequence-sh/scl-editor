@@ -1,6 +1,4 @@
 ﻿@page "/playground"
-@inject IJSRuntime JS;
-
 <MudGrid>
 
   <MudItem xs='12' lg='6'>
@@ -21,8 +19,6 @@
       {
         <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
       }
-      
-      <MudIconButton Icon='@Icons.Material.Filled.TextFormat' OnClick="FormatSCL"/>
     </MudPaper>
 
 
@@ -62,7 +58,7 @@
   </MudItem>
 
   <MudItem xs='12'>
-    <FileSelection @ref="_fileSelection" FileSystem='@_fileSystem' SetSCLAction='@SetSCL'/>
+    <FileSelection FileSystem='@_fileSystem' SetSCLAction='@SetSCL'/>
   </MudItem>
 
 </MudGrid>
@@ -70,7 +66,4 @@
 
 <style>
   .monaco-editor-container { height: 500px; }
-  .monaco-editor .scl-error {
-    text-decoration: underline red;
-  }
 </style>

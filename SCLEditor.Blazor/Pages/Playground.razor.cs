@@ -12,7 +12,6 @@ using MELT;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using Reductech.EDR.Connectors.FileSystem;
 using Reductech.EDR.Connectors.StructuredData;
 using Reductech.EDR.Core;
@@ -22,21 +21,18 @@ using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Parser;
 using Reductech.EDR.Core.Internal.Serialization;
 using Reductech.EDR.Core.Util;
-using Reductech.Utilities.SCLEditor.LanguageServer;
-using Range = BlazorMonaco.Range;
 
-namespace Reductech.Utilities.SCLEditor.Blazor.Pages
-{
+namespace Reductech.Utilities.SCLEditor.Blazor.Pages;
 
 public partial class Playground
 {
     [Inject] public IJSRuntime Runtime { get; set; } = null!;
 
-    private FileSelection _fileSelection;
+    //private FileSelection _fileSelection;
 
     private MonacoEditor _sclEditor;
 
-    private MonacoEditor _fileEditor;
+    //private MonacoEditor _fileEditor;
 
     bool OutputExpanded { get; set; } = true;
     bool LogExpanded { get; set; } = true;
@@ -50,8 +46,8 @@ public partial class Playground
 
     private readonly StringBuilder _consoleStringBuilder = new();
 
-    private StepFactoryStore _stepFactoryStore;
-    private IExternalContext _externalContext;
+    private StepFactoryStore _stepFactoryStore = null!;
+    private IExternalContext _externalContext = null!;
 
     public CancellationTokenSource? CancellationTokenSource { get; set; }
 
@@ -84,13 +80,13 @@ public partial class Playground
     {
         if (firstRender)
         {
-            var helper  = new SCLHelper(_stepFactoryStore);
-            var _objRef = DotNetObjectReference.Create(helper);
+            var helper = new SCLHelper(_stepFactoryStore);
+            var objRef = DotNetObjectReference.Create(helper);
             //await MonacoEditorBase.SetTheme("vs-dark");
 
             await Runtime.InvokeVoidAsync(
                 "registerSCL",
-                _objRef
+                objRef
             ); //Function Defined in DefineSCLLanguage.js
 
             var model = await _sclEditor.GetModel();
@@ -99,12 +95,12 @@ public partial class Playground
             await _sclEditor.AddAction(
                 "runSCL",
                 "Run SCL",
-                new int[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_R },
+                new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_R },
                 null,
                 null,
                 "SCL",
                 1.5,
-                async (editor, keycodes) =>
+                async (_, _) =>
                 {
                     await Run();
                     StateHasChanged();
@@ -114,12 +110,12 @@ public partial class Playground
             await _sclEditor.AddAction(
                 "formatscl",
                 "Format SCL",
-                new int[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_F },
+                new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_F },
                 null,
                 null,
                 "SCL",
                 1.5,
-                async (editor, keycodes) =>
+                async (_, _) =>
                 {
                     await FormatSCL();
                 }
@@ -152,7 +148,7 @@ public partial class Playground
 
         var diagnostics = DiagnosticsHelper.GetDiagnostics(code, _stepFactoryStore);
 
-        await JS.InvokeAsync<string>("setDiagnostics", diagnostics, uri);
+        await Runtime.InvokeAsync<string>("setDiagnostics", diagnostics, uri);
     }
 
     public void CancelRun()
@@ -176,25 +172,9 @@ public partial class Playground
 
         var edits = Formatter
             .FormatDocument(sclText, _stepFactoryStore)
-            .Select(Convert)
             .ToList();
 
         await _sclEditor.ExecuteEdits(uri, edits, selections);
-
-        IdentifiedSingleEditOperation Convert(TextEdit edit)
-        {
-            return new IdentifiedSingleEditOperation()
-            {
-                Range =
-                    new Range(
-                        edit.Range.Start.Line + 1,
-                        edit.Range.Start.Character + 1,
-                        edit.Range.End.Line + 1,
-                        edit.Range.End.Character + 1
-                    ),
-                Text = edit.NewText,
-            };
-        }
     }
 
     public async Task Run()
@@ -244,12 +224,18 @@ public partial class Playground
         _consoleStringBuilder.AppendLine();
     }
 
-    private StandaloneEditorConstructionOptions SCLEditorConstructionOptions(MonacoEditor _)
+    private static StandaloneEditorConstructionOptions SCLEditorConstructionOptions(MonacoEditor _)
     {
-        return new() { AutomaticLayout = true, Language = "scl", Value = "print 123" };
+        return new()
+        {
+            AutomaticLayout = true,
+            Language        = "scl",
+            Value = @"- print 123
+- log 456"
+        };
     }
 
-    //    private StandaloneEditorConstructionOptions FileEditorConstructionOptions(MonacoEditor _)
+    //    private static StandaloneEditorConstructionOptions FileEditorConstructionOptions(MonacoEditor _)
     //{
     //    if (_fileSelection?.SelectedFile is not null)
     //    {
@@ -268,7 +254,7 @@ public partial class Playground
     //    return new() { AutomaticLayout = true };
     //}
 
-    private string GetLanguageFromFileExtension(string extension)
+    private static string GetLanguageFromFileExtension(string extension)
     {
         return extension?.ToLowerInvariant() switch
 
@@ -280,6 +266,4 @@ public partial class Playground
             _      => ""
         };
     }
-}
-
 }

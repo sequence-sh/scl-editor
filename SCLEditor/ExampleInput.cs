@@ -89,12 +89,14 @@ public abstract partial record ExampleInput(string Name, string Group)
         }
     }
 
+    public record EnumValue(string Name, string Value);
+
     [Equatable]
     public partial record ExampleEnumVariableInput(
         string Name,
         string Group,
-        string InitialValue,
-        [property: OrderedEquality] IReadOnlyList<string> PossibleValues) : ExampleVariableInput(
+        EnumValue InitialValue,
+        [property: OrderedEquality] IReadOnlyList<EnumValue> PossibleValues) : ExampleVariableInput(
         Name,
         Group
     )
@@ -102,17 +104,17 @@ public abstract partial record ExampleInput(string Name, string Group)
         /// <inheritdoc />
         public override void SetInitialValue(ExampleChoiceData exampleChoiceData)
         {
-            exampleChoiceData.StringValues[Name] = InitialValue;
+            exampleChoiceData.EnumValues[Name] = InitialValue;
         }
 
         /// <inheritdoc />
         public override IStep<Unit> GetStep(ExampleChoiceData exampleChoiceData)
         {
-            var value = exampleChoiceData.StringValues[Name];
+            var value = exampleChoiceData.EnumValues[Name];
 
             return new SetVariable<StringStream>()
             {
-                Variable = VariableName, Value = new StringConstant(value)
+                Variable = VariableName, Value = new StringConstant(value.Value)
             };
         }
     }

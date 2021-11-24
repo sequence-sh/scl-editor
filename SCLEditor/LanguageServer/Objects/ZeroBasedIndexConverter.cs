@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace Reductech.Utilities.SCLEditor.Blazor;
+namespace Reductech.Utilities.SCLEditor.LanguageServer.Objects;
 
 internal class ZeroBasedIndexConverter : JsonConverter
 {
@@ -15,7 +15,7 @@ internal class ZeroBasedIndexConverter : JsonConverter
     public override object? ReadJson(
         JsonReader reader,
         Type objectType,
-        object existingValue,
+        object? existingValue,
         JsonSerializer serializer)
     {
         if (reader.TokenType == JsonToken.Null)
@@ -23,7 +23,7 @@ internal class ZeroBasedIndexConverter : JsonConverter
 
         if (objectType == typeof(int[]))
         {
-            var numArray = serializer.Deserialize<int[]>(reader);
+            var numArray = serializer.Deserialize<int[]>(reader) ?? Array.Empty<int>();
 
             for (var index = 0; index < numArray.Length; ++index)
                 numArray[index] = numArray[index] - 1;
@@ -32,7 +32,7 @@ internal class ZeroBasedIndexConverter : JsonConverter
         }
 
         if (objectType == typeof(IEnumerable<int>))
-            return serializer.Deserialize<IEnumerable<int>>(reader)
+            return serializer.Deserialize<IEnumerable<int>>(reader) ?? Array.Empty<int>()
                 .Select(x => x - 1);
 
         var nullable = serializer.Deserialize<int?>(reader);

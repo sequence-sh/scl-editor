@@ -3,22 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Parser;
-using Range = OmniSharp.Extensions.LanguageServer.Protocol.Models.Range;
+using Reductech.Utilities.SCLEditor.LanguageServer.Objects;
 
 namespace Reductech.Utilities.SCLEditor.LanguageServer;
 
 /// <summary>
 /// Visits SCL for completion
 /// </summary>
-public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
+public class CompletionVisitor : SCLBaseVisitor<CompletionResponse?>
 {
     /// <summary>
     /// Creates a new Completion Visitor
     /// </summary>
-    public CompletionVisitor(Position position, StepFactoryStore stepFactoryStore)
+    public CompletionVisitor(LinePosition position, StepFactoryStore stepFactoryStore)
     {
         Position         = position;
         StepFactoryStore = stepFactoryStore;
@@ -27,7 +26,7 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
     /// <summary>
     /// The position
     /// </summary>
-    public Position Position { get; }
+    public LinePosition Position { get; }
 
     /// <summary>
     /// The Step Factory Store
@@ -35,7 +34,7 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
     public StepFactoryStore StepFactoryStore { get; }
 
     /// <inheritdoc />
-    public override CompletionList? VisitChildren(IRuleNode node)
+    public override CompletionResponse? VisitChildren(IRuleNode node)
     {
         var i = 0;
 
@@ -78,7 +77,7 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
     }
 
     /// <inheritdoc />
-    public override CompletionList? VisitErrorNode(IErrorNode node)
+    public override CompletionResponse? VisitErrorNode(IErrorNode node)
     {
         if (node.Symbol.ContainsPosition(Position))
         {
@@ -89,7 +88,7 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
     }
 
     /// <inheritdoc />
-    public override CompletionList? VisitFunction1(SCLParser.Function1Context context)
+    public override CompletionResponse? VisitFunction1(SCLParser.Function1Context context)
     {
         var func = context.function();
 
@@ -99,7 +98,7 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
     }
 
     /// <inheritdoc />
-    public override CompletionList? VisitFunction(SCLParser.FunctionContext context)
+    public override CompletionResponse? VisitFunction(SCLParser.FunctionContext context)
     {
         var name = context.NAME().GetText();
 
@@ -109,7 +108,10 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
             {
                 //Assume this is another parameter to this function
                 if (StepFactoryStore.Dictionary.TryGetValue(name, out var stepFactory))
-                    return StepParametersCompletionList(stepFactory, new Range(Position, Position));
+                    return StepParametersCompletionResponse(
+                        stepFactory,
+                        new TextRange(Position, Position)
+                    );
             }
 
             return null;
@@ -151,7 +153,7 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
 
                     var range = namedArgumentContext.NAME().Symbol.GetRange();
 
-                    return StepParametersCompletionList(stepFactory, range);
+                    return StepParametersCompletionResponse(stepFactory, range);
                 }
 
                 return Visit(namedArgumentContext);
@@ -162,17 +164,17 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
             if (!StepFactoryStore.Dictionary.TryGetValue(name, out var stepFactory))
                 return null; //No clue what name to use
 
-            return StepParametersCompletionList(stepFactory, new Range(Position, Position));
+            return StepParametersCompletionResponse(stepFactory, new TextRange(Position, Position));
         }
     }
 
-    private static CompletionList ReplaceWithSteps(
+    private static CompletionResponse ReplaceWithSteps(
         IEnumerable<IGrouping<IStepFactory, string>> stepFactories,
-        Range range)
+        TextRange range)
     {
-        var options = stepFactories.SelectMany(CreateCompletionItems);
+        var items = stepFactories.SelectMany(CreateCompletionItems).ToList();
 
-        return new CompletionList(options);
+        return new CompletionResponse() { Items = items, IsIncomplete = false };
 
         IEnumerable<CompletionItem> CreateCompletionItems(IGrouping<IStepFactory, string> factory)
         {
@@ -182,18 +184,18 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
             {
                 yield return new()
                 {
-                    TextEdit =
-                        TextEditOrInsertReplaceEdit.From(
-                            new InsertReplaceEdit { Replace = range, NewText = key }
-                        ),
+                    TextEdit = new LinePositionSpanTextChange()
+                    {
+                        NewText     = key,
+                        StartLine   = range.StartLineNumber,
+                        EndLine     = range.EndLineNumber,
+                        StartColumn = range.StartColumn,
+                        EndColumn   = range.EndColumn,
+                    },
                     Label            = key,
-                    InsertTextMode   = InsertTextMode.AsIs,
                     InsertTextFormat = InsertTextFormat.PlainText,
-                    InsertText       = key,
                     Detail           = factory.Key.Summary,
-                    Documentation = new StringOrMarkupContent(
-                        new MarkupContent { Kind = MarkupKind.Markdown, Value = documentation }
-                    )
+                    Documentation    = documentation
                 };
             }
         }
@@ -202,7 +204,9 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
     /// <summary>
     /// Gets the step parameter completion list
     /// </summary>
-    public static CompletionList StepParametersCompletionList(IStepFactory stepFactory, Range range)
+    public static CompletionResponse StepParametersCompletionResponse(
+        IStepFactory stepFactory,
+        TextRange range)
     {
         var documentation = Helpers.GetMarkDownDocumentation(stepFactory);
 
@@ -218,21 +222,21 @@ public class CompletionVisitor : SCLBaseVisitor<CompletionList?>
         {
             return new()
             {
-                TextEdit =
-                    new InsertReplaceEdit()
-                    {
-                        Replace = range, NewText = stepParameterReference.Name + ":"
-                    },
+                TextEdit = new LinePositionSpanTextChange()
+                {
+                    NewText     = stepParameterReference.Name + ":",
+                    StartLine   = range.StartLineNumber,
+                    StartColumn = range.StartColumn,
+                    EndLine     = range.EndLineNumber,
+                    EndColumn   = range.EndColumn
+                },
                 Label            = stepParameterReference.Name,
-                InsertTextMode   = InsertTextMode.AsIs,
                 InsertTextFormat = InsertTextFormat.PlainText,
                 Detail           = stepParameter.Summary,
-                Documentation = new StringOrMarkupContent(
-                    new MarkupContent() { Kind = MarkupKind.Markdown, Value = documentation }
-                )
+                Documentation    = documentation
             };
         }
 
-        return new CompletionList(options);
+        return new CompletionResponse() { Items = options, IsIncomplete = false };
     }
 }

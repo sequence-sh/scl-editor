@@ -88,7 +88,7 @@ public static class ExampleHelpers
                         new ExampleComponent.Variable(
                             new ExampleInput.ExampleStringVariableInput(
                                 "Schema Name",
-                                "Schema",
+                                "Input",
                                 "Schema"
                             )
                         ),
@@ -103,9 +103,11 @@ public static class ExampleHelpers
                                         new List<ExampleComponent>()
                                         {
                                             new ExampleComponent.Variable(
-                                                DefaultInputs.CSVDelimiter
+                                                DefaultInputs.CSVDelimiter with { Group = "Input" }
                                             ),
-                                            new ExampleComponent.File(DefaultInputs.InputCSV),
+                                            new ExampleComponent.File(
+                                                DefaultInputs.InputCSV with { Group = "Input" }
+                                            ),
                                             new ExampleComponent.Constant(
                                                 "ReadCSV",
                                                 new SetVariable<Array<Entity>>()
@@ -134,7 +136,9 @@ public static class ExampleHelpers
                                         "Json",
                                         new List<ExampleComponent>()
                                         {
-                                            new ExampleComponent.File(DefaultInputs.InputJson),
+                                            new ExampleComponent.File(
+                                                DefaultInputs.InputJson with { Group = "Input" }
+                                            ),
                                             new ExampleComponent.Constant(
                                                 "ReadJson",
                                                 new SetVariable<Array<Entity>>()
@@ -199,9 +203,11 @@ public static class ExampleHelpers
                                         new List<ExampleComponent>()
                                         {
                                             new ExampleComponent.Variable(
-                                                DefaultInputs.CSVDelimiter
+                                                DefaultInputs.CSVDelimiter with { Group = "Input" }
                                             ),
-                                            new ExampleComponent.File(DefaultInputs.InputCSV),
+                                            new ExampleComponent.File(
+                                                DefaultInputs.InputCSV with { Group = "Input" }
+                                            ),
                                             new ExampleComponent.Constant(
                                                 "ReadCSV",
                                                 new SetVariable<Array<Entity>>()
@@ -230,7 +236,9 @@ public static class ExampleHelpers
                                         "Json",
                                         new List<ExampleComponent>()
                                         {
-                                            new ExampleComponent.File(DefaultInputs.InputJson),
+                                            new ExampleComponent.File(
+                                                DefaultInputs.InputJson with { Group = "Input" }
+                                            ),
                                             new ExampleComponent.Constant(
                                                 "ReadJson",
                                                 new SetVariable<Array<Entity>>()

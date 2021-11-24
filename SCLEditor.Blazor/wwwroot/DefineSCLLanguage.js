@@ -142,21 +142,19 @@ async function provideCompletionItems(model, position, context, sclHelper) {
   request.CompletionTrigger = (context.triggerKind + 1);
   request.TriggerCharacter = context.triggerCharacter;
 
-  {
-    const code = model.getValue();
-    const response = await sclHelper.invokeMethodAsync("GetCompletionAsync", code, request);
-    const mappedItems = response.items.map(this._convertToVscodeCompletionItem);
+  const code = model.getValue();
+  const response = await sclHelper.invokeMethodAsync("GetCompletionAsync", code, request);
+  const mappedItems = response.items.map(this._convertToVscodeCompletionItem);
 
-    let lastCompletions = new Map();
+  let lastCompletions = new Map();
 
-    for (let i = 0; i < mappedItems.length; i++) {
-      lastCompletions.set(mappedItems[i], response.items[i]);
-    }
-
-    this._lastCompletions = lastCompletions;
-
-    return { suggestions: mappedItems };
+  for (let i = 0; i < mappedItems.length; i++) {
+    lastCompletions.set(mappedItems[i], response.items[i]);
   }
+
+  this._lastCompletions = lastCompletions;
+
+  return { suggestions: mappedItems };
 }
 
 

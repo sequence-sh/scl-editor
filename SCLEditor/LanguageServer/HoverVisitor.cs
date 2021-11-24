@@ -5,37 +5,35 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using CSharpFunctionalExtensions;
 using Namotion.Reflection;
-using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using Reductech.EDR.Core;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Errors;
 using Reductech.EDR.Core.Internal.Parser;
 using Reductech.EDR.Core.Internal.Serialization;
 using Reductech.EDR.Core.Steps;
-using Reductech.EDR.Core.Util;
+using Reductech.Utilities.SCLEditor.LanguageServer.Objects;
 using Entity = CSharpFunctionalExtensions.Entity;
-using Range = OmniSharp.Extensions.LanguageServer.Protocol.Models.Range;
 
 namespace Reductech.Utilities.SCLEditor.LanguageServer;
 
 /// <summary>
 /// Visits SCL to find hover
 /// </summary>
-public class HoverVisitor : SCLBaseVisitor<Hover?>
+public class HoverVisitor : SCLBaseVisitor<QuickInfoResponse?>
 {
     /// <summary>
     /// Create a new HoverVisitor
     /// </summary>
     public HoverVisitor(
-        Position position,
-        Position positionOffset,
+        LinePosition position,
+        LinePosition positionOffset,
         StepFactoryStore stepFactoryStore,
         Lazy<Result<TypeResolver, IError>> lazyTypeResolver)
     {
-        Position         = position;
-        PositionOffset   = positionOffset;
-        StepFactoryStore = stepFactoryStore;
-        LazyTypeResolver = lazyTypeResolver;
+        LinePosition       = position;
+        LinePositionOffset = positionOffset;
+        StepFactoryStore   = stepFactoryStore;
+        LazyTypeResolver   = lazyTypeResolver;
     }
 
     /// <summary>
@@ -64,12 +62,12 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
     /// <summary>
     /// The position of the hover
     /// </summary>
-    public Position Position { get; }
+    public LinePosition LinePosition { get; }
 
     /// <summary>
     /// The position offset
     /// </summary>
-    public Position PositionOffset { get; }
+    public LinePosition LinePositionOffset { get; }
 
     /// <summary>
     /// The Step Factory Store
@@ -82,31 +80,31 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
     public Lazy<Result<TypeResolver, IError>> LazyTypeResolver { get; }
 
     /// <inheritdoc />
-    protected override bool ShouldVisitNextChild(IRuleNode node, Hover? currentResult)
+    protected override bool ShouldVisitNextChild(IRuleNode node, QuickInfoResponse? currentResult)
     {
         return currentResult == null;
     }
 
     /// <inheritdoc />
-    public override Hover? Visit(IParseTree tree)
+    public override QuickInfoResponse? Visit(IParseTree tree)
     {
-        if (tree is ParserRuleContext context && context.ContainsPosition(Position))
+        if (tree is ParserRuleContext context && context.ContainsPosition(LinePosition))
             return base.Visit(tree);
 
         return DefaultResult;
     }
 
     /// <inheritdoc />
-    public override Hover? VisitFunction(SCLParser.FunctionContext context)
+    public override QuickInfoResponse? VisitFunction(SCLParser.FunctionContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
         var name = context.NAME().GetText();
 
         if (StepFactoryStore.Dictionary.TryGetValue(name, out var stepFactory))
         {
-            if (!context.NAME().Symbol.ContainsPosition(Position))
+            if (!context.NAME().Symbol.ContainsPosition(LinePosition))
             {
                 var positionalTerms = context.term();
 
@@ -114,7 +112,7 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
                 {
                     var term = positionalTerms[index];
 
-                    if (term.ContainsPosition(Position))
+                    if (term.ContainsPosition(LinePosition))
                     {
                         int trueIndex;
 
@@ -143,26 +141,20 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
                                 return Description(
                                     stepParameter.Name,
                                     stepParameter.ActualType.Name,
-                                    stepParameter.Summary,
-                                    term.GetRange(),
-                                    PositionOffset
+                                    stepParameter.Summary
                                 );
                             }
 
                             return nHover;
                         }
 
-                        return Error(
-                            $"Step '{name}' does not take an argument {index}",
-                            context.GetRange(),
-                            PositionOffset
-                        );
+                        return Error($"Step '{name}' does not take an argument {index}");
                     }
                 }
 
                 foreach (var namedArgumentContext in context.namedArgument())
                 {
-                    if (namedArgumentContext.ContainsPosition(Position))
+                    if (namedArgumentContext.ContainsPosition(LinePosition))
                     {
                         var argumentName = namedArgumentContext.NAME().GetText();
 
@@ -177,19 +169,13 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
                                 return Description(
                                     stepParameter.Name,
                                     stepParameter.ActualType.Name,
-                                    stepParameter.Summary,
-                                    namedArgumentContext.GetRange(),
-                                    PositionOffset
+                                    stepParameter.Summary
                                 );
 
                             return nHover;
                         }
 
-                        return Error(
-                            $"Step '{name}' does not take an argument {argumentName}",
-                            context.GetRange(),
-                            PositionOffset
-                        );
+                        return Error($"Step '{name}' does not take an argument {argumentName}");
                     }
                 }
             }
@@ -199,21 +185,19 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
             return Description(
                 stepFactory.TypeName,
                 stepFactory.OutputTypeExplanation,
-                summary,
-                context.GetRange(),
-                PositionOffset
+                summary
             );
         }
         else
         {
-            return Error(name, context.GetRange(), PositionOffset);
+            return Error(name);
         }
     }
 
     /// <inheritdoc />
-    public override Hover? VisitNumber(SCLParser.NumberContext context)
+    public override QuickInfoResponse? VisitNumber(SCLParser.NumberContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
         var text = context.GetText();
@@ -222,28 +206,26 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
             ? TypeReference.Actual.Integer
             : TypeReference.Actual.Double;
 
-        return Description(text, typeReference.Name, null, context.GetRange(), PositionOffset);
+        return Description(text, typeReference.Name, null);
     }
 
     /// <inheritdoc />
-    public override Hover? VisitBoolean(SCLParser.BooleanContext context)
+    public override QuickInfoResponse? VisitBoolean(SCLParser.BooleanContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
         return Description(
             context.GetText(),
             TypeReference.Actual.Bool.Name,
-            null,
-            context.GetRange(),
-            PositionOffset
+            null
         );
     }
 
     /// <inheritdoc />
-    public override Hover? VisitEntity(SCLParser.EntityContext context)
+    public override QuickInfoResponse? VisitEntity(SCLParser.EntityContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
         foreach (var contextChild in context.children)
@@ -257,31 +239,27 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
         return Description(
             context.GetText(),
             TypeReference.Actual.Entity.Name,
-            null,
-            context.GetRange(),
-            PositionOffset
+            null
         );
     }
 
     /// <inheritdoc />
-    public override Hover? VisitDateTime(SCLParser.DateTimeContext context)
+    public override QuickInfoResponse? VisitDateTime(SCLParser.DateTimeContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
         return Description(
             context.GetText(),
             TypeReference.Actual.Date.Name,
-            null,
-            context.GetRange(),
-            PositionOffset
+            null
         );
     }
 
     /// <inheritdoc />
-    public override Hover? VisitEnumeration(SCLParser.EnumerationContext context)
+    public override QuickInfoResponse? VisitEnumeration(SCLParser.EnumerationContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
         if (context.children.Count != 3 || context.NAME().Length != 2)
@@ -292,53 +270,46 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
 
         if (!StepFactoryStore.EnumTypesDictionary.TryGetValue(prefix, out var enumType))
         {
-            return Error(
-                $"'{prefix}' is not a valid enum type.",
-                context.GetRange(),
-                PositionOffset
-            );
+            return Error($"'{prefix}' is not a valid enum type.");
         }
 
         if (!Enum.TryParse(enumType, suffix, true, out var value))
         {
-            return Error(
-                $"'{suffix}' is not a member of enumeration '{prefix}'",
-                context.GetRange(),
-                PositionOffset
-            );
+            return Error($"'{suffix}' is not a member of enumeration '{prefix}'");
         }
 
         return Description(
             value!.ToString(),
             enumType.Name,
-            value.GetType().GetXmlDocsSummary(),
-            context.GetRange(),
-            PositionOffset
+            value.GetType().GetXmlDocsSummary()
         );
     }
 
     /// <inheritdoc />
-    public override Hover? VisitGetAutomaticVariable(SCLParser.GetAutomaticVariableContext context)
+    public override QuickInfoResponse? VisitGetAutomaticVariable(
+        SCLParser.GetAutomaticVariableContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
-        return Description("<>", null, "Automatic Variable", context.GetRange(), PositionOffset);
+        return Description(
+            "<>",
+            null,
+            "Automatic Variable"
+        );
     }
 
     /// <inheritdoc />
-    public override Hover? VisitGetVariable(SCLParser.GetVariableContext context)
+    public override QuickInfoResponse? VisitGetVariable(SCLParser.GetVariableContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
         if (LazyTypeResolver.Value.IsFailure)
             return Description(
                 context.GetText(),
                 nameof(VariableName),
-                null,
-                context.GetRange(),
-                PositionOffset
+                null
             );
 
         var vn = new VariableName(context.GetText().TrimStart('<').TrimEnd('>'));
@@ -348,25 +319,21 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
             return Description(
                 context.GetText(),
                 tr.Name,
-                null,
-                context.GetRange(),
-                PositionOffset
+                null
             );
         }
 
         return Description(
             context.GetText(),
             nameof(VariableName),
-            null,
-            context.GetRange(),
-            PositionOffset
+            null
         );
     }
 
     /// <inheritdoc />
-    public override Hover? VisitSetVariable(SCLParser.SetVariableContext context)
+    public override QuickInfoResponse? VisitSetVariable(SCLParser.SetVariableContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
         var variableHover = VisitVariable(context.VARIABLENAME());
@@ -384,15 +351,13 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
         return Description(
             setVariable.TypeName,
             setVariable.OutputTypeExplanation,
-            setVariable.Summary,
-            context.GetRange(),
-            PositionOffset
+            setVariable.Summary
         );
     }
 
-    private Hover? VisitVariable(ITerminalNode variableNameNode)
+    private QuickInfoResponse? VisitVariable(ITerminalNode variableNameNode)
     {
-        if (!variableNameNode.Symbol.ContainsPosition(Position))
+        if (!variableNameNode.Symbol.ContainsPosition(LinePosition))
             return null;
 
         var text = variableNameNode.GetText();
@@ -401,9 +366,7 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
             return Description(
                 text,
                 nameof(VariableName),
-                null,
-                variableNameNode.Symbol.GetRange(),
-                PositionOffset
+                null
             );
 
         var vn = new VariableName(text.TrimStart('<').TrimEnd('>'));
@@ -413,40 +376,34 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
             return Description(
                 text,
                 tr.Name,
-                null,
-                variableNameNode.Symbol.GetRange(),
-                PositionOffset
+                null
             );
         }
 
         return Description(
             text,
             nameof(VariableName),
-            null,
-            variableNameNode.Symbol.GetRange(),
-            PositionOffset
+            null
         );
     }
 
     /// <inheritdoc />
-    public override Hover? VisitQuotedString(SCLParser.QuotedStringContext context)
+    public override QuickInfoResponse? VisitQuotedString(SCLParser.QuotedStringContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
         return Description(
             context.GetText(),
             TypeReference.Actual.String.Name,
-            null,
-            context.GetRange(),
-            PositionOffset
+            null
         );
     }
 
     /// <inheritdoc />
-    public override Hover? VisitArray(SCLParser.ArrayContext context)
+    public override QuickInfoResponse? VisitArray(SCLParser.ArrayContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
         foreach (var contextChild in context.children)
@@ -457,13 +414,13 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
                 return h1;
         }
 
-        return DescribeStep(context.GetText(), context.GetRange(), PositionOffset);
+        return DescribeStep(context.GetText());
     }
 
     /// <inheritdoc />
-    public override Hover? VisitInfixOperation(SCLParser.InfixOperationContext context)
+    public override QuickInfoResponse? VisitInfixOperation(SCLParser.InfixOperationContext context)
     {
-        if (!context.ContainsPosition(Position))
+        if (!context.ContainsPosition(LinePosition))
             return null;
 
         foreach (var termContext in context.infixableTerm())
@@ -479,39 +436,35 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
 
         if (operatorSymbols.Count != 1)
         {
-            return Error("Invalid mix of operators", context.GetRange(), PositionOffset);
+            return Error("Invalid mix of operators");
         }
 
-        return DescribeStep(context.GetText(), context.GetRange(), PositionOffset);
+        return DescribeStep(context.GetText());
     }
 
-    private Hover DescribeStep(string text, Range range, Position offsetPosition)
+    private QuickInfoResponse DescribeStep(string text)
     {
         var step = SCLParsing.TryParseStep(text);
 
         if (step.IsFailure)
-            return Error(step.Error.AsString, range, offsetPosition);
+            return Error(step.Error.AsString);
 
         var callerMetadata = new CallerMetadata("Step", "Parameter", TypeReference.Any.Instance);
 
         Result<IStep, IError> freezeResult;
 
         if (LazyTypeResolver.Value.IsFailure)
-        {
             freezeResult = step.Value.TryFreeze(callerMetadata, StepFactoryStore);
-        }
         else
-        {
             freezeResult = step.Value.TryFreeze(callerMetadata, LazyTypeResolver.Value.Value);
-        }
 
         if (freezeResult.IsFailure)
-            return Error(freezeResult.Error.AsString, range, offsetPosition);
+            return Error(freezeResult.Error.AsString);
 
-        return Description(freezeResult.Value, range, offsetPosition);
+        return Description(freezeResult.Value);
     }
 
-    private static Hover Description(IStep step, Range range, Position offsetPosition)
+    private static QuickInfoResponse Description(IStep step)
     {
         var     name = step.Name;
         string  type = GetHumanReadableTypeName(step.OutputType);
@@ -527,35 +480,25 @@ public class HoverVisitor : SCLBaseVisitor<Hover?>
             description = null;
         }
 
-        return Description(name, type, description, range, offsetPosition);
+        return Description(name, type, description);
     }
 
-    private static Hover Description(
+    private static QuickInfoResponse Description(
         string? name,
         string? type,
-        string? summary,
-        Range range,
-        Position offsetPosition)
+        string? summary)
     {
-        var markedStrings = new[] { $"`{name}`", $"`{type}`", summary }
-            .WhereNotNull()
-            .Select(x => new MarkedString(x))
-            .ToList();
+        var markdown = $@"`{name}`
+`{type}`
+{summary}
+";
 
-        return new()
-        {
-            Range    = range.Offset(offsetPosition),
-            Contents = new MarkedStringsOrMarkupContent(markedStrings)
-        };
+        return new() { Markdown = markdown };
     }
 
-    private static Hover Error(string message, Range range, Position offsetPosition)
+    private static QuickInfoResponse Error(string message)
     {
-        return new()
-        {
-            Range    = range.Offset(offsetPosition),
-            Contents = new MarkedStringsOrMarkupContent(message)
-        };
+        return new() { Markdown = message };
     }
 
     private static string GetHumanReadableTypeName(Type t)

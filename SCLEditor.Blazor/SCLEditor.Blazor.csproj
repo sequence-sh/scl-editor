@@ -6,6 +6,10 @@
     <AssemblyName>SCLEditor.Blazor</AssemblyName>
     <RootNamespace>Reductech.Utilities.SCLEditor.Blazor</RootNamespace>
     <nullable>enable</nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <PublishTrimmed>false</PublishTrimmed>
+
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,5 +25,11 @@
   <ItemGroup>
     <ProjectReference Include="..\SCLEditor\SCLEditor.csproj" />
   </ItemGroup>
+
+  <Target Name="_ResolveCopyLocalNuGetPackagePdbsAndXml" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths->'%(RootDir)%(Directory)%(Filename).xml')" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' != '' and Exists('%(RootDir)%(Directory)%(Filename).xml')" />
+    </ItemGroup>
+  </Target>
 
 </Project>

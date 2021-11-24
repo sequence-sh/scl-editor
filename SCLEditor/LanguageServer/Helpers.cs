@@ -5,11 +5,10 @@ using System.Linq;
 using System.Text;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Documentation;
 using Reductech.EDR.Core.Internal.Parser;
-using Range = OmniSharp.Extensions.LanguageServer.Protocol.Models.Range;
+using Reductech.Utilities.SCLEditor.LanguageServer.Objects;
 
 namespace Reductech.Utilities.SCLEditor.LanguageServer;
 
@@ -21,7 +20,7 @@ public static class Helpers
     /// <summary>
     /// Does this token contain this position
     /// </summary>
-    public static bool ContainsPosition(this IToken token, Position position)
+    public static bool ContainsPosition(this IToken token, LinePosition position)
     {
         return token.StartsBeforeOrAt(position) && token.EndsAfterOrAt(position);
     }
@@ -29,7 +28,7 @@ public static class Helpers
     /// <summary>
     /// Gets the range of this token
     /// </summary>
-    public static Range GetRange(this IToken token)
+    public static TextRange GetRange(this IToken token)
     {
         return new(
             token.Line - 1,
@@ -42,7 +41,7 @@ public static class Helpers
     /// <summary>
     /// Returns whether this node siblings after the position
     /// </summary>
-    public static bool HasSiblingsAfter(this IRuleNode ruleContext, Position p)
+    public static bool HasSiblingsAfter(this IRuleNode ruleContext, LinePosition p)
     {
         if (ruleContext.Parent is ParserRuleContext prc)
         {
@@ -60,7 +59,7 @@ public static class Helpers
     /// <summary>
     /// Whether this token starts before or at the position
     /// </summary>
-    public static bool StartsBeforeOrAt(this IToken token, Position position)
+    public static bool StartsBeforeOrAt(this IToken token, LinePosition position)
     {
         if (token.Line - 1 < position.Line)
             return true;
@@ -73,7 +72,7 @@ public static class Helpers
     /// <summary>
     /// Whether this token ends after or at the position
     /// </summary>
-    public static bool EndsAfterOrAt(this IToken token, Position position)
+    public static bool EndsAfterOrAt(this IToken token, LinePosition position)
     {
         if (token.Line - 1 < position.Line)
             return false;
@@ -86,7 +85,7 @@ public static class Helpers
     /// <summary>
     /// Whether this token ends at the position
     /// </summary>
-    public static bool EndsAt(this IToken token, Position position)
+    public static bool EndsAt(this IToken token, LinePosition position)
     {
         if (token.Line - 1 < position.Line)
             return false;
@@ -99,7 +98,7 @@ public static class Helpers
     /// <summary>
     /// Splits SCL text into commands
     /// </summary>
-    public static IReadOnlyList<(string text, Position position)> SplitIntoCommands(string text)
+    public static IReadOnlyList<(string text, LinePosition position)> SplitIntoCommands(string text)
     {
         var inputStream = new AntlrInputStream(text);
         var lexer       = new SCLLexer(inputStream, TextWriter.Null, TextWriter.Null);
@@ -108,18 +107,18 @@ public static class Helpers
 
         var newCommandTokenType = lexer.GetTokenType("NEWCOMMAND");
 
-        List<(string text, Position startPosition)> results = new();
+        List<(string text, LinePosition startPosition)> results = new();
 
         StringBuilder sb    = new();
-        Position?     start = null;
+        LinePosition? start = null;
 
         foreach (var token in tokens)
         {
             if (token.Type == newCommandTokenType)
             {
-                if (start is not null)
+                if (start.HasValue)
                 {
-                    results.Add((sb.ToString(), start));
+                    results.Add((sb.ToString(), start.Value));
                 }
 
                 sb    = new StringBuilder();
@@ -152,8 +151,8 @@ public static class Helpers
             }
         }
 
-        if (start is not null)
-            results.Add((sb.ToString(), start));
+        if (start.HasValue)
+            results.Add((sb.ToString(), start.Value));
 
         return results;
     }
@@ -161,9 +160,10 @@ public static class Helpers
     /// <summary>
     /// Gets a particular command from the text
     /// </summary>
-    public static (string command, Position newPosition, Position positionOffset)? GetCommand(
-        string text,
-        Position originalPosition)
+    public static (string command, LinePosition newPosition, LinePosition positionOffset)?
+        GetCommand(
+            string text,
+            LinePosition originalPosition)
     {
         var commands  = SplitIntoCommands(text);
         var myCommand = commands.TakeWhile(x => x.position <= originalPosition).LastOrDefault();
@@ -171,12 +171,12 @@ public static class Helpers
         if (myCommand == default)
             return null;
 
-        Position newPosition;
-        Position offsetPosition;
+        LinePosition newPosition;
+        LinePosition offsetPosition;
 
         if (originalPosition.Line == myCommand.position.Line)
         {
-            newPosition = new Position(
+            newPosition = new LinePosition(
                 0,
                 originalPosition.Character - myCommand.position.Character
             );
@@ -185,7 +185,7 @@ public static class Helpers
         }
         else
         {
-            newPosition = new Position(
+            newPosition = new LinePosition(
                 originalPosition.Line - myCommand.position.Line,
                 originalPosition.Character
             );
@@ -199,7 +199,7 @@ public static class Helpers
     /// <summary>
     /// Remove a token from the text
     /// </summary>
-    public static string RemoveToken(string text, Position tokenPosition)
+    public static string RemoveToken(string text, LinePosition tokenPosition)
     {
         var inputStream = new AntlrInputStream(text);
         var lexer       = new SCLLexer(inputStream, TextWriter.Null, TextWriter.Null);
@@ -227,7 +227,7 @@ public static class Helpers
     /// <summary>
     /// Whether the context contains the position
     /// </summary>
-    public static bool ContainsPosition(this ParserRuleContext context, Position position)
+    public static bool ContainsPosition(this ParserRuleContext context, LinePosition position)
     {
         if (!context.Start.StartsBeforeOrAt(position))
             return false;
@@ -241,7 +241,7 @@ public static class Helpers
     /// <summary>
     /// Whether the token is on the same line as the position
     /// </summary>
-    public static bool IsSameLineAs(this IToken token, Position position)
+    public static bool IsSameLineAs(this IToken token, LinePosition position)
     {
         var sameLine = token.Line - 1 == position.Line;
         return sameLine;
@@ -250,19 +250,19 @@ public static class Helpers
     /// <summary>
     /// Whether the context ends before the position
     /// </summary>
-    public static bool EndsBefore(this ParserRuleContext context, Position position) =>
+    public static bool EndsBefore(this ParserRuleContext context, LinePosition position) =>
         !context.Stop.EndsAfterOrAt(position);
 
     /// <summary>
     /// Whether the context starts after the position
     /// </summary>
-    public static bool StartsAfter(this ParserRuleContext context, Position position) =>
+    public static bool StartsAfter(this ParserRuleContext context, LinePosition position) =>
         !context.Start.StartsBeforeOrAt(position);
 
     /// <summary>
     /// Get the range of the context
     /// </summary>
-    public static Range GetRange(this ParserRuleContext context)
+    public static TextRange GetRange(this ParserRuleContext context)
     {
         return new(
             context.Start.Line - 1,
@@ -275,35 +275,43 @@ public static class Helpers
     /// <summary>
     /// Get the range of the Text Location
     /// </summary>
-    public static Range GetRange(this TextLocation textLocation, int lineOffset, int charOffSet)
+    public static TextRange GetRange(this TextLocation textLocation, int lineOffset, int charOffSet)
     {
         return new(
-            textLocation.Start.GetFromOffset(lineOffset, charOffSet),
-            textLocation.Stop.GetFromOffset(lineOffset, charOffSet)
+            textLocation.Start.ToLinePosition().GetFromOffset(lineOffset, charOffSet),
+            textLocation.Stop.ToLinePosition().GetFromOffset(lineOffset, charOffSet)
         );
     }
 
     /// <summary>
     /// Offsets the range by the position
     /// </summary>
-    public static Range Offset(this Range range, Position offset)
+    public static TextRange Offset(this TextRange range, LinePosition offset)
     {
-        return new Range(
-            new Position(offset.Line + range.Start.Line, range.Start.Character),
-            new Position(offset.Line + range.End.Line,   range.End.Character)
+        return new TextRange(
+            new LinePosition(offset.Line + range.StartLineNumber, range.StartColumn),
+            new LinePosition(offset.Line + range.EndLineNumber,   range.EndColumn)
         );
+    }
+
+    public static LinePosition ToLinePosition(this TextPosition textPosition)
+    {
+        return new LinePosition(textPosition.Line, textPosition.Column);
     }
 
     /// <summary>
     /// Get the position adjusted by the offset
     /// </summary>
-    public static Position GetFromOffset(this TextPosition position, int lineOffset, int charOffSet)
+    public static LinePosition GetFromOffset(
+        this LinePosition position,
+        int lineOffset,
+        int charOffSet)
     {
         if (position.Line == 1)
             //same line, add columns
-            return new Position(lineOffset, position.Column + charOffSet);
+            return new LinePosition(lineOffset, position.Character + charOffSet);
         else //add lines
-            return new Position(position.Line - 1 + lineOffset, position.Column);
+            return new LinePosition(position.Line - 1 + lineOffset, position.Character);
     }
 
     /// <summary>

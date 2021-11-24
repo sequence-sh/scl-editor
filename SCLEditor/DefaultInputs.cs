@@ -26,8 +26,8 @@ public static class DefaultInputs
         new ExampleInput.ExampleEnumVariableInput(
             "delimiter",
             "CSV",
-            ",",
-            new List<string> { ",", "\t" }
+            new ExampleInput.EnumValue("Comma", ","),
+            new List<ExampleInput.EnumValue> { new("Comma", ","), new("Tab", "\t"), }
         );
 
     public static readonly ExampleInput.ExampleFileInput SchemaJson =

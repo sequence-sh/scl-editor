@@ -35,13 +35,13 @@
           }
           else if (input is ExampleInput.ExampleEnumVariableInput enumVariableInput)
           {
-            <MudSelect T='string'
+            <MudSelect T='ExampleInput.EnumValue'
                        Label='@enumVariableInput.Name'
                        SelectedValuesChanged='UpdateOutput'
-                       @bind-Value='_choiceData.StringValues[id]'>
+                       @bind-Value='_choiceData.EnumValues[id]'>
               @foreach (var val in enumVariableInput.PossibleValues)
               {
-                <MudSelectItem Value="@(val)"/>
+                <MudSelectItem Value="@(val)">@val.Name</MudSelectItem>
               }
             </MudSelect>
           }
@@ -99,15 +99,15 @@
   [Parameter]
   public string ExampleName { get; set; }
 
-  private MonacoEditor _outputEditor;
+  private MonacoEditor _outputEditor = null!;
 
   private ExampleChoiceData _choiceData = new();
 
-  private StepFactoryStore _stepFactoryStore;
+  private StepFactoryStore _stepFactoryStore = null!;
 
   private readonly ICompression _compression = new CompressionAdapter();
 
-  public CancellationTokenSource? _cancellationTokenSource { get; set; }
+  public CancellationTokenSource? CancellationTokenSource { get; set; }
 
   private ExampleData example { get; set; }
 
@@ -160,16 +160,22 @@
 
   private async Task UpdateOutput()
   {
-    _cancellationTokenSource?.Cancel();
-    _cancellationTokenSource = new CancellationTokenSource();
+    if(_outputEditor is null)return;
+
+    CancellationTokenSource?.Cancel();
+    CancellationTokenSource = new CancellationTokenSource();
 
     var fileSystem = new MockFileSystem();
 
     foreach (var fileInput in example.ExampleComponent.GetInputs(_choiceData).OfType<ExampleInput.ExampleFileInput>())
     {
-      var editor = (MonacoEditor)_choiceData.Editors[fileInput.Name];
-      var text = await editor.GetValue();
-      fileSystem.AddFile(fileInput.Name, text);
+      var editor = (MonacoEditor?)_choiceData.Editors[fileInput.Name];
+
+      if (editor is not null)
+      {
+        var text = await editor.GetValue();
+        fileSystem.AddFile(fileInput.Name, text);
+      }
     }
 
     var externalContext = new ExternalContext(ExternalProcessRunner.Instance,
@@ -182,7 +188,7 @@
     var state = new StateMonad(NullLogger.Instance, _stepFactoryStore, externalContext, new Dictionary<string, object>());
 
     var sequence = example.GetSequence(_choiceData);
-    var result = await sequence.Run<StringStream>(state, _cancellationTokenSource.Token).Map(x => x.GetStringAsync());
+    var result = await sequence.Run<StringStream>(state, CancellationTokenSource.Token).Map(x => x.GetStringAsync());
 
     var scl = sequence.Serialize();
     Console.WriteLine(scl);

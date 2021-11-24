@@ -1,19 +1,20 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Parser;
+using Reductech.Utilities.SCLEditor.LanguageServer.Objects;
 
 namespace Reductech.Utilities.SCLEditor.LanguageServer;
 
 /// <summary>
 /// Visits SCL to get Signature Help
 /// </summary>
-public class SignatureHelpVisitor : SCLBaseVisitor<SignatureHelp?>
+public class SignatureHelpVisitor : SCLBaseVisitor<SignatureHelpResponse?>
 {
     /// <inheritdoc />
-    public SignatureHelpVisitor(Position position, StepFactoryStore stepFactoryStore)
+    public SignatureHelpVisitor(LinePosition position, StepFactoryStore stepFactoryStore)
     {
         Position         = position;
         StepFactoryStore = stepFactoryStore;
@@ -22,7 +23,7 @@ public class SignatureHelpVisitor : SCLBaseVisitor<SignatureHelp?>
     /// <summary>
     /// The position to get Signature Help at
     /// </summary>
-    public Position Position { get; }
+    public LinePosition Position { get; }
 
     /// <summary>
     /// The Step Factory Store
@@ -30,7 +31,7 @@ public class SignatureHelpVisitor : SCLBaseVisitor<SignatureHelp?>
     public StepFactoryStore StepFactoryStore { get; }
 
     /// <inheritdoc />
-    public override SignatureHelp? Visit(IParseTree tree)
+    public override SignatureHelpResponse? Visit(IParseTree tree)
     {
         if (tree is ParserRuleContext context)
         {
@@ -50,7 +51,9 @@ public class SignatureHelpVisitor : SCLBaseVisitor<SignatureHelp?>
     }
 
     /// <inheritdoc />
-    protected override bool ShouldVisitNextChild(IRuleNode node, SignatureHelp? currentResult)
+    protected override bool ShouldVisitNextChild(
+        IRuleNode node,
+        SignatureHelpResponse? currentResult)
     {
         if (currentResult is not null)
             return false;
@@ -59,7 +62,7 @@ public class SignatureHelpVisitor : SCLBaseVisitor<SignatureHelp?>
     }
 
     /// <inheritdoc />
-    public override SignatureHelp? VisitFunction(SCLParser.FunctionContext context)
+    public override SignatureHelpResponse? VisitFunction(SCLParser.FunctionContext context)
     {
         var name = context.NAME().GetText();
 
@@ -123,38 +126,39 @@ public class SignatureHelpVisitor : SCLBaseVisitor<SignatureHelp?>
         }
     }
 
-    private static SignatureHelp StepParametersSignatureHelp(IStepFactory stepFactory)
+    private static SignatureHelpResponse StepParametersSignatureHelp(IStepFactory stepFactory)
     {
         var documentation = Helpers.GetMarkDownDocumentation(stepFactory);
 
-        var options =
+        var parameters =
             stepFactory.ParameterDictionary.Keys
                 .OfType<StepParameterReference.Named>()
-                .Select(CreateCompletionItem)
+                .Select(CreateSignatureHelpParameter)
                 .ToList();
 
-        ParameterInformation CreateCompletionItem(
+        static SignatureHelpParameter CreateSignatureHelpParameter(
             StepParameterReference.Named stepParameterReference)
         {
             return new()
             {
-                Label = stepParameterReference.Name,
-                Documentation = new StringOrMarkupContent(
-                    new MarkupContent() { Kind = MarkupKind.Markdown, Value = documentation }
-                )
+                Label = stepParameterReference.Name, Name = stepParameterReference.Name
             };
         }
 
-        var signatureHelp = new SignatureHelp()
+        var signatureHelp = new SignatureHelpResponse
         {
-            Signatures = new Container<SignatureInformation>(
-                new SignatureInformation
+            Signatures = new List<SignatureHelpItem>()
+            {
+                new()
                 {
+                    Parameters    = parameters,
+                    Documentation = documentation,
                     Label         = stepFactory.TypeName,
-                    Documentation = stepFactory.Summary,
-                    Parameters    = new Container<ParameterInformation>(options)
+                    Name          = stepFactory.TypeName
                 }
-            )
+            },
+            ActiveParameter = 0,
+            ActiveSignature = 0
         };
 
         return signatureHelp;
