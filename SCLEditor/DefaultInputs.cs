@@ -11,7 +11,17 @@ public static class DefaultInputs
             "input.json",
             "Json",
             "json",
-            "[{\"a\": true, \"b\": 1}]"
+            @"[{
+  ""stringProp"": ""hello"",
+  ""numberProp"": 1,
+    ""boolProp"": true
+},
+{
+  ""stringProp"": ""world"",
+  ""numberProp"": 2,
+    ""boolProp"": false
+}
+]"
         );
 
     public static readonly ExampleInput.ExampleFileInput InputCSV
@@ -19,7 +29,7 @@ public static class DefaultInputs
             "input.csv",
             "CSV",
             "csv",
-            "string,number,bool\r\nhello,1,true\r\nworld,2,false"
+            "stringProp,numberProp,boolProp\r\nhello,1,true\r\nworld,2,false"
         );
 
     public static readonly ExampleInput.ExampleVariableInput CSVDelimiter =
@@ -39,12 +49,14 @@ public static class DefaultInputs
                 new JsonSchemaBuilder()
                     .Title("MySchema")
                     .AdditionalProperties(JsonSchema.False)
-                    .Required("a", "b")
+                    .Required("stringProp", "numberProp", "boolProp")
                     .Properties(
-                        ("a", new JsonSchemaBuilder().Type(SchemaValueType.Boolean)),
-                        ("b", new JsonSchemaBuilder().Type(SchemaValueType.Integer))
+                        ("stringProp", new JsonSchemaBuilder().Type(SchemaValueType.String)),
+                        ("numberProp", new JsonSchemaBuilder().Type(SchemaValueType.Integer)),
+                        ("boolProp", new JsonSchemaBuilder().Type(SchemaValueType.Boolean))
                     )
-                    .Build()
+                    .Build(),
+                new JsonSerializerOptions() { WriteIndented = true }
             )
         );
 }

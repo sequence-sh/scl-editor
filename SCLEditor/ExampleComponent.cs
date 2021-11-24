@@ -9,19 +9,33 @@ using Reductech.EDR.Core.Util;
 
 namespace Reductech.Utilities.SCLEditor;
 
+/// <summary>
+/// A component used in an example
+/// </summary>
+/// <param name="Name"></param>
 [Equatable]
 public abstract partial record ExampleComponent(string Name)
 {
+    /// <summary>
+    /// Get the example sequence
+    /// </summary>
     public abstract IStep<Unit> GetSequence(ExampleChoiceData choiceData);
 
+    /// <summary>
+    /// Get the example inputs
+    /// </summary>
     public abstract IEnumerable<ExampleInput> GetInputs(ExampleChoiceData choiceData);
 
+    /// <summary>
+    /// Get all example inputs
+    /// </summary>
     public abstract IEnumerable<ExampleInput> GetAllInputs();
 
+    /// <summary>
+    /// A choice of different example components
+    /// </summary>
     [Equatable]
-    public partial record Choice(ExampleInput.ExampleChoice ExampleChoice) : ExampleComponent(
-        ExampleChoice.Name
-    )
+    public partial record Choice(ExampleInput.Mode Mode) : ExampleComponent(Mode.Name)
     {
         private ExampleComponent GetChoice(ExampleChoiceData exampleChoiceData) =>
             exampleChoiceData.ChoiceValues[Name];
@@ -35,7 +49,7 @@ public abstract partial record ExampleComponent(string Name)
         /// <inheritdoc />
         public override IEnumerable<ExampleInput> GetInputs(ExampleChoiceData choiceData)
         {
-            yield return ExampleChoice;
+            yield return Mode;
 
             foreach (var chosenComponentInput in GetChoice(choiceData).GetInputs(choiceData))
             {
@@ -46,14 +60,17 @@ public abstract partial record ExampleComponent(string Name)
         /// <inheritdoc />
         public override IEnumerable<ExampleInput> GetAllInputs()
         {
-            yield return ExampleChoice;
+            yield return Mode;
 
-            foreach (var option in ExampleChoice.Options)
+            foreach (var option in Mode.Options)
             foreach (var input in option.GetAllInputs())
                 yield return input;
         }
     }
 
+    /// <summary>
+    /// Constant SCL
+    /// </summary>
     [Equatable]
     public partial record Constant(string Name, IStep<Unit> Step) : ExampleComponent(Name)
     {
@@ -76,6 +93,9 @@ public abstract partial record ExampleComponent(string Name)
         }
     }
 
+    /// <summary>
+    /// A variable input
+    /// </summary>
     [Equatable]
     public partial record Variable
         (ExampleInput.ExampleVariableInput VariableInput) : ExampleComponent(VariableInput.Name)
@@ -99,6 +119,9 @@ public abstract partial record ExampleComponent(string Name)
         }
     }
 
+    /// <summary>
+    /// A file input component
+    /// </summary>
     [Equatable]
     public partial record File
         (ExampleInput.ExampleFileInput FileInput) : ExampleComponent(FileInput.Name)
@@ -115,6 +138,9 @@ public abstract partial record ExampleComponent(string Name)
             return step;
         }
 
+        /// <summary>
+        /// The name of the variable
+        /// </summary>
         public VariableName VariableName
         {
             get
@@ -137,6 +163,9 @@ public abstract partial record ExampleComponent(string Name)
         }
     }
 
+    /// <summary>
+    /// A Sequence of Steps
+    /// </summary>
     [Equatable]
     public partial record Sequence(
         string Name,
@@ -149,26 +178,8 @@ public abstract partial record ExampleComponent(string Name)
             {
                 FinalStep = new DoNothing(),
                 InitialSteps = Components.Select(x => x.GetSequence(choiceData))
-                    .SelectMany(Flatten)
                     .ToList()
             };
-        }
-
-        public IEnumerable<IStep<Unit>> Flatten(IStep<Unit> step)
-        {
-            if (step is Sequence<Unit> sequence)
-            {
-                foreach (var initial in sequence.InitialSteps)
-                {
-                    yield return initial;
-                }
-
-                yield return sequence.FinalStep;
-            }
-            else
-            {
-                yield return step;
-            }
         }
 
         /// <inheritdoc />

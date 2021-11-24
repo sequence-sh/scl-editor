@@ -8,13 +8,13 @@ using Reductech.EDR.Core.Util;
 
 namespace Reductech.Utilities.SCLEditor;
 
-public static class ExampleHelpers
+public static class ExampleList
 {
-    public static IEnumerable<ExampleData> AllExamples
+    public static IEnumerable<ExampleTemplate> AllExamples
     {
         get
         {
-            yield return new ExampleData(
+            yield return new ExampleTemplate(
                 "Convert CSV to Json",
                 "convertcsvtojson",
                 new ExampleComponent.Sequence(
@@ -26,7 +26,7 @@ public static class ExampleHelpers
                     }
                 ),
                 new ExampleOutput(
-                    "Json",
+                    "json",
                     "off",
                     new ToJsonArray()
                     {
@@ -46,7 +46,7 @@ public static class ExampleHelpers
                 )
             );
 
-            yield return new ExampleData(
+            yield return new ExampleTemplate(
                 "Convert Json to CSV",
                 "convertjsontocsv",
                 new ExampleComponent.Sequence(
@@ -78,7 +78,7 @@ public static class ExampleHelpers
                 )
             );
 
-            yield return new ExampleData(
+            yield return new ExampleTemplate(
                 "Generate Schema",
                 "generateschema",
                 new ExampleComponent.Sequence(
@@ -93,7 +93,7 @@ public static class ExampleHelpers
                             )
                         ),
                         new ExampleComponent.Choice(
-                            new ExampleInput.ExampleChoice(
+                            new ExampleInput.Mode(
                                 "Input",
                                 "Input",
                                 new List<ExampleComponent>()
@@ -184,7 +184,7 @@ public static class ExampleHelpers
                 )
             );
 
-            yield return new ExampleData(
+            yield return new ExampleTemplate(
                 "Validate Schema",
                 "validateschema",
                 new ExampleComponent.Sequence(
@@ -193,7 +193,7 @@ public static class ExampleHelpers
                     {
                         new ExampleComponent.File(DefaultInputs.SchemaJson),
                         new ExampleComponent.Choice(
-                            new ExampleInput.ExampleChoice(
+                            new ExampleInput.Mode(
                                 "Input",
                                 "Input",
                                 new List<ExampleComponent>()

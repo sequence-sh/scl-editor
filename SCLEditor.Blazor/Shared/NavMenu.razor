@@ -15,7 +15,7 @@
     {
       yield return ("SCL Playground", "playground");
 
-      foreach (var example in ExampleHelpers.AllExamples)
+      foreach (var example in ExampleList.AllExamples)
       {
         yield return (example.Name, $"example/{example.Url}");
       }

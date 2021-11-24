@@ -55,7 +55,7 @@
                              Max='@(intVariableInput.Maximum ?? int.MaxValue)'
                              Step='@(intVariableInput.Step ?? 1)'/>
           }
-          else if (input is ExampleInput.ExampleChoice choice)
+          else if (input is ExampleInput.Mode choice)
           {
             <MudSelect T='ExampleComponent'
                        Label='@choice.Name'
@@ -109,7 +109,7 @@
 
   public CancellationTokenSource? CancellationTokenSource { get; set; }
 
-  private ExampleData example { get; set; }
+  private ExampleTemplate example { get; set; }
 
   /// <inheritdoc />
   protected override async Task OnParametersSetAsync()
@@ -125,7 +125,7 @@
 
     _stepFactoryStore = stepFactoryStoreResult.Value;
 
-    example = ExampleHelpers.AllExamples.Single(x => x.Url.Equals(ExampleName));
+    example = ExampleList.AllExamples.Single(x => x.Url.Equals(ExampleName));
 
     _choiceData = ExampleChoiceData.Create(example.ExampleComponent);
   }
