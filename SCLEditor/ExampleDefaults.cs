@@ -53,8 +53,8 @@ public static class ExampleDefaults
                     .Required("stringProp", "numberProp", "boolProp")
                     .Properties(
                         ("stringProp", new JsonSchemaBuilder().Type(SchemaValueType.String)),
-                        ("numberProp", new JsonSchemaBuilder().Type(SchemaValueType.Integer)),
-                        ("boolProp", new JsonSchemaBuilder().Type(SchemaValueType.Boolean))
+                        ("numberProp", new JsonSchemaBuilder().Type(SchemaValueType.String)),
+                        ("boolProp", new JsonSchemaBuilder().Type(SchemaValueType.String))
                     )
                     .Build(),
                 new JsonSerializerOptions() { WriteIndented = true }
