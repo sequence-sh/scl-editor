@@ -1,27 +1,35 @@
 ﻿@page "/playground"
 
+
 <MudGrid>
 
   <MudItem xs='12' lg='6'>
 
-    <MudPaper Class="ma-2" Square="true">
+    <MudPaper Class="pa-4 ma-2" Square="true">
 
-      @*<MudMenu Label='Examples' s>
-        @foreach (var example in ExampleHelpers.AllExamples)
-        {
-          <MudMenuItem OnClick='_ => SetSCL(example.ExampleComponent.)'>@example.Name</MudMenuItem>
-        }
-
-      </MudMenu>*@
-      <MonacoEditor Id="scl-monaco" @ref="_sclEditor" OnDidChangeModel='OnModelChanged' ConstructionOptions="SCLEditorConstructionOptions"/>
-      @if (CancellationTokenSource != null)
+      @if (_title is not null)
       {
-        <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="Cancel"/>
+        <MudText Typo='Typo.h5'>
+          @_title
+        </MudText>
+      }
+
+      <MonacoEditor
+        Id="playground-monaco"
+        @ref="_sclEditor"
+        OnDidChangeModelContent='OnDidChangeModelContentAsync'
+        ConstructionOptions="SCLEditorConstructionOptions"/>
+      @if (RunCancellation != null)
+      {
+        <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="CancelRun"/>
       }
       else
       {
         <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
       }
+
+      <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveSCLFile' Disabled='!_hotChanges'/>
+
     </MudPaper>
 
 
@@ -30,13 +38,6 @@
   <MudItem xs='12' lg='6'>
 
     <MudExpansionPanels MultiExpansion='true'>
-
-      @*<MudExpansionPanel @bind-IsExpanded='InputFileExpanded'>
-        @if(_fileSelection?.SelectedFile is not null)
-                {
-                  <MonacoEditor Id='file-monaco' @ref="_fileEditor" ConstructionOptions='FileEditorConstructionOptions' />
-                }
-            </MudExpansionPanel>*@
 
       <MudExpansionPanel @bind-IsExpanded='OutputExpanded'>
         <MudTextField FullWidth='true'
@@ -63,15 +64,62 @@
                       Style='width: 100%'
                       OnAdornmentClick="@ClearLogs"/>
       </MudExpansionPanel>
+
+      <MudExpansionPanel Icon='@Icons.Material.Filled.Settings'>
+        <MudCheckBox @bind-Checked="_configuration.CompletionEnabled" Label='@nameof(_configuration.CompletionEnabled)'/>
+        <MudCheckBox @bind-Checked="_configuration.DiagnosticsEnabled" Label='@nameof(_configuration.DiagnosticsEnabled)'/>
+        <MudCheckBox @bind-Checked="_configuration.SignatureHelpEnabled" Label='@nameof(_configuration.SignatureHelpEnabled)'/>
+        <MudCheckBox @bind-Checked="_configuration.QuickInfoEnabled" Label='@nameof(_configuration.QuickInfoEnabled)'/>
+
+      </MudExpansionPanel>
+
+
     </MudExpansionPanels>
 
   </MudItem>
 
+  @if (_openedFile is not null)
+  {
+    var constructionOptions = GetFileEditorConstructionOptions(_openedFile);
+    
+    <MudItem xs='12' lg='6'>
+
+      <MudPaper Class="pa-4 ma-2" Square="true">
+
+        <MudText Typo='Typo.h5'>
+          @_openedFile.Path
+        </MudText>
+
+        <MonacoEditor
+          Id="file-monaco"
+          @ref="_fileEditor"
+          ConstructionOptions="_ => constructionOptions"/>
+
+        <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveOpenFile'/>
+        <MudIconButton Icon='@Icons.Filled.Close' OnClick='CloseOpenFile'/>
+
+      </MudPaper>
+
+
+    </MudItem>
+  }
+
   <MudItem xs='12'>
-    <FileSelection @ref="_fileSelection" FileSystem='@_fileSystem' SetSCLAction='@SetSCL'/>
+    <FileSelection @ref="_fileSelection" OpenFileAction='OpenFileAction'/>
   </MudItem>
 
+
 </MudGrid>
+
+
+<MudMessageBox @ref="MudMessageBox" Title="Choose File Name" CancelText="Cancel">
+  <MessageContent>
+    <MudTextField @bind-Value='_title'/>
+  </MessageContent>
+  <YesButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save">Save</MudButton>
+  </YesButton>
+</MudMessageBox>
 
 
 <style>

@@ -4,6 +4,7 @@
 @using System.IO.Abstractions.TestingHelpers
 @using System.Threading
 @using BlazorDownloadFile
+@using Blazored.LocalStorage
 
 
 <InputFile id='fileInput112' OnChange="OnInputFileChanged" hidden multiple/>
@@ -16,8 +17,7 @@
   Upload File
 </MudButton>
 
-
-<MudTable Items="GetFileData()" Hover="true" Breakpoint="Breakpoint.Sm" @bind-SelectedItem='SelectedFile'>
+<MudTable Items="FileSystem.GetFileData()" Hover="true" Breakpoint="Breakpoint.Sm" @bind-SelectedItem='FileSystem.SelectedFile'>
   <HeaderContent>
     <MudTh>Path</MudTh>
     <MudTh>Text</MudTh>
@@ -33,96 +33,62 @@
     <MudTd DataLabel="LastModified">@context.Data.LastWriteTime</MudTd>
     <MudTd DataLabel="Size">@context.SizeString</MudTd>
     <MudTd DataLabel="Open">
-      <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' OnClick='() => SetSCL(context.Path)'/>
+      <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' OnClick='() => OpenFileAction(context)'/>
     </MudTd>
     <MudTd DataLabel="Download">
-      <MudIconButton Icon='@Icons.Material.Filled.FileDownload' OnClick='() => Download(context.Path)'/>
+      <MudIconButton Icon='@Icons.Material.Filled.FileDownload' OnClick='() => FileSystem.Download(context.Path)'/>
     </MudTd>
     <MudTd DataLabel="Remove">
-      <MudIconButton Icon='@Icons.Material.Filled.Delete' OnClick='() => DeleteFile(context.Path)'/>
+      <MudIconButton Icon='@Icons.Material.Filled.Delete' OnClick='() => FileSystem.DeleteFile(context.Path)'/>
     </MudTd>
   </RowTemplate>
 </MudTable>
 
 <MudGrid Justify="Justify.Center" Spacing="4">
   <MudItem>
-    <MudButton OnClick="@ClearFiles" Disabled="@(!FilesExist())" Color="Color.Error" Variant="Variant.Filled">Clear</MudButton>
+    <MudButton
+      OnClick="@FileSystem.ClearFiles"
+      Disabled="@(!FileSystem.FilesExist())"
+      Color="Color.Error"
+      Variant="Variant.Filled">
+      Clear
+    </MudButton>
   </MudItem>
 </MudGrid>
 
 @code {
 
   [Parameter]
-  public MockFileSystem FileSystem { get; set; }
-
-  [Parameter]
-  public Func<string, Task> SetSCLAction { get; set; }
-
-  [Inject]
-  IBlazorDownloadFileService BlazorDownloadFileService { get; set; }
-
-  public FileData? SelectedFile { get; set; }
-
-  async Task Download(string fileName)
-  {
-    var text = FileSystem.GetFile(fileName).TextContents;
-  //var file = Files[fileName];
-    await BlazorDownloadFileService.DownloadFileFromText(fileName, text, "text/plain");
-  }
-
-  async Task SetSCL(string fileName)
-  {
-    var text = FileSystem.GetFile(fileName).TextContents;
-    await SetSCLAction(text);
-  }
+  public Func<FileData, Task> OpenFileAction { get; set; }
+  
+  [CascadingParameter]
+  public CompoundFileSystem FileSystem { get; set; }
 
   async Task OnInputFileChanged(InputFileChangeEventArgs e)
   {
     var files = e.GetMultipleFiles();
 
-    foreach (var browserFile in files)
-    {
-      using var reader = new StreamReader(browserFile.OpenReadStream());
-
-      var text = await reader.ReadToEndAsync();
-      var mfd = new MockFileData(text);
-
-      FileSystem.AddFile(browserFile.Name, mfd);
-    }
+    await FileSystem.ImportFiles(files);
   }
 
-  void UpdateFile(FileData data, string newText)
+  /// <inheritdoc />
+  protected override async Task OnParametersSetAsync()
   {
-    FileSystem.AddFile(data.Path, new MockFileData(newText));
+    await base.OnParametersSetAsync();
+    await FileSystem.Initialize();
   }
 
-  bool FilesExist()
-  {
-    return FileSystem.AllFiles.Any();
-  }
+  
 
-  void DeleteFile(string path)
-  {
-    FileSystem.RemoveFile(path);
-  }
+  
 
-  void ClearFiles()
-  {
-    foreach (var file in FileSystem.AllFiles.ToList())
-    {
-      FileSystem.RemoveFile(file);
-    }
-  }
+  
 
-  IEnumerable<FileData> GetFileData()
-  {
-    foreach (var file in FileSystem.AllFiles)
-    {
-      var mfd = FileSystem.GetFile(file);
+  
 
-      yield return new FileData(file, mfd);
-    }
-  }
+  
+
+  
 
 
 

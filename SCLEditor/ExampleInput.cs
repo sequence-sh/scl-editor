@@ -1,19 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Generator.Equals;
-using Reductech.EDR.Core;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Steps;
-using Reductech.EDR.Core.Util;
+﻿namespace Reductech.Utilities.SCLEditor;
 
-namespace Reductech.Utilities.SCLEditor;
-
+/// <summary>
+/// The input to an example
+/// </summary>
+/// <param name="Name">The name of the input</param>
+/// <param name="Group">Where to group the input control on screen</param>
 [Equatable]
 public abstract partial record ExampleInput(string Name, string Group)
 {
+    /// <summary>
+    /// Sets the initial values for this input
+    /// </summary>
+    /// <param name="exampleChoiceData"></param>
     public abstract void SetInitialValue(ExampleChoiceData exampleChoiceData);
 
-    public record ExampleChoice
+    /// <summary>
+    /// Allows you to choose between different modes
+    /// </summary>
+    public record Mode
     (
         string Name,
         string Group,
@@ -26,6 +30,9 @@ public abstract partial record ExampleInput(string Name, string Group)
         }
     }
 
+    /// <summary>
+    /// Reads text from a file
+    /// </summary>
     public record ExampleFileInput(
             string Name,
             string Group,
@@ -40,6 +47,9 @@ public abstract partial record ExampleInput(string Name, string Group)
         }
     }
 
+    /// <summary>
+    /// An integer variable
+    /// </summary>
     public record ExampleIntVariableInput(
         string Name,
         string Group,
@@ -66,6 +76,9 @@ public abstract partial record ExampleInput(string Name, string Group)
         }
     }
 
+    /// <summary>
+    /// A string variable
+    /// </summary>
     public record ExampleStringVariableInput(
         string Name,
         string Group,
@@ -89,12 +102,20 @@ public abstract partial record ExampleInput(string Name, string Group)
         }
     }
 
+    /// <summary>
+    /// A possible value for an enum variable
+    /// </summary>
+    public record EnumValue(string Name, string Value);
+
+    /// <summary>
+    /// An enum variable
+    /// </summary>
     [Equatable]
     public partial record ExampleEnumVariableInput(
         string Name,
         string Group,
-        string InitialValue,
-        [property: OrderedEquality] IReadOnlyList<string> PossibleValues) : ExampleVariableInput(
+        EnumValue InitialValue,
+        [property: OrderedEquality] IReadOnlyList<EnumValue> PossibleValues) : ExampleVariableInput(
         Name,
         Group
     )
@@ -102,26 +123,35 @@ public abstract partial record ExampleInput(string Name, string Group)
         /// <inheritdoc />
         public override void SetInitialValue(ExampleChoiceData exampleChoiceData)
         {
-            exampleChoiceData.StringValues[Name] = InitialValue;
+            exampleChoiceData.EnumValues[Name] = InitialValue;
         }
 
         /// <inheritdoc />
         public override IStep<Unit> GetStep(ExampleChoiceData exampleChoiceData)
         {
-            var value = exampleChoiceData.StringValues[Name];
+            var value = exampleChoiceData.EnumValues[Name];
 
             return new SetVariable<StringStream>()
             {
-                Variable = VariableName, Value = new StringConstant(value)
+                Variable = VariableName, Value = new StringConstant(value.Value)
             };
         }
     }
 
-    public abstract partial record ExampleVariableInput(string Name, string Group)
+    /// <summary>
+    /// A variable
+    /// </summary>
+    public abstract record ExampleVariableInput(string Name, string Group)
         : ExampleInput(Name, Group)
     {
+        /// <summary>
+        /// Get the step
+        /// </summary>
         public abstract IStep<Unit> GetStep(ExampleChoiceData exampleChoiceData);
 
+        /// <summary>
+        /// The name of the variable
+        /// </summary>
         public VariableName VariableName => new(Name);
     }
 }
