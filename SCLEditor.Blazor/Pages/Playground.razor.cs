@@ -176,7 +176,13 @@ public partial class Playground
         }
         else
         {
+            await CloseOpenFile();
+
             _openedFile = arg;
+
+            if (_fileEditor is not null)
+                await _fileEditor.SetValue(arg.Data.TextContents);
+
             StateHasChanged();
         }
     }

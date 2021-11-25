@@ -33,7 +33,7 @@ public class SCLCodeHelper
         CompletionRequest completionRequest)
     {
         if (!Configuration.CompletionEnabled)
-            return new CompletionResponse();
+            return new CompletionResponse() { Items = new List<CompletionItem>() };
 
         var position = new LinePosition(completionRequest.Line, completionRequest.Column);
         var visitor  = new CompletionVisitor(position, StepFactoryStore);
@@ -42,7 +42,7 @@ public class SCLCodeHelper
             code,
             x => { x.RemoveErrorListeners(); },
             x => { x.RemoveErrorListeners(); }
-        ) ?? new CompletionResponse();
+        ) ?? new CompletionResponse() { Items = new List<CompletionItem>() };
 
         return completionList;
     }
@@ -66,7 +66,7 @@ public class SCLCodeHelper
         SignatureHelpRequest signatureHelpRequest)
     {
         if (!Configuration.SignatureHelpEnabled)
-            return new SignatureHelpResponse();
+            return new SignatureHelpResponse() { Signatures = new List<SignatureHelpItem>() };
 
         var visitor = new SignatureHelpVisitor(
             new LinePosition(signatureHelpRequest.Line, signatureHelpRequest.Column),
