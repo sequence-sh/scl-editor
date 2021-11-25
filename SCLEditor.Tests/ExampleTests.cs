@@ -108,7 +108,7 @@ public partial class ExampleTests
     /// <summary>
     /// Tests documentation xml doc summaries appear
     /// </summary>
-    [Fact]
+    [Fact(Skip = "skip")]
     public void TestDocumentation()
     {
         var logSummary = new Log<int>().StepFactory.Summary;
