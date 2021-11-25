@@ -24,6 +24,8 @@ public class Program
         builder.Services.AddBlazoredLocalStorage();
 
         builder.Services.AddMudBlazorJsApi().AddMudServices();
+        builder.Services.AddScoped<CompoundFileSystem>();
+
         await builder.Build().RunAsync();
     }
 }

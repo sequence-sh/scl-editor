@@ -1,14 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using BlazorMonaco;
-using CSharpFunctionalExtensions;
-using MELT;
-using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
-using Microsoft.JSInterop;
-using Reductech.EDR.Core.Abstractions;
-using Reductech.EDR.Core.ExternalProcesses;
-using Reductech.EDR.Core.Internal.Serialization;
+﻿using MudBlazor;
 
 namespace Reductech.Utilities.SCLEditor.Blazor.Pages;
 
@@ -23,12 +13,16 @@ public partial class Playground
     [Inject]
     public IJSRuntime Runtime { get; set; } = null!;
 
+    [Inject] public IDialogService DialogService { get; set; }
+
+    [CascadingParameter] public CompoundFileSystem FileSystem { get; set; }
+
     /// <summary>
     /// The _scl editor to use
     /// </summary>
     private MonacoEditor _sclEditor = null!;
 
-    //private MonacoEditor _fileEditor;
+    private MonacoEditor? _fileEditor = null!;
 
     bool OutputExpanded { get; set; } = true;
     bool LogExpanded { get; set; } = true;
@@ -36,14 +30,13 @@ public partial class Playground
     private readonly ITestLoggerFactory _testLoggerFactory =
         TestLoggerFactory.Create(x => x.FilterByMinimumLevel(LogLevel.Information));
 
-    private readonly MockFileSystem _fileSystem = new();
-
     private readonly ICompression _compression = new CompressionAdapter();
 
     private readonly StringBuilder _consoleStringBuilder = new();
 
     private StepFactoryStore _stepFactoryStore = null!;
-    private IExternalContext _externalContext = null!;
+
+    private FileSelection _fileSelection;
 
     private CancellationTokenSource? RunCancellation { get; set; }
 
@@ -51,49 +44,27 @@ public partial class Playground
 
     private EditorConfiguration _configuration = new();
 
-    /// <summary>
-    /// The configuration key in local storage
-    /// </summary>
-    private const string ConfigurationKey = "SCLPlaygroundConfiguration";
+    private FileData? _openedFile = null;
+
+    private bool _hotChanges = false;
+    MudMessageBox MudMessageBox { get; set; }
+
+    private string? _title = null;
 
     /// <inheritdoc />
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+
         Console.SetOut(new StringWriter(_consoleStringBuilder));
 
-        _externalContext = new ExternalContext(
-            ExternalProcessRunner.Instance,
-            DefaultRestClientFactory.Instance,
-            ConsoleAdapter.Instance,
-            (ConnectorInjection.FileSystemKey, _fileSystem),
-            (ConnectorInjection.CompressionKey, _compression)
-        );
-
         var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
-            _externalContext,
+            ExternalContext.Default,
             typeof(FileRead).Assembly,
             typeof(ToCSV).Assembly
         );
 
         _stepFactoryStore = stepFactoryStoreResult.Value;
-
-        if (localStorage.ContainKey(ConfigurationKey))
-            _configuration = localStorage.GetItem<EditorConfiguration>(ConfigurationKey);
-        else
-            _configuration = new EditorConfiguration();
-
-        _configuration.PropertyChanged += _configuration_PropertyChanged;
-
-        _sclCodeHelper = new SCLCodeHelper(_stepFactoryStore, _configuration);
-
-        base.OnInitialized();
-    }
-
-    private void _configuration_PropertyChanged(
-        object? sender,
-        System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        localStorage.SetItem(ConfigurationKey, _configuration);
     }
 
     /// <inheritdoc />
@@ -101,6 +72,21 @@ public partial class Playground
     {
         if (firstRender)
         {
+            var containsConfigKey =
+                await FileSystem.LocalStorage.ContainKeyAsync(EditorConfiguration.ConfigurationKey);
+
+            if (containsConfigKey)
+                _configuration = await
+                    FileSystem.LocalStorage.GetItemAsync<EditorConfiguration>(
+                        EditorConfiguration.ConfigurationKey
+                    );
+            else
+                _configuration = new EditorConfiguration();
+
+            _configuration.PropertyChanged += _configuration_PropertyChanged;
+
+            _sclCodeHelper = new SCLCodeHelper(_stepFactoryStore, _configuration);
+
             var objRef = DotNetObjectReference.Create(_sclCodeHelper);
 
             await Runtime.InvokeVoidAsync(
@@ -144,6 +130,72 @@ public partial class Playground
         await base.OnAfterRenderAsync(firstRender);
     }
 
+    private async Task SaveSCLFile()
+    {
+        if (_title is null)
+        {
+            var change = await MudMessageBox.Show(new DialogOptions() { });
+
+            if (change != true)
+                return;
+
+            if (_title is null)
+                return;
+        }
+
+        if (!_title.EndsWith(".scl", StringComparison.InvariantCultureIgnoreCase))
+        {
+            _title += ".scl";
+        }
+
+        _hotChanges = false;
+
+        await _fileSelection.FileSystem.SaveFile(_sclEditor, _title);
+    }
+
+    private async Task CloseOpenFile()
+    {
+        _openedFile = null;
+    }
+
+    private async Task SaveOpenFile()
+    {
+        if (_fileEditor is not null && _openedFile is not null)
+        {
+            await FileSystem.SaveFile(_fileEditor, _openedFile.Path);
+        }
+    }
+
+    private async Task OpenFileAction(FileData arg)
+    {
+        if (Path.GetExtension(arg.Path) == ".scl")
+        {
+            _title      = arg.Path;
+            _hotChanges = false;
+            await _sclEditor.SetValue(arg.Data.TextContents);
+        }
+        else
+        {
+            _openedFile = arg;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveConfiguration()
+    {
+        await FileSystem.LocalStorage.SetItemAsync(
+            EditorConfiguration.ConfigurationKey,
+            _configuration
+        );
+    }
+
+    private void _configuration_PropertyChanged(
+        object? sender,
+        PropertyChangedEventArgs e)
+    {
+        SaveConfiguration();
+    }
+
     private void ClearLogs()
     {
         _testLoggerFactory.Sink.Clear();
@@ -160,18 +212,16 @@ public partial class Playground
         return text;
     }
 
-    private Task OnDidChangeModelContentAsync() =>
-        _sclCodeHelper.SetDiagnostics(_sclEditor, Runtime);
+    private Task OnDidChangeModelContentAsync()
+    {
+        _hotChanges = true;
+        return _sclCodeHelper.SetDiagnostics(_sclEditor, Runtime);
+    }
 
     private void CancelRun()
     {
         RunCancellation?.Cancel();
         RunCancellation = null;
-    }
-
-    private async Task SetSCL(string s)
-    {
-        await _sclEditor.SetValue(s);
     }
 
     private async Task FormatSCL()
@@ -208,10 +258,18 @@ public partial class Playground
         }
         else
         {
+            var externalContext = new ExternalContext(
+                ExternalProcessRunner.Instance,
+                DefaultRestClientFactory.Instance,
+                ConsoleAdapter.Instance,
+                (ConnectorInjection.FileSystemKey, FileSystem.FileSystem),
+                (ConnectorInjection.CompressionKey, _compression)
+            );
+
             await using var stateMonad = new StateMonad(
                 logger,
                 _stepFactoryStore,
-                _externalContext,
+                externalContext,
                 new Dictionary<string, object>()
             );
 
@@ -247,35 +305,32 @@ public partial class Playground
         };
     }
 
-    //    private static StandaloneEditorConstructionOptions FileEditorConstructionOptions(MonacoEditor _)
-    //{
-    //    if (_fileSelection?.SelectedFile is not null)
-    //    {
-    //        var extension = GetLanguageFromFileExtension(
-    //            _fileSystem.Path.GetExtension(_fileSelection.SelectedFile.Path)
-    //        );
-
-    //        return new()
-    //        {
-    //            AutomaticLayout = true,
-    //            Language        = extension,
-    //            Value           = _fileSelection.SelectedFile.Data.TextContents
-    //        };
-    //    }
-
-    //    return new() { AutomaticLayout = true };
-    //}
-
-    private static string GetLanguageFromFileExtension(string extension)
+    private StandaloneEditorConstructionOptions GetFileEditorConstructionOptions(FileData file)
     {
-        return extension?.ToLowerInvariant() switch
+        var extension =
+            GetLanguageFromFileExtension(FileSystem.FileSystem.Path.GetExtension(file.Path));
 
+        return new()
         {
-            "yml"  => "yaml",
-            "yaml" => "yaml",
-            "json" => "json",
-            "cs"   => "csharp",
-            _      => ""
+            AutomaticLayout = true,
+            Language        = extension,
+            Value           = file.Data.TextContents,
+            WordWrap        = "off",
+            TabSize         = 8,
+            UseTabStops     = true,
         };
+
+        static string GetLanguageFromFileExtension(string extension)
+        {
+            return extension?.ToLowerInvariant() switch
+
+            {
+                "yml"  => "yaml",
+                "yaml" => "yaml",
+                "json" => "json",
+                "cs"   => "csharp",
+                _      => ""
+            };
+        }
     }
 }

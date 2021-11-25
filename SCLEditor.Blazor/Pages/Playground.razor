@@ -1,6 +1,4 @@
 ﻿@page "/playground"
-@inject Blazored.LocalStorage.ISyncLocalStorageService localStorage
-
 
 
 <MudGrid>
@@ -8,13 +6,19 @@
   <MudItem xs='12' lg='6'>
 
     <MudPaper Class="pa-4 ma-2" Square="true">
-      
-      <MonacoEditor 
-        Id="scl-monaco" 
+
+      @if (_title is not null)
+      {
+        <MudText Typo='Typo.h5'>
+          @_title
+        </MudText>
+      }
+
+      <MonacoEditor
+        Id="playground-monaco"
         @ref="_sclEditor"
         OnDidChangeModelContent='OnDidChangeModelContentAsync'
-        ConstructionOptions="SCLEditorConstructionOptions"
-      />
+        ConstructionOptions="SCLEditorConstructionOptions"/>
       @if (RunCancellation != null)
       {
         <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="CancelRun"/>
@@ -23,8 +27,8 @@
       {
         <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
       }
-      
-      
+
+      <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveSCLFile' Disabled='!_hotChanges'/>
 
     </MudPaper>
 
@@ -60,25 +64,62 @@
                       Style='width: 100%'
                       OnAdornmentClick="@ClearLogs"/>
       </MudExpansionPanel>
-      
+
       <MudExpansionPanel Icon='@Icons.Material.Filled.Settings'>
-        <MudCheckBox  @bind-Checked="_configuration.CompletionEnabled" Label='@nameof(_configuration.CompletionEnabled)'/>
-        <MudCheckBox  @bind-Checked="_configuration.DiagnosticsEnabled" Label='@nameof(_configuration.DiagnosticsEnabled)'/>
-        <MudCheckBox  @bind-Checked="_configuration.SignatureHelpEnabled" Label='@nameof(_configuration.SignatureHelpEnabled)'/>
-        <MudCheckBox  @bind-Checked="_configuration.QuickInfoEnabled" Label='@nameof(_configuration.QuickInfoEnabled)'/>
+        <MudCheckBox @bind-Checked="_configuration.CompletionEnabled" Label='@nameof(_configuration.CompletionEnabled)'/>
+        <MudCheckBox @bind-Checked="_configuration.DiagnosticsEnabled" Label='@nameof(_configuration.DiagnosticsEnabled)'/>
+        <MudCheckBox @bind-Checked="_configuration.SignatureHelpEnabled" Label='@nameof(_configuration.SignatureHelpEnabled)'/>
+        <MudCheckBox @bind-Checked="_configuration.QuickInfoEnabled" Label='@nameof(_configuration.QuickInfoEnabled)'/>
 
       </MudExpansionPanel>
-      
+
 
     </MudExpansionPanels>
 
   </MudItem>
 
+  @if (_openedFile is not null)
+  {
+    var constructionOptions = GetFileEditorConstructionOptions(_openedFile);
+
+    <MudItem xs='12' lg='6'>
+
+      <MudPaper Class="pa-4 ma-2" Square="true">
+
+        <MudText Typo='Typo.h5'>
+          @_openedFile.Path
+        </MudText>
+
+        <MonacoEditor
+          Id="file-monaco"
+          @ref="_fileEditor"
+          ConstructionOptions="_ => constructionOptions"/>
+
+        <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveOpenFile'/>
+        <MudIconButton Icon='@Icons.Filled.Close' OnClick='CloseOpenFile'/>
+
+      </MudPaper>
+
+
+    </MudItem>
+  }
+
   <MudItem xs='12'>
-    <FileSelection FileSystem='@_fileSystem' SetSCLAction='@SetSCL'/>
+    <FileSelection @ref="_fileSelection" OpenFileAction='OpenFileAction'/>
   </MudItem>
 
+
 </MudGrid>
+
+
+<MudMessageBox @ref="MudMessageBox" Title="Choose File Name" CancelText="Cancel">
+  <MessageContent>
+    <MudTextField @bind-Value='_title'/>
+  </MessageContent>
+  <YesButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save">Save</MudButton>
+  </YesButton>
+</MudMessageBox>
 
 
 <style>
