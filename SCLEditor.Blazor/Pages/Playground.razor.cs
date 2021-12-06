@@ -13,9 +13,17 @@ public partial class Playground
     [Inject]
     public IJSRuntime Runtime { get; set; } = null!;
 
-    [Inject] public IDialogService DialogService { get; set; }
+    /// <summary>
+    /// The Dialog Service
+    /// </summary>
+    [Inject]
+    public IDialogService DialogService { get; set; } = null!;
 
-    [CascadingParameter] public CompoundFileSystem FileSystem { get; set; }
+    /// <summary>
+    /// The File System
+    /// </summary>
+    [CascadingParameter]
+    public CompoundFileSystem FileSystem { get; set; } = null!;
 
     /// <summary>
     /// The _scl editor to use

@@ -49,7 +49,13 @@ public class CompoundFileSystem
     public async Task Download(string fileName)
     {
         var text = FileSystem.GetFile(fileName).TextContents;
-        await BlazorDownloadFileService.DownloadFileFromText(fileName, text, "text/plain");
+
+        await BlazorDownloadFileService.DownloadFileFromText(
+            fileName,
+            text,
+            Encoding.UTF8,
+            "text/plain"
+        );
     }
 
     public async Task ImportFiles(IEnumerable<IBrowserFile> files)
