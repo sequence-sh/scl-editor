@@ -30,11 +30,11 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Reductech.EDR.Connectors.FileSystem" Version="0.11.0-a.master.2109032032" />
-    <PackageReference Include="Reductech.EDR.Connectors.StructuredData" Version="0.12.0-a.main.2111181604" />
-    <PackageReference Include="Reductech.EDR.Core" Version="0.12.0-a.main.2111181519" />
-    <PackageReference Include="System.IO.Abstractions" Version="13.2.47" />
-    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="13.2.47" />
+    <PackageReference Include="Reductech.EDR.Connectors.FileSystem" Version="0.12.0" />
+    <PackageReference Include="Reductech.EDR.Connectors.StructuredData" Version="0.12.0" />
+    <PackageReference Include="Reductech.EDR.Core" Version="0.12.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="14.0.3" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="14.0.3" />
 
   </ItemGroup>
 
