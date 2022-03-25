@@ -1,4 +1,10 @@
-﻿namespace Reductech.Utilities.SCLEditor;
+﻿using Reductech.Sequence.Connectors.FileSystem.Steps;
+using Reductech.Sequence.Core;
+using Reductech.Sequence.Core.Internal;
+using Reductech.Sequence.Core.Steps;
+using Reductech.Sequence.Core.Util;
+
+namespace Reductech.Utilities.SCLEditor;
 
 /// <summary>
 /// A component used in an example
@@ -123,7 +129,7 @@ public abstract partial record ExampleComponent(string Name)
             var step = new SetVariable<StringStream>()
             {
                 Variable = VariableName,
-                Value    = new FileRead() { Path = new StringConstant(Name) }
+                Value    = new FileRead() { Path = new SCLConstant<StringStream>(Name) }
             };
 
             return step;

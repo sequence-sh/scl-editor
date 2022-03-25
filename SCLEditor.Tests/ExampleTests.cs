@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
-using Reductech.EDR.Connectors.FileSystem;
-using Reductech.EDR.Core;
-using Reductech.EDR.Core.Abstractions;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Steps;
-using Reductech.EDR.Core.TestHarness;
+using Reductech.Sequence.Connectors.FileSystem;
+using Reductech.Sequence.Core;
+using Reductech.Sequence.Core.Abstractions;
+using Reductech.Sequence.Core.Internal;
+using Reductech.Sequence.Core.Steps;
+using Reductech.Sequence.Core.TestHarness;
 using Reductech.Utilities.SCLEditor;
 using Xunit;
 
@@ -111,11 +111,11 @@ public partial class ExampleTests
     [Fact(Skip = "skip")]
     public void TestDocumentation()
     {
-        var logSummary = new Log<int>().StepFactory.Summary;
+        var logSummary = new Log().StepFactory.Summary;
 
         logSummary.Should().NotBeNullOrWhiteSpace();
 
-        var printSummary = new Print<int>().StepFactory.Summary;
+        var printSummary = new Print().StepFactory.Summary;
 
         printSummary.Should().NotBeNullOrWhiteSpace();
     }

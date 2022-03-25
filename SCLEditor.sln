@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCLEditor.Blazor", "SCLEdit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCLEditor.Tests", "SCLEditor.Tests\SCLEditor.Tests.csproj", "{336D7284-40BA-434E-BE4F-EF964FB00C8E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCLEditor.BlazorServer", "SCLEditor.BlazorServer\SCLEditor.BlazorServer.csproj", "{2235D00E-240E-43A1-8EAA-1858ED17551D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCLEditor.Util", "SCLEditor.Util\SCLEditor.Util.csproj", "{9AAD9A9B-3013-4E34-915E-785C4A73A1EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{336D7284-40BA-434E-BE4F-EF964FB00C8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{336D7284-40BA-434E-BE4F-EF964FB00C8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{336D7284-40BA-434E-BE4F-EF964FB00C8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2235D00E-240E-43A1-8EAA-1858ED17551D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2235D00E-240E-43A1-8EAA-1858ED17551D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2235D00E-240E-43A1-8EAA-1858ED17551D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2235D00E-240E-43A1-8EAA-1858ED17551D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AAD9A9B-3013-4E34-915E-785C4A73A1EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AAD9A9B-3013-4E34-915E-785C4A73A1EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AAD9A9B-3013-4E34-915E-785C4A73A1EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AAD9A9B-3013-4E34-915E-785C4A73A1EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

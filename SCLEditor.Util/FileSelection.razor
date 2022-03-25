@@ -1,0 +1,82 @@
+﻿@using JetBrains.Annotations
+@using System.IO
+@using System.IO.Abstractions
+@using System.IO.Abstractions.TestingHelpers
+@using System.Threading
+@using BlazorDownloadFile
+@using Blazored.LocalStorage
+@using Microsoft.AspNetCore.Components
+
+
+<InputFile id='fileInput112' OnChange="OnInputFileChanged" hidden multiple/>
+
+<MudButton HtmlTag="label"
+           Variant="Variant.Filled"
+           Color="Color.Primary"
+           StartIcon="@Icons.Filled.CloudUpload"
+           for="fileInput112">
+  Upload File
+</MudButton>
+
+<MudTable Items="FileSystem.GetFileData()" Hover="true" Breakpoint="Breakpoint.Sm" @bind-SelectedItem='FileSystem.SelectedFile'>
+  <HeaderContent>
+    <MudTh>Path</MudTh>
+    <MudTh>Text</MudTh>
+    <MudTh>LastModified</MudTh>
+    <MudTh>Size</MudTh>
+    <MudTh>Open</MudTh>
+    <MudTh>Download</MudTh>
+    <MudTh>Remove</MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd DataLabel="Path">@context.Path</MudTd>
+    <MudTd DataLabel="Text">@context.TruncatedText</MudTd>
+    <MudTd DataLabel="LastModified">@context.Data.LastWriteTime</MudTd>
+    <MudTd DataLabel="Size">@context.SizeString</MudTd>
+    <MudTd DataLabel="Open">
+      <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' OnClick='() => OpenFileAction(context)'/>
+    </MudTd>
+    <MudTd DataLabel="Download">
+      <MudIconButton Icon='@Icons.Material.Filled.FileDownload' OnClick='() => FileSystem.Download(context.Path)'/>
+    </MudTd>
+    <MudTd DataLabel="Remove">
+      <MudIconButton Icon='@Icons.Material.Filled.Delete' OnClick='() => FileSystem.DeleteFile(context.Path)'/>
+    </MudTd>
+  </RowTemplate>
+</MudTable>
+
+<MudGrid Justify="Justify.Center" Spacing="4">
+  <MudItem>
+    <MudButton
+      OnClick="@FileSystem.ClearFiles"
+      Disabled="@(!FileSystem.FilesExist())"
+      Color="Color.Error"
+      Variant="Variant.Filled">
+      Clear All Data
+    </MudButton>
+  </MudItem>
+</MudGrid>
+
+@code {
+
+  [Parameter]
+  public Func<FileData, Task> OpenFileAction { get; set; }  = null!;
+  
+  [Parameter]
+  public CompoundFileSystem FileSystem { get; set; }  = null!;
+
+  async Task OnInputFileChanged(InputFileChangeEventArgs e)
+  {
+    var files = e.GetMultipleFiles();
+
+    await FileSystem.ImportFiles(files);
+  }
+
+  /// <inheritdoc />
+  protected override async Task OnParametersSetAsync()
+  {
+    await base.OnParametersSetAsync();
+    await FileSystem.Initialize();
+  }
+
+}

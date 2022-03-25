@@ -1,0 +1,123 @@
+﻿<MudThemeProvider Theme="CurrentTheme"/>
+
+<MudGrid>
+
+  <MudItem xs='12' lg='6'>
+
+    <MudPaper Class="pa-4 ma-2" Square="true">
+
+      @if (_title is not null)
+      {
+        <MudText Typo='Typo.h5'>
+          @_title
+        </MudText>
+      }
+
+      <MonacoEditor
+        Id="playground-monaco"
+        @ref="_sclEditor"
+        CssClass='nested-monaco-editor'
+        OnDidChangeModelContent='OnDidChangeModelContent'
+        ConstructionOptions="SCLEditorConstructionOptions"
+      />
+      @if (RunCancellation != null)
+      {
+        <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="CancelRun"/>
+      }
+      else
+      {
+        <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
+      }
+
+      <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveSCLFile' Disabled='!_hotChanges'/>
+
+    </MudPaper>
+  </MudItem>
+
+  <MudItem xs='12' lg='6'>
+
+    <MudExpansionPanels MultiExpansion='true'>
+
+      <MudExpansionPanel @bind-IsExpanded='OutputExpanded'>
+        <MudTextField FullWidth='true'
+                      Value="@_consoleStringBuilder.ToString()"
+                      Label="Output"
+                      ReadOnly="true"
+                      Variant="Variant.Outlined"
+                      Lines="10"
+                      AdornmentIcon="@Icons.Material.Filled.Clear"
+                      Adornment="Adornment.End"
+                      Style='width: 100%'
+                      OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
+      </MudExpansionPanel>
+
+      <MudExpansionPanel @bind-IsExpanded='@LogExpanded'>
+        <MudTextField FullWidth='true'
+                      Value="@LogText()"
+                      Label="Log"
+                      ReadOnly="true"
+                      Variant="Variant.Outlined"
+                      Lines="10"
+                      AdornmentIcon="@Icons.Material.Filled.Clear"
+                      Adornment="Adornment.End"
+                      Style='width: 100%'
+                      OnAdornmentClick="@ClearLogs"/>
+      </MudExpansionPanel>
+
+      <MudExpansionPanel Icon='@Icons.Material.Filled.Settings'>
+        <MudCheckBox @bind-Checked="_configuration.CompletionEnabled" Label='@nameof(_configuration.CompletionEnabled)'/>
+        <MudCheckBox @bind-Checked="_configuration.DiagnosticsEnabled" Label='@nameof(_configuration.DiagnosticsEnabled)'/>
+        <MudCheckBox @bind-Checked="_configuration.SignatureHelpEnabled" Label='@nameof(_configuration.SignatureHelpEnabled)'/>
+        <MudCheckBox @bind-Checked="_configuration.QuickInfoEnabled" Label='@nameof(_configuration.QuickInfoEnabled)'/>
+
+      </MudExpansionPanel>
+
+
+    </MudExpansionPanels>
+  </MudItem>
+
+  @if (_openedFile is not null)
+  {
+    var constructionOptions = GetFileEditorConstructionOptions(_openedFile);
+
+    <MudItem xs='12' lg='6'>
+
+      <MudPaper Class="pa-4 ma-2" Square="true" Style=''>
+
+        <MudText Typo='Typo.h5'>
+          @_openedFile.Path
+        </MudText>
+
+        <MonacoEditor
+          Id="file-monaco"
+          CssClass='nested-monaco-editor'
+          @ref="_fileEditor"
+          ConstructionOptions="_ => constructionOptions"/>
+
+        <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveOpenFile'/>
+        <MudIconButton Icon='@Icons.Filled.Close' OnClick='CloseOpenFile'/>
+
+      </MudPaper>
+
+
+    </MudItem>
+  }
+
+  <MudItem xs='12'>
+    <FileSelection @ref="_fileSelection" FileSystem='FileSystem' OpenFileAction='OpenFileAction'/>
+  </MudItem>
+
+</MudGrid>
+
+<MudMessageBox @ref="MudMessageBox" Title="Choose File Name" CancelText="Cancel">
+  <MessageContent>
+    <MudTextField @bind-Value='_title'/>
+  </MessageContent>
+  <YesButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save">Save</MudButton>
+  </YesButton>
+</MudMessageBox>
+
+<style>
+  .nested-monaco-editor { text-align: initial; height: 500px; }
+</style>

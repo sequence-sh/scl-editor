@@ -1,4 +1,9 @@
-﻿namespace Reductech.Utilities.SCLEditor;
+﻿using Reductech.Sequence.Core;
+using Reductech.Sequence.Core.Internal;
+using Reductech.Sequence.Core.Steps;
+using Reductech.Sequence.Core.Util;
+
+namespace Reductech.Utilities.SCLEditor;
 
 /// <summary>
 /// A dynamic scl example
