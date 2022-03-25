@@ -1,4 +1,7 @@
-﻿namespace Reductech.Utilities.SCLEditor;
+﻿using Reductech.Sequence.Core;
+using Reductech.Sequence.Core.Internal;
+
+namespace Reductech.Utilities.SCLEditor;
 
 /// <summary>
 /// The Output of an example

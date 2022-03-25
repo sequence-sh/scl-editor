@@ -1,4 +1,7 @@
 ﻿using System.Text.Json;
+using Reductech.Sequence.Core;
+using Reductech.Sequence.Core.Internal;
+using Reductech.Sequence.Core.Steps;
 
 namespace Reductech.Utilities.SCLEditor;
 

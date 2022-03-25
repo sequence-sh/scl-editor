@@ -1,4 +1,9 @@
-﻿namespace Reductech.Utilities.SCLEditor;
+﻿using Reductech.Sequence.Core;
+using Reductech.Sequence.Core.Internal;
+using Reductech.Sequence.Core.Steps;
+using Reductech.Sequence.Core.Util;
+
+namespace Reductech.Utilities.SCLEditor;
 
 /// <summary>
 /// The input to an example
@@ -69,9 +74,9 @@ public abstract partial record ExampleInput(string Name, string Group)
         {
             var value = exampleChoiceData.IntValues[Name];
 
-            return new SetVariable<int>()
+            return new SetVariable<SCLInt>()
             {
-                Variable = VariableName, Value = new IntConstant(value)
+                Variable = VariableName, Value = new SCLConstant<SCLInt>(new SCLInt(value))
             };
         }
     }
@@ -97,7 +102,7 @@ public abstract partial record ExampleInput(string Name, string Group)
 
             return new SetVariable<StringStream>()
             {
-                Variable = VariableName, Value = new StringConstant(value)
+                Variable = VariableName, Value = new SCLConstant<StringStream>(value)
             };
         }
     }
@@ -133,7 +138,7 @@ public abstract partial record ExampleInput(string Name, string Group)
 
             return new SetVariable<StringStream>()
             {
-                Variable = VariableName, Value = new StringConstant(value.Value)
+                Variable = VariableName, Value = new SCLConstant<StringStream>(value.Value)
             };
         }
     }

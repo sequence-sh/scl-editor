@@ -1,4 +1,8 @@
-﻿using Reductech.EDR.Core.Enums;
+﻿using Reductech.Sequence.Core;
+using Reductech.Sequence.Core.Enums;
+using Reductech.Sequence.Core.Internal;
+using Reductech.Sequence.Core.Steps;
+using Reductech.Sequence.Core.Util;
 
 namespace Reductech.Utilities.SCLEditor;
 
@@ -60,13 +64,13 @@ public static class ExampleList
                                 {
                                     Variable = new VariableName("Schema Name")
                                 },
-                            AllowExtraProperties = new BoolConstant(false),
+                            AllowExtraProperties = new SCLConstant<SCLBool>(SCLBool.False),
                             Entities = new GetVariable<Array<Entity>>
                             {
                                 Variable = new VariableName("entities")
                             }
                         },
-                        FormatOutput = new BoolConstant(true)
+                        FormatOutput = new SCLConstant<SCLBool>(SCLBool.True)
                     }
                 )
             );
@@ -98,8 +102,9 @@ public static class ExampleList
                                             Variable = new VariableName("schemajson")
                                         }
                                     },
-                                    ErrorBehavior =
-                                        new EnumConstant<ErrorBehavior>(ErrorBehavior.Fail)
+                                    ErrorBehavior = new SCLConstant<SCLEnum<ErrorBehavior>>(
+                                        new SCLEnum<ErrorBehavior>(ErrorBehavior.Fail)
+                                    )
                                 },
                                 Action = new LambdaFunction<Entity, Unit>(
                                     null,
@@ -112,7 +117,7 @@ public static class ExampleList
                 new ExampleOutput(
                     null,
                     "on",
-                    new StringConstant("Validation Successful")
+                    new SCLConstant<StringStream>("Validation Successful")
                 )
             );
         }

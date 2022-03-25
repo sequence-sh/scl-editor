@@ -1,0 +1,26 @@
+﻿@using Reductech.Utilities.SCLEditor
+<MudNavMenu>
+
+  @foreach (var (name, path) in Stuff)
+  {
+    <MudNavLink Href="@path" ForceLoad='true'>@name</MudNavLink>
+  }
+
+</MudNavMenu>
+
+@code {
+
+  public static IEnumerable<(string name, string path)> Stuff
+  {
+    get
+    {
+      yield return ("SCL Playground", "playground");
+
+      foreach (var example in ExampleList.AllExamples)
+      {
+        yield return (example.Name, $"example/{example.Url}");
+      }
+    }
+  }
+
+}
