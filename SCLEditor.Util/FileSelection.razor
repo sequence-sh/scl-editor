@@ -9,38 +9,40 @@
 
 <InputFile id='fileInput112' OnChange="OnInputFileChanged" hidden multiple/>
   
-<MudGrid Class="pa-2" Justify="Justify.Center">
-  
-  <MudItem xl='12'>
-    <MudTable Items="FileSystem.GetFileData()" FixedHeader="true" Hover="true" Breakpoint="Breakpoint.Sm" @bind-SelectedItem='FileSystem.SelectedFile'>
-      <HeaderContent>
-        <MudTh>Path</MudTh>
-        <MudTh>Text</MudTh>
-        <MudTh>LastModified</MudTh>
-        <MudTh>Size</MudTh>
-        <MudTh Style='width: 120px;'></MudTh>
-      </HeaderContent>
-      <RowTemplate>
-        <MudTd DataLabel="Path">@context.Path</MudTd>
-        <MudTd DataLabel="Text">@context.TruncatedText</MudTd>
-        <MudTd DataLabel="LastModified">@context.Data.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss")</MudTd>
-        <MudTd DataLabel="Size">@context.SizeString</MudTd>
-        <MudTd DataLabel="Config" HideSmall='true'>
-          <MudTooltip Text="Open File">
-            <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' Size='Size.Small' OnClick='() => OpenFileAction(context)'/>
-          </MudTooltip>
-          <MudTooltip Text="Download File">
-            <MudIconButton Icon='@Icons.Material.Filled.FileDownload' Size='Size.Small' OnClick='() => FileSystem.Download(context.Path)'/>
-          </MudTooltip>
-          <MudTooltip Text="Delete File">
-            <MudIconButton Icon='@Icons.Material.Filled.Delete' Size='Size.Small' OnClick='() => FileSystem.DeleteFile(context.Path)'/>
-          </MudTooltip>
-        </MudTd>
-      </RowTemplate>
-    </MudTable>
-  </MudItem>
-  
-  <MudItem xl='12'>
+<MudContainer MaxWidth='MaxWidth.Large'>
+
+  <MudGrid Class="pa-2" Justify="Justify.Center">
+
+    <MudItem xl='12'>
+      <MudTable Items="FileSystem.GetFileData()" FixedHeader="true" Hover="true" Breakpoint="Breakpoint.Sm" @bind-SelectedItem='FileSystem.SelectedFile'>
+        <HeaderContent>
+          <MudTh>Path</MudTh>
+          <MudTh>Text</MudTh>
+          <MudTh>LastModified</MudTh>
+          <MudTh>Size</MudTh>
+          <MudTh Style='width: 120px;'></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+          <MudTd DataLabel="Path">@context.Path</MudTd>
+          <MudTd DataLabel="Text">@context.TruncatedText</MudTd>
+          <MudTd DataLabel="LastModified">@context.Data.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss")</MudTd>
+          <MudTd DataLabel="Size">@context.SizeString</MudTd>
+          <MudTd DataLabel="Config" HideSmall='true'>
+            <MudTooltip Text="Open File">
+              <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' Size='Size.Small' OnClick='() => OpenFileAction(context)'/>
+            </MudTooltip>
+            <MudTooltip Text="Download File">
+              <MudIconButton Icon='@Icons.Material.Filled.FileDownload' Size='Size.Small' OnClick='() => FileSystem.Download(context.Path)'/>
+            </MudTooltip>
+            <MudTooltip Text="Delete File">
+              <MudIconButton Icon='@Icons.Material.Filled.Delete' Size='Size.Small' OnClick='() => FileSystem.DeleteFile(context.Path)'/>
+            </MudTooltip>
+          </MudTd>
+        </RowTemplate>
+      </MudTable>
+    </MudItem>
+
+    <MudItem>
       <MudButton HtmlTag="label"
                  Variant="Variant.Filled"
                  Color="Color.Primary"
@@ -55,11 +57,13 @@
                  Color="Color.Error"
                  Class='ml-2'
                  StartIcon="@Icons.Filled.DeleteSweep">
-        Clear All Data
+        Clear Data
       </MudButton>
-  </MudItem>
+    </MudItem>
 
-</MudGrid>
+  </MudGrid>
+
+</MudContainer>
 
 @code {
 
