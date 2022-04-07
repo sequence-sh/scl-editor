@@ -1,10 +1,8 @@
-﻿<MudThemeProvider Theme="CurrentTheme"/>
-
-<MudGrid>
+﻿<MudGrid>
 
   <MudItem xs='12' lg='6'>
 
-    <MudPaper Class="pa-2 ma-2">
+    <MudPaper Class="pt-2 ma-2">
 
       @if (_title is not null)
       {
@@ -21,16 +19,21 @@
         ConstructionOptions="SCLEditorConstructionOptions"
       />
 
-      @if (RunCancellation != null)
-      {
-        <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="CancelRun"/>
-      }
-      else
-      {
-        <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
-      }
+      <MudDivider DividerType='DividerType.FullWidth' Class='mt-2' />
 
-      <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveSCLFile' Disabled='!_hotChanges'/>
+      <MudToolBar Dense='true' DisableGutters='true'>
+        @if (RunCancellation != null)
+        {
+          <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="CancelRun"/>
+        }
+        else
+        {
+          <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
+        }
+        <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveSCLFile' Disabled='!_hotChanges'/>
+        <MudSpacer/>
+        <SettingsMenu Configuration='_configuration' />
+      </MudToolBar>
 
     </MudPaper>
 
@@ -38,27 +41,30 @@
 
   <MudItem xs='12' lg='6'>
     
-    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6 mb-6">
+    <MudTabs Elevation="2"
+             Rounded="true"
+             ApplyEffectsToContainer="true"
+             Class='ma-2'>
       <MudTabPanel Text="Output">
         <MudTextField FullWidth='true'
                       Value="@_consoleStringBuilder.ToString()"
                       ReadOnly="true"
-                      Variant="Variant.Outlined"
-                      Lines="10"
+                      Lines="16"
                       AdornmentIcon="@Icons.Material.Filled.Clear"
                       Adornment="Adornment.End"
-                      Style='width: 100%'
+                      Class='pa-4'
+                      DisableUnderLine='true'
                       OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
       </MudTabPanel>
       <MudTabPanel Text="Log">
         <MudTextField FullWidth='true'
                       Value="@LogText()"
                       ReadOnly="true"
-                      Variant="Variant.Outlined"
-                      Lines="10"
+                      Lines="16"
                       AdornmentIcon="@Icons.Material.Filled.Clear"
                       Adornment="Adornment.End"
-                      Style='width: 100%'
+                      Class='pa-4'
+                      DisableUnderLine='true'
                       OnAdornmentClick="@ClearLogs"/>
       </MudTabPanel>
     </MudTabs>
@@ -108,5 +114,8 @@
 </MudMessageBox>
 
 <style>
-  .nested-monaco-editor { text-align: initial; height: 500px; }
+  .nested-monaco-editor {
+    text-align: initial;
+    height: 500px;
+  }
 </style>

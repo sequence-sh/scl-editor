@@ -1,0 +1,28 @@
+﻿<div>
+  <MudToggleIconButton @bind-Toggled="@_isSettingsOpen"
+                       Icon="@Icons.Filled.Settings"
+                       Color="@Color.Default"
+                       ToggledIcon="@Icons.Filled.Close"
+                       ToggledColor="@Color.Default" />
+
+  <MudPopover Open="@_isSettingsOpen"
+              Fixed="true"
+              Class="pa-2"
+              AnchorOrigin='Origin.TopCenter'
+              TransformOrigin='Origin.BottomRight'>
+    <div class="d-flex flex-column">
+      <MudSwitch @bind-Checked="@Configuration.CompletionEnabled" Label="@nameof(Configuration.CompletionEnabled)" Color='Color.Primary'/>
+      <MudSwitch @bind-Checked="@Configuration.DiagnosticsEnabled" Label="@nameof(Configuration.DiagnosticsEnabled)" Color='Color.Primary'/>
+      <MudSwitch @bind-Checked="@Configuration.SignatureHelpEnabled" Label="@nameof(Configuration.SignatureHelpEnabled)" Color='Color.Primary'/>
+      <MudSwitch @bind-Checked="@Configuration.QuickInfoEnabled" Label="@nameof(Configuration.QuickInfoEnabled)" Color='Color.Primary'/>
+      <MudSwitch @bind-Checked="@Configuration.MinimapEnabled" Label="@nameof(Configuration.MinimapEnabled)" Color='Color.Primary'/>
+    </div>
+  </MudPopover>
+</div>
+
+@code {
+  [Parameter]
+  public EditorConfiguration Configuration { get; set; }
+
+  private bool _isSettingsOpen = false;
+}
