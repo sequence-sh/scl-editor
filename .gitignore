@@ -377,3 +377,6 @@ nupkg/
 ####
 **/StrykerOutput/
 version.env
+scleditor-react/public/_framework/
+scleditor-react/public/_content/
+scleditor-react/public/DefineSCLLanguage.js
