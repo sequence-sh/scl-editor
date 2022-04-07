@@ -367,7 +367,8 @@ public sealed partial class Playground : IDisposable
             AutomaticLayout = true,
             Language        = "scl",
             Value = @"- print 123
-- log 456"
+- log 456",
+            Minimap = new EditorMinimapOptions { Enabled = false }
         };
     }
 
