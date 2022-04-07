@@ -64,7 +64,7 @@ public class EditorConfiguration : INotifyPropertyChanged
         }
     }
 
-    private bool _diagnosticsEnabled = true;
+    private bool _diagnosticsEnabled = false;
 
     /// <summary>
     /// Whether diagnostics is enabled
@@ -78,6 +78,24 @@ public class EditorConfiguration : INotifyPropertyChanged
                 return;
 
             _diagnosticsEnabled = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private bool _minimapEnabled = false;
+
+    /// <summary>
+    /// Whether the minimap view is enabled
+    /// </summary>
+    public bool MinimapEnabled
+    {
+        get => _minimapEnabled;
+        set
+        {
+            if (value == _minimapEnabled)
+                return;
+
+            _minimapEnabled = value;
             OnPropertyChanged();
         }
     }
