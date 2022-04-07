@@ -4,7 +4,7 @@
 
   <MudItem xs='12' lg='6'>
 
-    <MudPaper Class="pa-4 ma-2" Square="true">
+    <MudPaper Class="pa-2 ma-2">
 
       @if (_title is not null)
       {
@@ -20,6 +20,7 @@
         OnDidChangeModelContent='OnDidChangeModelContent'
         ConstructionOptions="SCLEditorConstructionOptions"
       />
+
       @if (RunCancellation != null)
       {
         <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="CancelRun"/>
@@ -32,16 +33,15 @@
       <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveSCLFile' Disabled='!_hotChanges'/>
 
     </MudPaper>
+
   </MudItem>
 
   <MudItem xs='12' lg='6'>
-
-    <MudExpansionPanels MultiExpansion='true'>
-
-      <MudExpansionPanel @bind-IsExpanded='OutputExpanded'>
+    
+    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6 mb-6">
+      <MudTabPanel Text="Output">
         <MudTextField FullWidth='true'
                       Value="@_consoleStringBuilder.ToString()"
-                      Label="Output"
                       ReadOnly="true"
                       Variant="Variant.Outlined"
                       Lines="10"
@@ -49,12 +49,10 @@
                       Adornment="Adornment.End"
                       Style='width: 100%'
                       OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
-      </MudExpansionPanel>
-
-      <MudExpansionPanel @bind-IsExpanded='@LogExpanded'>
+      </MudTabPanel>
+      <MudTabPanel Text="Log">
         <MudTextField FullWidth='true'
                       Value="@LogText()"
-                      Label="Log"
                       ReadOnly="true"
                       Variant="Variant.Outlined"
                       Lines="10"
@@ -62,18 +60,9 @@
                       Adornment="Adornment.End"
                       Style='width: 100%'
                       OnAdornmentClick="@ClearLogs"/>
-      </MudExpansionPanel>
-
-      <MudExpansionPanel Icon='@Icons.Material.Filled.Settings'>
-        <MudCheckBox @bind-Checked="_configuration.CompletionEnabled" Label='@nameof(_configuration.CompletionEnabled)'/>
-        <MudCheckBox @bind-Checked="_configuration.DiagnosticsEnabled" Label='@nameof(_configuration.DiagnosticsEnabled)'/>
-        <MudCheckBox @bind-Checked="_configuration.SignatureHelpEnabled" Label='@nameof(_configuration.SignatureHelpEnabled)'/>
-        <MudCheckBox @bind-Checked="_configuration.QuickInfoEnabled" Label='@nameof(_configuration.QuickInfoEnabled)'/>
-
-      </MudExpansionPanel>
-
-
-    </MudExpansionPanels>
+      </MudTabPanel>
+    </MudTabs>
+    
   </MudItem>
 
   @if (_openedFile is not null)
