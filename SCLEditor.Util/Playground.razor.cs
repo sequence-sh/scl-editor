@@ -258,19 +258,88 @@ public sealed partial class Playground : IDisposable
         #pragma warning restore CS4014
     }
 
+    private int _activeTabIndex;
+
+    private const int OutputTabIndex = 0;
+    private const int LogTabIndex = 1;
+
+    public int ActiveOutputTabPanel
+    {
+        get => _activeTabIndex;
+        set
+        {
+            if (value == _activeTabIndex)
+                return;
+
+            switch (value)
+            {
+                case OutputTabIndex:
+                    SetOutputBadge(false);
+                    break;
+                case LogTabIndex:
+                    SetLogBadge(false);
+                    break;
+            }
+
+            _activeTabIndex = value;
+        }
+    }
+
+    private string? _outputBadge = null;
+    private bool _outputDot = false;
+
+    private void SetOutputBadge(bool display)
+    {
+        if (display)
+        {
+            if (_activeTabIndex != OutputTabIndex)
+            {
+                _outputBadge = string.Empty;
+                _outputDot   = true;
+            }
+        }
+        else
+        {
+            _outputBadge = null;
+            _outputDot   = false;
+        }
+    }
+
+    private string? _logBadge = null;
+    private bool _logDot = false;
+
+    private void SetLogBadge(bool display)
+    {
+        if (display)
+        {
+            if (_activeTabIndex != LogTabIndex)
+            {
+                _logBadge = string.Empty;
+                _logDot   = true;
+            }
+        }
+        else
+        {
+            _logBadge = null;
+            _logDot   = false;
+        }
+    }
+
+    private void ClearOutput()
+    {
+        _consoleStringBuilder.Clear();
+        SetOutputBadge(false);
+    }
+
     private void ClearLogs()
     {
         _testLoggerFactory.Sink.Clear();
+        SetLogBadge(false);
     }
 
     private string LogText()
     {
-        var text =
-            string.Join(
-                "\r\n",
-                _testLoggerFactory.Sink.LogEntries.Select(x => x.Message)
-            );
-
+        var text = string.Join("\r\n", _testLoggerFactory.Sink.LogEntries.Select(x => x.Message));
         return text;
     }
 
@@ -313,10 +382,15 @@ public sealed partial class Playground : IDisposable
         var cts = new CancellationTokenSource();
         RunCancellation = cts;
 
-        var logger = _testLoggerFactory.CreateLogger("SCL");
+        var loggerSink = _testLoggerFactory.CreateLogger("SCL");
+        var logger     = new LoggyLog(loggerSink);
+        logger.PropertyChanged += (_, _) => SetLogBadge(true);
 
         var stepResult = SCLParsing.TryParseStep(sclText)
             .Bind(x => x.TryFreeze(SCLRunner.RootCallerMetadata, _stepFactoryStore));
+
+        _consoleStringBuilder.AppendLine("Sequence Running\n");
+        SetOutputBadge(true);
 
         if (stepResult.IsFailure)
         {
@@ -346,18 +420,16 @@ public sealed partial class Playground : IDisposable
 
             if (runResult.IsFailure)
                 _consoleStringBuilder.AppendLine(runResult.Error.AsString);
-
             else if (runResult.Value is Unit)
-                _consoleStringBuilder.AppendLine("Sequence Completed Successfully");
+                _consoleStringBuilder.AppendLine("\nSequence Completed Successfully");
             else
-            {
                 _consoleStringBuilder.AppendLine(runResult.Value.ToString());
-            }
         }
 
         RunCancellation = null;
 
         _consoleStringBuilder.AppendLine();
+        SetOutputBadge(true);
     }
 
     private static StandaloneEditorConstructionOptions SCLEditorConstructionOptions(MonacoEditor _)

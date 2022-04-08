@@ -18,7 +18,7 @@
           @ref="_sclEditor"
           CssClass='nested-monaco-editor'
           OnDidChangeModelContent='OnDidChangeModelContent'
-          ConstructionOptions="SCLEditorConstructionOptions"/>
+          ConstructionOptions="SCLEditorConstructionOptions" />
 
       </div>
 
@@ -44,34 +44,42 @@
 
   <MudItem xs='12' lg='6'>
     
-    <MudTabs Elevation="2"
-             Rounded="true"
-             ApplyEffectsToContainer="true"
+    <MudTabs Elevation='2'
+             Rounded='true'
+             ApplyEffectsToContainer='true'
              Class='ma-2'
-             Styles='height: 40%;'>
+             Styles='height: 40%;'
+             KeepPanelsAlive='true'
+             @bind-ActivePanelIndex='@ActiveOutputTabPanel'>
 
-      <MudTabPanel Text="Output">
+      <MudTabPanel Text='Output'
+                   BadgeData='@_outputBadge'
+                   BadgeDot='@_outputDot'
+                   BadgeColor='Color.Secondary'>
         <MudTextField FullWidth='true'
-                      Value="@_consoleStringBuilder.ToString()"
-                      ReadOnly="true"
-                      Lines="12"
-                      AdornmentIcon="@Icons.Material.Filled.Clear"
-                      Adornment="Adornment.End"
+                      Value='@_consoleStringBuilder.ToString()'
+                      ReadOnly='true'
+                      Lines='12'
+                      AdornmentIcon='@Icons.Filled.PlaylistRemove'
+                      Adornment='Adornment.End'
                       Class='pa-4'
                       DisableUnderLine='true'
-                      OnAdornmentClick="() => _consoleStringBuilder.Clear()"/>
+                      OnAdornmentClick='@ClearOutput' />
       </MudTabPanel>
 
-      <MudTabPanel Text="Log">
+      <MudTabPanel Text='Log'
+                   BadgeData='@_logBadge'
+                   BadgeDot='@_logDot'
+                   BadgeColor='Color.Secondary'>
         <MudTextField FullWidth='true'
-                      Value="@LogText()"
-                      ReadOnly="true"
-                      Lines="12"
-                      AdornmentIcon="@Icons.Material.Filled.Clear"
-                      Adornment="Adornment.End"
+                      Value='@LogText()'
+                      ReadOnly='true'
+                      Lines='12'
+                      AdornmentIcon='@Icons.Filled.PlaylistRemove'
+                      Adornment='Adornment.End'
                       Class='pa-4'
                       DisableUnderLine='true'
-                      OnAdornmentClick="@ClearLogs"/>
+                      OnAdornmentClick='@ClearLogs'/>
       </MudTabPanel>
 
     </MudTabs>
