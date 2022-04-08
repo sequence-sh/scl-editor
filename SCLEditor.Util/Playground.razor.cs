@@ -249,13 +249,23 @@ public sealed partial class Playground : IDisposable
         );
     }
 
-    private void Configuration_PropertyChanged(
-        object? sender,
-        PropertyChangedEventArgs e)
+    private void Configuration_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         #pragma warning disable CS4014
         SaveConfiguration();
         #pragma warning restore CS4014
+        if (e.PropertyName == nameof(EditorConfiguration.MinimapEnabled))
+        {
+            _sclEditor.UpdateOptions(
+                new GlobalEditorOptions
+                {
+                    Minimap = new EditorMinimapOptions
+                    {
+                        Enabled = _configuration.MinimapEnabled
+                    }
+                }
+            );
+        }
     }
 
     private int _activeTabIndex;

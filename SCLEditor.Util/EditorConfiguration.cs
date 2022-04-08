@@ -96,7 +96,7 @@ public class EditorConfiguration : INotifyPropertyChanged
                 return;
 
             _minimapEnabled = value;
-            OnPropertyChanged();
+            OnPropertyChanged((nameof(MinimapEnabled)));
         }
     }
 
