@@ -11,11 +11,11 @@
               AnchorOrigin='Origin.TopCenter'
               TransformOrigin='Origin.BottomRight'>
     <div class="d-flex flex-column">
-      <MudSwitch @bind-Checked="@Configuration.CompletionEnabled" Label="@nameof(Configuration.CompletionEnabled)" Color='Color.Primary'/>
-      <MudSwitch @bind-Checked="@Configuration.DiagnosticsEnabled" Label="@nameof(Configuration.DiagnosticsEnabled)" Color='Color.Primary'/>
-      <MudSwitch @bind-Checked="@Configuration.SignatureHelpEnabled" Label="@nameof(Configuration.SignatureHelpEnabled)" Color='Color.Primary'/>
-      <MudSwitch @bind-Checked="@Configuration.QuickInfoEnabled" Label="@nameof(Configuration.QuickInfoEnabled)" Color='Color.Primary'/>
-      <MudSwitch @bind-Checked="@Configuration.MinimapEnabled" Label="@nameof(Configuration.MinimapEnabled)" Color='Color.Primary'/>
+      <MudSwitch @bind-Checked="@Configuration.CompletionEnabled" Label="Code Completion" Color='Color.Primary'/>
+      <MudSwitch @bind-Checked="@Configuration.DiagnosticsEnabled" Label="Error Highlighting" Color='Color.Primary'/>
+      <MudSwitch @bind-Checked="@Configuration.SignatureHelpEnabled" Label="Parameter Help" Color='Color.Primary'/>
+      <MudSwitch @bind-Checked="@Configuration.QuickInfoEnabled" Label="Hover Tips" Color='Color.Primary'/>
+      <MudSwitch @bind-Checked="@Configuration.MinimapEnabled" Label="Minimap" Color='Color.Primary'/>
     </div>
   </MudPopover>
 </div>
