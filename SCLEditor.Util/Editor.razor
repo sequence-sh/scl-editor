@@ -1,0 +1,37 @@
+﻿<div>
+  <div class='px-2'>
+
+    @if (Title is not null)
+    {
+      <MudText Typo='Typo.h5' Class='pb-2 pl-3'>
+        @Title
+      </MudText>
+    }
+
+    <MonacoEditor
+      Id='@Id'
+      @ref='@Instance'
+      CssClass='nested-monaco-editor'
+      OnDidChangeModelContent='@OnDidChangeModelContent'
+      ConstructionOptions='SCLEditorConstructionOptions' />
+
+  </div>
+  
+  <MudDivider DividerType='DividerType.FullWidth' Class='mt-2' />
+
+  <MudToolBar Dense='true' DisableGutters='true'>
+    <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveFile' Disabled='!HotChanges'/>
+    @if (ToolBar is not null)
+    {
+      @ToolBar
+    }
+    @if (SettingsMenu is not null)
+    {
+      <MudSpacer/>
+      <SettingsMenu>
+        @SettingsMenu
+      </SettingsMenu>
+    }
+  </MudToolBar>
+
+</div>
