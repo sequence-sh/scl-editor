@@ -13,25 +13,47 @@
       @ref='@Instance'
       CssClass='nested-monaco-editor'
       OnDidChangeModelContent='@OnDidChangeModelContent'
-      ConstructionOptions='SCLEditorConstructionOptions' />
+      ConstructionOptions='@EditorOptions' />
 
   </div>
   
-  <MudDivider DividerType='DividerType.FullWidth' Class='mt-2' />
+  @if (ToolbarEnabled)
+  {
+    <MudDivider DividerType='DividerType.FullWidth' Class='mt-2' />
 
-  <MudToolBar Dense='true' DisableGutters='true'>
-    <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveFile' Disabled='!HotChanges'/>
-    @if (ToolBar is not null)
-    {
-      @ToolBar
-    }
-    @if (SettingsMenu is not null)
-    {
-      <MudSpacer/>
-      <SettingsMenu>
-        @SettingsMenu
-      </SettingsMenu>
-    }
-  </MudToolBar>
+    <MudToolBar Dense='true' DisableGutters='true'>
+      @if (FileSystem is not null)
+      {
+        <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveFile' Disabled='!HotChanges'/>
+      }
+      @if (Toolbar is not null)
+      {
+        @Toolbar
+      }
+      @if (SettingsMenu is not null)
+      {
+        <MudSpacer/>
+        <SettingsMenu>
+          @SettingsMenu
+        </SettingsMenu>
+      }
+    </MudToolBar>
+  }
 
 </div>
+
+<MudMessageBox @ref="@SaveDialog" Title="Choose File Name" CancelText="Cancel">
+  <MessageContent>
+    <MudTextField @bind-Value='@Title'/>
+  </MessageContent>
+  <YesButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save">Save</MudButton>
+  </YesButton>
+</MudMessageBox>
+
+<style>
+  .nested-monaco-editor {
+    text-align: initial;
+    height: 500px;
+  }
+</style>

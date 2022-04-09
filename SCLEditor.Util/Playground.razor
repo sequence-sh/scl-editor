@@ -4,39 +4,25 @@
 
     <MudPaper Class="pt-2 ma-2">
       
-      <div class='px-2'>
-
-        @if (_title is not null)
-        {
-          <MudText Typo='Typo.h5' Class='pb-2 pl-3'>
-            @_title
-          </MudText>
-        }
-
-        <MonacoEditor
-          Id="playground-monaco"
-          @ref="_sclEditor"
-          CssClass='nested-monaco-editor'
-          OnDidChangeModelContent='OnDidChangeModelContent'
-          ConstructionOptions="SCLEditorConstructionOptions" />
-
-      </div>
-
-      <MudDivider DividerType='DividerType.FullWidth' Class='mt-2' />
-
-      <MudToolBar Dense='true' DisableGutters='true'>
-        @if (RunCancellation != null)
-        {
-          <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="CancelRun"/>
-        }
-        else
-        {
-          <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
-        }
-        <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveSCLFile' Disabled='!_hotChanges'/>
-        <MudSpacer/>
-        <SettingsMenu Configuration='_configuration' />
-      </MudToolBar>
+      <Editor>
+@*        <Toolbar>
+          @if (RunCancellation != null)
+          {
+            <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="CancelRun"/>
+          }
+          else
+          {
+            <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
+          }
+        </Toolbar>
+        <SettingsMenu>
+          <MudSwitch @bind-Checked="@_configuration.CompletionEnabled" Label="Code Completion" Color='Color.Primary'/>
+          <MudSwitch @bind-Checked="@_configuration.DiagnosticsEnabled" Label="Error Highlighting" Color='Color.Primary'/>
+          <MudSwitch @bind-Checked="@_configuration.SignatureHelpEnabled" Label="Parameter Help" Color='Color.Primary'/>
+          <MudSwitch @bind-Checked="@_configuration.QuickInfoEnabled" Label="Hover Tips" Color='Color.Primary'/>
+          <MudSwitch @bind-Checked="@_configuration.MinimapEnabled" Label="Minimap" Color='Color.Primary'/>
+        </SettingsMenu>*@
+      </Editor>
 
     </MudPaper>
 
@@ -85,52 +71,8 @@
     
   </MudItem>
 
-  @if (_openedFile is not null)
-  {
-    var constructionOptions = GetFileEditorConstructionOptions(_openedFile);
-
-    <MudItem xs='12' lg='6'>
-
-      <MudPaper Class="pa-4 ma-2" Square="true" Style=''>
-
-        <MudText Typo='Typo.h5'>
-          @_openedFile.Path
-        </MudText>
-
-        <MonacoEditor
-          Id="file-monaco"
-          CssClass='nested-monaco-editor'
-          @ref="_fileEditor"
-          ConstructionOptions="_ => constructionOptions"/>
-
-        <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveOpenFile'/>
-        <MudIconButton Icon='@Icons.Filled.Close' OnClick='CloseOpenFile'/>
-
-      </MudPaper>
-
-
-    </MudItem>
-  }
-
   <MudItem xs='12'>
     <FileSelection @ref="_fileSelection" FileSystem='FileSystem' OpenFileAction='OpenFileAction'/>
   </MudItem>
 
 </MudGrid>
-
-<MudMessageBox @ref="MudMessageBox" Title="Choose File Name" CancelText="Cancel">
-  <MessageContent>
-    <MudTextField @bind-Value='_title'/>
-  </MessageContent>
-  <YesButton>
-    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save">Save</MudButton>
-  </YesButton>
-</MudMessageBox>
-
-<style>
-  .nested-monaco-editor {
-    text-align: initial;
-    min-height: 400px;
-    height: 40%;
-  }
-</style>

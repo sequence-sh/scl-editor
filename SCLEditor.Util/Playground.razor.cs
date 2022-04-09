@@ -113,70 +113,69 @@ public sealed partial class Playground : IDisposable
     }
 
     /// <inheritdoc />
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            var containsConfigKey =
-                await FileSystem.LocalStorage.ContainKeyAsync(EditorConfiguration.ConfigurationKey);
+    //protected override async Task OnAfterRenderAsync(bool firstRender)
+    //{
+    //    if (firstRender)
+    //    {
+    //        var containsConfigKey =
+    //            await FileSystem.LocalStorage.ContainKeyAsync(EditorConfiguration.ConfigurationKey);
 
-            if (containsConfigKey)
-                _configuration = await
-                    FileSystem.LocalStorage.GetItemAsync<EditorConfiguration>(
-                        EditorConfiguration.ConfigurationKey
-                    );
-            else
-                _configuration = new EditorConfiguration();
+    //        if (containsConfigKey)
+    //            _configuration = await
+    //                FileSystem.LocalStorage.GetItemAsync<EditorConfiguration>(
+    //                    EditorConfiguration.ConfigurationKey
+    //                );
+    //        else
+    //            _configuration = new EditorConfiguration();
 
-            _configuration.PropertyChanged += Configuration_PropertyChanged;
+    //        _configuration.PropertyChanged += Configuration_PropertyChanged;
 
-            _sclCodeHelper = new SCLCodeHelper(_stepFactoryStore, _configuration);
+    //        _sclCodeHelper = new SCLCodeHelper(_stepFactoryStore, _configuration);
 
-            var objRef = DotNetObjectReference.Create(_sclCodeHelper);
+    //        var objRef = DotNetObjectReference.Create(_sclCodeHelper);
 
-            await Runtime.InvokeVoidAsync(
-                "registerSCL",
-                objRef
-            ); //Function Defined in DefineSCLLanguage.js
+    //        await Runtime.InvokeVoidAsync(
+    //            "registerSCL",
+    //            objRef
+    //        ); //Function Defined in DefineSCLLanguage.js
 
-            var model = await _sclEditor.GetModel();
-            await MonacoEditorBase.SetModelLanguage(model, "scl");
+    //        var model = await _sclEditor.GetModel();
+    //        await MonacoEditorBase.SetModelLanguage(model, "scl");
 
-            await _sclEditor.AddAction(
-                "runSCL",
-                "Run SCL",
-                new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_R },
-                null,
-                null,
-                "SCL",
-                1.5,
-                // ReSharper disable once AsyncVoidLambda
-                async (_, _) =>
-                {
-                    await Run();
-                    StateHasChanged();
-                }
-            );
+    //        await _sclEditor.AddAction(
+    //            "runSCL",
+    //            "Run SCL",
+    //            new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_R },
+    //            null,
+    //            null,
+    //            "SCL",
+    //            1.5,
+    //            // ReSharper disable once AsyncVoidLambda
+    //            async (_, _) =>
+    //            {
+    //                await Run();
+    //                StateHasChanged();
+    //            }
+    //        );
 
-            await _sclEditor.AddAction(
-                "formatscl",
-                "Format SCL",
-                new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_F },
-                null,
-                null,
-                "SCL",
-                1.5,
-                // ReSharper disable once AsyncVoidLambda
-                async (_, _) =>
-                {
-                    await FormatSCL();
-                }
-            );
-        }
+    //        await _sclEditor.AddAction(
+    //            "formatscl",
+    //            "Format SCL",
+    //            new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_F },
+    //            null,
+    //            null,
+    //            "SCL",
+    //            1.5,
+    //            // ReSharper disable once AsyncVoidLambda
+    //            async (_, _) =>
+    //            {
+    //                await FormatSCL();
+    //            }
+    //        );
+    //    }
 
-        await base.OnAfterRenderAsync(firstRender);
-    }
-
+    //    await base.OnAfterRenderAsync(firstRender);
+    //}
     private readonly Subject<bool> _disposed = new();
 
     public void Dispose()
@@ -353,15 +352,15 @@ public sealed partial class Playground : IDisposable
         return text;
     }
 
-    private readonly Debouncer _diagnosticsDebouncer = new(TimeSpan.FromMilliseconds(300));
+    //    private readonly Debouncer _diagnosticsDebouncer = new(TimeSpan.FromMilliseconds(300));
 
-    private void OnDidChangeModelContent()
-    {
-        _hotChanges = true;
-        #pragma warning disable CS4014
-        _diagnosticsDebouncer.Dispatch(() => _sclCodeHelper.SetDiagnostics(_sclEditor, Runtime));
-        #pragma warning restore CS4014
-    }
+    //    private void OnDidChangeModelContent()
+    //    {
+    //        _hotChanges = true;
+    //        #pragma warning disable CS4014
+    //        _diagnosticsDebouncer.Dispatch(() => _sclCodeHelper.SetDiagnostics(_sclEditor, Runtime));
+    //        #pragma warning restore CS4014
+    //    }
 
     private void CancelRun()
     {
@@ -442,44 +441,44 @@ public sealed partial class Playground : IDisposable
         SetOutputBadge(true);
     }
 
-    private static StandaloneEditorConstructionOptions SCLEditorConstructionOptions(MonacoEditor _)
-    {
-        return new()
-        {
-            AutomaticLayout = true,
-            Language        = "scl",
-            Value = @"- print 123
-- log 456",
-            Minimap = new EditorMinimapOptions { Enabled = false }
-        };
-    }
+    //    private static StandaloneEditorConstructionOptions SCLEditorConstructionOptions(MonacoEditor _)
+    //    {
+    //        return new()
+    //        {
+    //            AutomaticLayout = true,
+    //            Language        = "scl",
+    //            Value = @"- print 123
+    //- log 456",
+    //            Minimap = new EditorMinimapOptions { Enabled = false }
+    //        };
+    //    }
 
-    private StandaloneEditorConstructionOptions GetFileEditorConstructionOptions(FileData file)
-    {
-        var extension =
-            GetLanguageFromFileExtension(FileSystem.FileSystem.Path.GetExtension(file.Path));
+    //    private StandaloneEditorConstructionOptions GetFileEditorConstructionOptions(FileData file)
+    //    {
+    //        var extension =
+    //            GetLanguageFromFileExtension(FileSystem.FileSystem.Path.GetExtension(file.Path));
 
-        return new()
-        {
-            AutomaticLayout = true,
-            Language        = extension,
-            Value           = file.Data.TextContents,
-            WordWrap        = "off",
-            TabSize         = 8,
-            UseTabStops     = true,
-        };
+    //        return new()
+    //        {
+    //            AutomaticLayout = true,
+    //            Language        = extension,
+    //            Value           = file.Data.TextContents,
+    //            WordWrap        = "off",
+    //            TabSize         = 8,
+    //            UseTabStops     = true,
+    //        };
 
-        static string GetLanguageFromFileExtension(string? extension)
-        {
-            return extension?.ToLowerInvariant() switch
+    //        static string GetLanguageFromFileExtension(string? extension)
+    //        {
+    //            return extension?.ToLowerInvariant() switch
 
-            {
-                "yml"  => "yaml",
-                "yaml" => "yaml",
-                "json" => "json",
-                "cs"   => "csharp",
-                _      => ""
-            };
-        }
-    }
+    //            {
+    //                "yml"  => "yaml",
+    //                "yaml" => "yaml",
+    //                "json" => "json",
+    //                "cs"   => "csharp",
+    //                _      => ""
+    //            };
+    //        }
+    //    }
 }

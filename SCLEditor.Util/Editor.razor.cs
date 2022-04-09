@@ -8,21 +8,25 @@ namespace Reductech.Utilities.SCLEditor.Util;
 /// </summary>
 public partial class Editor : IDisposable
 {
-    //[Parameter] public StandaloneEditorConstructionOptions Options { get; set; } = null!;
-
     [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString();
 
     [Parameter] public string? Title { get; set; }
 
     [Parameter] public string? DefaultExtension { get; set; }
 
-    [Parameter] public RenderFragment? ToolBar { get; set; }
+    [Parameter] public StandaloneEditorConstructionOptions? Options { get; set; }
+
+    [Parameter] public bool ToolbarEnabled { get; set; } = true;
+
+    /// <summary>
+    /// Additional items to render in the toolbar
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Toolbar { get; set; }
 
     [Parameter] public RenderFragment? SettingsMenu { get; set; }
 
     //[Parameter] public FileData? File { get; set; }
-
-    [Parameter] public EventCallback<ModelContentChangedEvent> OnDidChangeModelContent { get; set; }
 
     public MonacoEditor Instance { get; private set; } = null!;
 
@@ -32,12 +36,15 @@ public partial class Editor : IDisposable
     /// The File System
     /// </summary>
     [Inject]
-    public CompoundFileSystem FileSystem { get; set; } = null!;
+    public CompoundFileSystem? FileSystem { get; set; }
 
     private MudMessageBox SaveDialog { get; set; } = null!;
 
     private async Task SaveFile()
     {
+        if (FileSystem is null)
+            return;
+
         if (Title is null)
         {
             var change = await SaveDialog.Show(new DialogOptions());
@@ -83,19 +90,13 @@ public partial class Editor : IDisposable
 
     //    await base.OnAfterRenderAsync(firstRender);
     //}
+    protected virtual void OnDidChangeModelContent() => HotChanges = true;
+
     private readonly Subject<bool> _disposed = new();
 
+    /// <inheritdoc />
     public void Dispose() => _disposed.OnNext(true);
 
-    private static StandaloneEditorConstructionOptions SCLEditorConstructionOptions(MonacoEditor _)
-    {
-        return new()
-        {
-            AutomaticLayout = true,
-            Language        = "scl",
-            Value = @"- print 123
-- log 456",
-            Minimap = new EditorMinimapOptions { Enabled = false }
-        };
-    }
+    protected virtual StandaloneEditorConstructionOptions EditorOptions(MonacoEditor _) => Options
+     ?? new() { AutomaticLayout = true, Minimap = new EditorMinimapOptions { Enabled = false } };
 }
