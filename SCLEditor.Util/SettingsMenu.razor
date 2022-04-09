@@ -11,18 +11,15 @@
               AnchorOrigin='Origin.TopCenter'
               TransformOrigin='Origin.BottomRight'>
     <div class="d-flex flex-column">
-      <MudSwitch @bind-Checked="@Configuration.CompletionEnabled" Label="Code Completion" Color='Color.Primary'/>
-      <MudSwitch @bind-Checked="@Configuration.DiagnosticsEnabled" Label="Error Highlighting" Color='Color.Primary'/>
-      <MudSwitch @bind-Checked="@Configuration.SignatureHelpEnabled" Label="Parameter Help" Color='Color.Primary'/>
-      <MudSwitch @bind-Checked="@Configuration.QuickInfoEnabled" Label="Hover Tips" Color='Color.Primary'/>
-      <MudSwitch @bind-Checked="@Configuration.MinimapEnabled" Label="Minimap" Color='Color.Primary'/>
+      @ChildContent
     </div>
   </MudPopover>
 </div>
 
 @code {
+
   [Parameter]
-  public EditorConfiguration Configuration { get; set; }
+  public RenderFragment ChildContent { get; set; } = null!;
 
   private bool _isSettingsOpen = false;
 }
