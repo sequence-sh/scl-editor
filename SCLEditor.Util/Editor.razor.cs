@@ -1,4 +1,3 @@
-using System.Reactive.Subjects;
 using MudBlazor;
 
 namespace Reductech.Utilities.SCLEditor.Util;
@@ -14,7 +13,11 @@ public partial class Editor : IDisposable
 
     [Parameter] public string? DefaultExtension { get; set; }
 
-    [Parameter] public StandaloneEditorConstructionOptions? Options { get; set; }
+    [Parameter] public EditorConfiguration? Configuration { get; set; } = new();
+
+    [Parameter] public RenderFragment? ConfigurationMenu { get; set; }
+
+    [Parameter] public bool ConfigurationMenuEnabled { get; set; } = true;
 
     [Parameter] public bool ToolbarEnabled { get; set; } = true;
 
@@ -24,19 +27,17 @@ public partial class Editor : IDisposable
     [Parameter]
     public RenderFragment? Toolbar { get; set; }
 
-    [Parameter] public RenderFragment? SettingsMenu { get; set; }
-
     //[Parameter] public FileData? File { get; set; }
 
     public MonacoEditor Instance { get; private set; } = null!;
-
-    protected bool HotChanges = false;
 
     /// <summary>
     /// The File System
     /// </summary>
     [Inject]
     public CompoundFileSystem? FileSystem { get; set; }
+
+    protected bool HotChanges = false;
 
     private MudMessageBox SaveDialog { get; set; } = null!;
 
@@ -57,7 +58,7 @@ public partial class Editor : IDisposable
         }
 
         if (DefaultExtension is not null && !Title.EndsWith(
-                ".scl",
+                DefaultExtension,
                 StringComparison.InvariantCultureIgnoreCase
             ))
         {
@@ -69,34 +70,69 @@ public partial class Editor : IDisposable
         await FileSystem.SaveFile(Instance, Title);
     }
 
-    /// <inheritdoc />
-    //protected override async Task OnAfterRenderAsync(bool firstRender)
-    //{
-    //    if (firstRender)
-    //    {
-    //        var containsConfigKey =
-    //            await FileSystem.LocalStorage.ContainKeyAsync(EditorConfiguration.ConfigurationKey);
+    private bool _isConfigPropChangeRegistered;
 
-    //        if (containsConfigKey)
-    //            _configuration = await
-    //                FileSystem.LocalStorage.GetItemAsync<EditorConfiguration>(
-    //                    EditorConfiguration.ConfigurationKey
-    //                );
-    //        else
-    //            _configuration = new EditorConfiguration();
+    protected override async Task OnInitializedAsync()
+    {
+        if (Configuration is not null)
+        {
+            if (FileSystem is not null)
+            {
+                var containsConfigKey =
+                    await FileSystem.LocalStorage.ContainKeyAsync(Configuration.ConfigurationKey);
 
-    //        _configuration.PropertyChanged += Configuration_PropertyChanged;
-    //    }
+                if (containsConfigKey)
+                    Configuration =
+                        await FileSystem.LocalStorage.GetItemAsync<EditorConfiguration>(
+                            Configuration.ConfigurationKey
+                        );
+            }
 
-    //    await base.OnAfterRenderAsync(firstRender);
-    //}
+            Configuration.PropertyChanged += Configuration_PropertyChanged;
+            _isConfigPropChangeRegistered =  true;
+        }
+
+        await base.OnInitializedAsync();
+    }
+
     protected virtual void OnDidChangeModelContent() => HotChanges = true;
 
-    private readonly Subject<bool> _disposed = new();
+    private void Configuration_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        #pragma warning disable CS4014
+        SaveConfiguration();
+        #pragma warning restore CS4014
+        if (e.PropertyName == nameof(EditorConfiguration.MinimapEnabled))
+        {
+            Instance.UpdateOptions(
+                new GlobalEditorOptions
+                {
+                    Minimap = new EditorMinimapOptions
+                    {
+                        Enabled = Configuration!.MinimapEnabled
+                    }
+                }
+            );
+        }
+    }
+
+    private async Task SaveConfiguration()
+    {
+        if (FileSystem is null)
+            return;
+
+        await FileSystem.LocalStorage.SetItemAsync(Configuration!.ConfigurationKey, Configuration);
+    }
 
     /// <inheritdoc />
-    public void Dispose() => _disposed.OnNext(true);
+    public void Dispose()
+    {
+        if (_isConfigPropChangeRegistered && Configuration is not null)
+            Configuration.PropertyChanged -= Configuration_PropertyChanged;
+    }
 
-    protected virtual StandaloneEditorConstructionOptions EditorOptions(MonacoEditor _) => Options
-     ?? new() { AutomaticLayout = true, Minimap = new EditorMinimapOptions { Enabled = false } };
+    protected virtual StandaloneEditorConstructionOptions EditorOptions(MonacoEditor _) => new()
+    {
+        AutomaticLayout = true, Minimap = new EditorMinimapOptions { Enabled = false }
+    };
 }

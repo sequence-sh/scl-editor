@@ -30,12 +30,12 @@
       {
         @Toolbar
       }
-      @if (SettingsMenu is not null)
+      @if (ConfigurationMenuEnabled && ConfigurationMenu is not null && Configuration is not null)
       {
         <MudSpacer/>
-        <SettingsMenu>
-          @SettingsMenu
-        </SettingsMenu>
+        <CascadingValue Value='@Configuration'>
+          @ConfigurationMenu
+        </CascadingValue>
       }
     </MudToolBar>
   }
