@@ -131,8 +131,6 @@ public partial class Editor : IDisposable
             Configuration.PropertyChanged -= Configuration_PropertyChanged;
     }
 
-    protected virtual StandaloneEditorConstructionOptions EditorOptions(MonacoEditor _) => new()
-    {
-        AutomaticLayout = true, Minimap = new EditorMinimapOptions { Enabled = false }
-    };
+    protected virtual StandaloneEditorConstructionOptions ConstructionOptions(MonacoEditor _) =>
+        new() { AutomaticLayout = true, Minimap = new EditorMinimapOptions { Enabled = false } };
 }
