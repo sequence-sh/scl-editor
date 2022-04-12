@@ -13,11 +13,16 @@ public partial class Editor : IDisposable
 
     [Parameter] public string? DefaultExtension { get; set; }
 
+    [Parameter]
+    public Func<MonacoEditor, StandaloneEditorConstructionOptions>
+        ConstructionOptions { get; set; } = (MonacoEditor _) => new()
+    {
+        AutomaticLayout = true, Minimap = new EditorMinimapOptions { Enabled = false }
+    };
+
     [Parameter] public EditorConfiguration? Configuration { get; set; } = new();
 
     [Parameter] public RenderFragment? ConfigurationMenu { get; set; }
-
-    [Parameter] public bool ConfigurationMenuEnabled { get; set; } = true;
 
     [Parameter] public bool ToolbarEnabled { get; set; } = true;
 
@@ -76,18 +81,6 @@ public partial class Editor : IDisposable
     {
         if (Configuration is not null)
         {
-            if (FileSystem is not null)
-            {
-                var containsConfigKey =
-                    await FileSystem.LocalStorage.ContainKeyAsync(Configuration.ConfigurationKey);
-
-                if (containsConfigKey)
-                    Configuration =
-                        await FileSystem.LocalStorage.GetItemAsync<EditorConfiguration>(
-                            Configuration.ConfigurationKey
-                        );
-            }
-
             Configuration.PropertyChanged += Configuration_PropertyChanged;
             _isConfigPropChangeRegistered =  true;
         }
@@ -99,9 +92,6 @@ public partial class Editor : IDisposable
 
     private void Configuration_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        #pragma warning disable CS4014
-        SaveConfiguration();
-        #pragma warning restore CS4014
         if (e.PropertyName == nameof(EditorConfiguration.MinimapEnabled))
         {
             Instance.UpdateOptions(
@@ -116,21 +106,10 @@ public partial class Editor : IDisposable
         }
     }
 
-    private async Task SaveConfiguration()
-    {
-        if (FileSystem is null)
-            return;
-
-        await FileSystem.LocalStorage.SetItemAsync(Configuration!.ConfigurationKey, Configuration);
-    }
-
     /// <inheritdoc />
     public void Dispose()
     {
         if (_isConfigPropChangeRegistered && Configuration is not null)
             Configuration.PropertyChanged -= Configuration_PropertyChanged;
     }
-
-    protected virtual StandaloneEditorConstructionOptions ConstructionOptions(MonacoEditor _) =>
-        new() { AutomaticLayout = true, Minimap = new EditorMinimapOptions { Enabled = false } };
 }
