@@ -29,7 +29,7 @@ public class LoggyLog : ILogger, INotifyPropertyChanged
             var message =
                 $"{logMessage.DateTime:yyyy/MM/dd HH:mm:ss}  {lvl,-6} {logMessage.Message}";
 
-            _logger.Log(logLevel, eventId, message, logMessage.MessageParams);
+            _logger.Log(logLevel, eventId, message);
         }
 
         OnPropertyChanged(nameof(Log));
