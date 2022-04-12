@@ -4,25 +4,41 @@
 
     <MudPaper Class="pt-2 ma-2">
       
-      <Editor>
-@*        <Toolbar>
-          @if (RunCancellation != null)
+@*      <Editor Configuration='@_configuration'>
+        <ConfigurationMenu>
+          <SettingsMenu>
+            <MudSwitch @bind-Checked="@_configuration.MinimapEnabled" Label="Minimap" Color='Color.Primary'/>
+          </SettingsMenu>
+        </ConfigurationMenu>
+      </Editor>*@
+      
+      <SCLEditor Configuration='@_sclConfiguration'
+                 OutputConsole='@_consoleStringBuilder'
+                 OnNewOutputMessage='@SetOutputBadge'
+                 OutputLog='@_testLoggerFactory'
+                 OnNewLogMessage='@_onNewLogMessage'
+                 DefaultExtension='scl'
+                 @ref='@_sclEditorInstance'>
+        <Toolbar>
+          @if (_sclEditorInstance.RunCancellation != null)
           {
-            <MudIconButton Icon='@Icons.Material.Filled.Cancel' OnClick="CancelRun"/>
+            <MudIconButton Icon='@Icons.Filled.Cancel' OnClick="@_sclEditorInstance.CancelRun"/>
           }
           else
           {
-            <MudIconButton Icon='@Icons.Material.Filled.PlayArrow' OnClick="Run"/>
+            <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick="@_sclEditorInstance.Run"/>
           }
         </Toolbar>
-        <SettingsMenu>
-          <MudSwitch @bind-Checked="@_configuration.CompletionEnabled" Label="Code Completion" Color='Color.Primary'/>
-          <MudSwitch @bind-Checked="@_configuration.DiagnosticsEnabled" Label="Error Highlighting" Color='Color.Primary'/>
-          <MudSwitch @bind-Checked="@_configuration.SignatureHelpEnabled" Label="Parameter Help" Color='Color.Primary'/>
-          <MudSwitch @bind-Checked="@_configuration.QuickInfoEnabled" Label="Hover Tips" Color='Color.Primary'/>
-          <MudSwitch @bind-Checked="@_configuration.MinimapEnabled" Label="Minimap" Color='Color.Primary'/>
-        </SettingsMenu>*@
-      </Editor>
+        <ConfigurationMenu>
+          <SettingsMenu>
+            <MudSwitch @bind-Checked="@_sclConfiguration.CompletionEnabled" Label="Code Completion" Color='Color.Primary'/>
+            <MudSwitch @bind-Checked="@_sclConfiguration.DiagnosticsEnabled" Label="Error Highlighting" Color='Color.Primary'/>
+            <MudSwitch @bind-Checked="@_sclConfiguration.SignatureHelpEnabled" Label="Parameter Help" Color='Color.Primary'/>
+            <MudSwitch @bind-Checked="@_sclConfiguration.QuickInfoEnabled" Label="Hover Tips" Color='Color.Primary'/>
+            <MudSwitch @bind-Checked="@_sclConfiguration.MinimapEnabled" Label="Minimap" Color='Color.Primary'/>
+          </SettingsMenu>
+        </ConfigurationMenu>
+      </SCLEditor>
 
     </MudPaper>
 

@@ -53,54 +53,22 @@ public sealed partial class Playground : IDisposable
 
     private MonacoEditor? _fileEditor = null!;
 
-    bool OutputExpanded { get; set; } = true;
-    bool LogExpanded { get; set; } = true;
-
     private readonly ITestLoggerFactory _testLoggerFactory =
         TestLoggerFactory.Create(x => x.FilterByMinimumLevel(LogLevel.Information));
 
-    private readonly ICompression _compression = new CompressionAdapter();
-
     private readonly StringBuilder _consoleStringBuilder = new();
-
-    private StepFactoryStore _stepFactoryStore = null!;
-
-    private FileSelection _fileSelection = null!;
-
-    private CancellationTokenSource? RunCancellation { get; set; }
-
-    private SCLCodeHelper _sclCodeHelper = null!;
 
     private EditorConfiguration _configuration = new();
 
+    private SCLEditorConfiguration _sclConfiguration = new();
+
+    private SCLEditor _sclEditorInstance = null!;
+
+    private PropertyChangedEventHandler _onNewLogMessage = null!;
+
+    private FileSelection _fileSelection = null!;
+
     private FileData? _openedFile = null;
-
-    private bool _hotChanges = false;
-    private MudMessageBox MudMessageBox { get; set; } = null!;
-
-    private string? _title = null;
-
-    /// <inheritdoc />
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-
-        Console.SetOut(new StringWriter(_consoleStringBuilder));
-
-        var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
-            ExternalContext.Default,
-            typeof(FileRead).Assembly,
-            typeof(ToCSV).Assembly
-        );
-
-        Themes.IsDarkMode
-            .TakeUntil(_disposed)
-            .Select(x => Observable.FromAsync(() => SetTheme(x)))
-            .Switch()
-            .Subscribe();
-
-        _stepFactoryStore = stepFactoryStoreResult.Value;
-    }
 
     private async Task SetTheme(bool isDarkMode)
     {
@@ -112,70 +80,12 @@ public sealed partial class Playground : IDisposable
         StateHasChanged();
     }
 
-    /// <inheritdoc />
-    //protected override async Task OnAfterRenderAsync(bool firstRender)
-    //{
-    //    if (firstRender)
-    //    {
-    //        var containsConfigKey =
-    //            await FileSystem.LocalStorage.ContainKeyAsync(EditorConfiguration.ConfigurationKey);
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _onNewLogMessage = (_, _) => SetLogBadge(true);
+    }
 
-    //        if (containsConfigKey)
-    //            _configuration = await
-    //                FileSystem.LocalStorage.GetItemAsync<EditorConfiguration>(
-    //                    EditorConfiguration.ConfigurationKey
-    //                );
-    //        else
-    //            _configuration = new EditorConfiguration();
-
-    //        _configuration.PropertyChanged += Configuration_PropertyChanged;
-
-    //        _sclCodeHelper = new SCLCodeHelper(_stepFactoryStore, _configuration);
-
-    //        var objRef = DotNetObjectReference.Create(_sclCodeHelper);
-
-    //        await Runtime.InvokeVoidAsync(
-    //            "registerSCL",
-    //            objRef
-    //        ); //Function Defined in DefineSCLLanguage.js
-
-    //        var model = await _sclEditor.GetModel();
-    //        await MonacoEditorBase.SetModelLanguage(model, "scl");
-
-    //        await _sclEditor.AddAction(
-    //            "runSCL",
-    //            "Run SCL",
-    //            new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_R },
-    //            null,
-    //            null,
-    //            "SCL",
-    //            1.5,
-    //            // ReSharper disable once AsyncVoidLambda
-    //            async (_, _) =>
-    //            {
-    //                await Run();
-    //                StateHasChanged();
-    //            }
-    //        );
-
-    //        await _sclEditor.AddAction(
-    //            "formatscl",
-    //            "Format SCL",
-    //            new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_F },
-    //            null,
-    //            null,
-    //            "SCL",
-    //            1.5,
-    //            // ReSharper disable once AsyncVoidLambda
-    //            async (_, _) =>
-    //            {
-    //                await FormatSCL();
-    //            }
-    //        );
-    //    }
-
-    //    await base.OnAfterRenderAsync(firstRender);
-    //}
     private readonly Subject<bool> _disposed = new();
 
     public void Dispose()
@@ -183,53 +93,17 @@ public sealed partial class Playground : IDisposable
         _disposed.OnNext(true);
     }
 
-    private async Task SaveSCLFile()
-    {
-        if (_title is null)
-        {
-            var change = await MudMessageBox.Show(new DialogOptions());
-
-            if (change != true)
-                return;
-
-            if (_title is null)
-                return;
-        }
-
-        if (!_title.EndsWith(".scl", StringComparison.InvariantCultureIgnoreCase))
-        {
-            _title += ".scl";
-        }
-
-        _hotChanges = false;
-
-        await _fileSelection.FileSystem.SaveFile(_sclEditor, _title);
-    }
-
-    private void CloseOpenFile()
-    {
-        _openedFile = null;
-    }
-
-    private async Task SaveOpenFile()
-    {
-        if (_fileEditor is not null && _openedFile is not null)
-        {
-            await FileSystem.SaveFile(_fileEditor, _openedFile.Path);
-        }
-    }
-
     private async Task OpenFileAction(FileData arg)
     {
         if (Path.GetExtension(arg.Path) == ".scl")
         {
-            _title      = arg.Path;
-            _hotChanges = false;
+            //_title = arg.Path;
+            //_hotChanges = false;
             await _sclEditor.SetValue(arg.Data.TextContents);
         }
         else
         {
-            CloseOpenFile();
+            //CloseOpenFile();
 
             _openedFile = arg;
 
@@ -237,33 +111,6 @@ public sealed partial class Playground : IDisposable
                 await _fileEditor.SetValue(arg.Data.TextContents);
 
             StateHasChanged();
-        }
-    }
-
-    private async Task SaveConfiguration()
-    {
-        await FileSystem.LocalStorage.SetItemAsync(
-            EditorConfiguration.ConfigurationKey,
-            _configuration
-        );
-    }
-
-    private void Configuration_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        #pragma warning disable CS4014
-        SaveConfiguration();
-        #pragma warning restore CS4014
-        if (e.PropertyName == nameof(EditorConfiguration.MinimapEnabled))
-        {
-            _sclEditor.UpdateOptions(
-                new GlobalEditorOptions
-                {
-                    Minimap = new EditorMinimapOptions
-                    {
-                        Enabled = _configuration.MinimapEnabled
-                    }
-                }
-            );
         }
     }
 
@@ -312,6 +159,7 @@ public sealed partial class Playground : IDisposable
             _outputBadge = null;
             _outputDot   = false;
         }
+        StateHasChanged();
     }
 
     private string? _logBadge = null;
@@ -332,6 +180,7 @@ public sealed partial class Playground : IDisposable
             _logBadge = null;
             _logDot   = false;
         }
+        StateHasChanged();
     }
 
     private void ClearOutput()
@@ -348,137 +197,7 @@ public sealed partial class Playground : IDisposable
 
     private string LogText()
     {
-        var text = string.Join("\r\n", _testLoggerFactory.Sink.LogEntries.Select(x => x.Message));
+        var text = string.Join("\n", _testLoggerFactory.Sink.LogEntries.Select(x => x.Message));
         return text;
     }
-
-    //    private readonly Debouncer _diagnosticsDebouncer = new(TimeSpan.FromMilliseconds(300));
-
-    //    private void OnDidChangeModelContent()
-    //    {
-    //        _hotChanges = true;
-    //        #pragma warning disable CS4014
-    //        _diagnosticsDebouncer.Dispatch(() => _sclCodeHelper.SetDiagnostics(_sclEditor, Runtime));
-    //        #pragma warning restore CS4014
-    //    }
-
-    private void CancelRun()
-    {
-        RunCancellation?.Cancel();
-        RunCancellation = null;
-    }
-
-    private async Task FormatSCL()
-    {
-        var sclText = await _sclEditor.GetValue();
-
-        var selections = await _sclEditor.GetSelections();
-
-        var uri = (await _sclEditor.GetModel()).Uri;
-
-        var edits = Formatter
-            .FormatDocument(sclText, _stepFactoryStore)
-            .ToList();
-
-        await _sclEditor.ExecuteEdits(uri, edits, selections);
-    }
-
-    private async Task Run()
-    {
-        var sclText = await _sclEditor.GetValue();
-
-        RunCancellation?.Cancel();
-        var cts = new CancellationTokenSource();
-        RunCancellation = cts;
-
-        var loggerSink = _testLoggerFactory.CreateLogger("SCL");
-        var logger     = new LoggyLog(loggerSink);
-        logger.PropertyChanged += (_, _) => SetLogBadge(true);
-
-        var stepResult = SCLParsing.TryParseStep(sclText)
-            .Bind(x => x.TryFreeze(SCLRunner.RootCallerMetadata, _stepFactoryStore));
-
-        _consoleStringBuilder.AppendLine("Sequence Running\n");
-        SetOutputBadge(true);
-
-        if (stepResult.IsFailure)
-        {
-            _consoleStringBuilder.AppendLine(stepResult.Error.AsString);
-        }
-        else
-        {
-            var externalContext = new ExternalContext(
-                ExternalProcessRunner.Instance,
-                new BlazorRestClientFactory(HttpClientFactory),
-                ConsoleAdapter.Instance,
-                (ConnectorInjection.FileSystemKey, FileSystem.FileSystem),
-                (ConnectorInjection.CompressionKey, _compression)
-            );
-
-            await using var stateMonad = new StateMonad(
-                logger,
-                _stepFactoryStore,
-                externalContext,
-                new Dictionary<string, object>()
-            );
-
-            var runResult = await stepResult.Value.Run<ISCLObject>(
-                stateMonad,
-                RunCancellation.Token
-            );
-
-            if (runResult.IsFailure)
-                _consoleStringBuilder.AppendLine(runResult.Error.AsString);
-            else if (runResult.Value is Unit)
-                _consoleStringBuilder.AppendLine("\nSequence Completed Successfully");
-            else
-                _consoleStringBuilder.AppendLine(runResult.Value.ToString());
-        }
-
-        RunCancellation = null;
-
-        _consoleStringBuilder.AppendLine();
-        SetOutputBadge(true);
-    }
-
-    //    private static StandaloneEditorConstructionOptions SCLEditorConstructionOptions(MonacoEditor _)
-    //    {
-    //        return new()
-    //        {
-    //            AutomaticLayout = true,
-    //            Language        = "scl",
-    //            Value = @"- print 123
-    //- log 456",
-    //            Minimap = new EditorMinimapOptions { Enabled = false }
-    //        };
-    //    }
-
-    //    private StandaloneEditorConstructionOptions GetFileEditorConstructionOptions(FileData file)
-    //    {
-    //        var extension =
-    //            GetLanguageFromFileExtension(FileSystem.FileSystem.Path.GetExtension(file.Path));
-
-    //        return new()
-    //        {
-    //            AutomaticLayout = true,
-    //            Language        = extension,
-    //            Value           = file.Data.TextContents,
-    //            WordWrap        = "off",
-    //            TabSize         = 8,
-    //            UseTabStops     = true,
-    //        };
-
-    //        static string GetLanguageFromFileExtension(string? extension)
-    //        {
-    //            return extension?.ToLowerInvariant() switch
-
-    //            {
-    //                "yml"  => "yaml",
-    //                "yaml" => "yaml",
-    //                "json" => "json",
-    //                "cs"   => "csharp",
-    //                _      => ""
-    //            };
-    //        }
-    //    }
 }
