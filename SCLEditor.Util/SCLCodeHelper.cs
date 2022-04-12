@@ -11,7 +11,7 @@ public class SCLCodeHelper
     /// <summary>
     /// Create a new SCL Code Helper
     /// </summary>
-    public SCLCodeHelper(StepFactoryStore stepFactoryStore, EditorConfiguration configuration)
+    public SCLCodeHelper(StepFactoryStore stepFactoryStore, SCLEditorConfiguration configuration)
     {
         StepFactoryStore = stepFactoryStore;
         Configuration    = configuration;
@@ -25,7 +25,7 @@ public class SCLCodeHelper
     /// <summary>
     /// The editor configuration
     /// </summary>
-    public EditorConfiguration Configuration { get; }
+    public SCLEditorConfiguration Configuration { get; }
 
     /// <summary>
     /// Gets code completion from a completion request
