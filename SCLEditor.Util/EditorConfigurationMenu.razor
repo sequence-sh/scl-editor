@@ -1,0 +1,8 @@
+﻿<SettingsMenu>
+  <MudSwitch @bind-Checked='@Configuration.MinimapEnabled' Label='Minimap' Color='Color.Primary'/>
+</SettingsMenu>
+
+@code {
+  [CascadingParameter]
+  public EditorConfiguration Configuration { get; set; } = null!;
+}
