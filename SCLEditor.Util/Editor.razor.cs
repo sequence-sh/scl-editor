@@ -14,7 +14,7 @@ public partial class Editor : IDisposable
     [Parameter] public string? DefaultExtension { get; set; }
 
     [Parameter]
-    public Func<MonacoEditor, StandaloneEditorConstructionOptions>
+    public virtual Func<MonacoEditor, StandaloneEditorConstructionOptions>
         ConstructionOptions { get; set; } = (MonacoEditor _) => new()
     {
         AutomaticLayout = true, Minimap = new EditorMinimapOptions { Enabled = false }
