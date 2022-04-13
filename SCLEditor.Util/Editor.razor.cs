@@ -36,6 +36,8 @@ public partial class Editor : IDisposable
     [Parameter]
     public RenderFragment? Toolbar { get; set; }
 
+    [Parameter] public Action? OnFileSave { get; set; }
+
     public MonacoEditor Instance { get; private set; } = null!;
 
     /// <summary>
@@ -75,6 +77,8 @@ public partial class Editor : IDisposable
         HotChanges = false;
 
         await FileSystem.SaveFile(Instance, Title);
+
+        OnFileSave?.Invoke();
     }
 
     private bool _isConfigPropChangeRegistered;
