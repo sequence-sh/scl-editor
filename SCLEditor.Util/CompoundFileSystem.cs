@@ -7,6 +7,9 @@ namespace Reductech.Utilities.SCLEditor.Util;
 
 public class CompoundFileSystem : INotifyCollectionChanged
 {
+    /// <summary>
+    /// Create a new FileSystem using the provided local storage and download services.
+    /// </summary>
     public CompoundFileSystem(
         ILocalStorageService localStorage,
         IBlazorDownloadFileService blazorDownloadFileService)
@@ -15,18 +18,30 @@ public class CompoundFileSystem : INotifyCollectionChanged
         BlazorDownloadFileService = blazorDownloadFileService;
     }
 
-    public ILocalStorageService LocalStorage { get; }
+    /// <summary>
+    /// The file prefix used to differentiated files in the browser file system.
+    /// </summary>
+    public const string FilePrefix = "SCLPlaygroundFile-";
 
-    IBlazorDownloadFileService BlazorDownloadFileService { get; }
-
+    /// <summary>
+    /// The FileSystem to use for storing and accessing file metadata
+    /// </summary>
     public MockFileSystem FileSystem { get; } = new();
+
+    /// <summary>
+    /// The file currently selected
+    /// </summary>
+    public FileData? SelectedFile { get; set; }
+
+    private ILocalStorageService LocalStorage { get; }
+
+    private IBlazorDownloadFileService BlazorDownloadFileService { get; }
 
     private bool _initialized = false;
 
-    public FileData? SelectedFile { get; set; }
-
-    public const string FilePrefix = "SCLPlaygroundFile-";
-
+    /// <summary>
+    /// Create a new local file system and load all files persisted in the browser storage
+    /// </summary>
     public async Task Initialize()
     {
         if (_initialized)
@@ -43,11 +58,18 @@ public class CompoundFileSystem : INotifyCollectionChanged
             if (key.StartsWith(FilePrefix))
             {
                 var text = await LocalStorage.GetItemAsync<string>(key);
-                FileSystem.AddFile(key.Substring(FilePrefix.Length), text);
+
+                FileSystem.AddFile(
+                    key.Substring(FilePrefix.Length),
+                    new MockFileData(text) { LastWriteTime = DateTimeOffset.Now }
+                );
             }
         }
     }
 
+    /// <summary>
+    /// Download file from the browser storage
+    /// </summary>
     public async Task Download(string fileName)
     {
         var text = FileSystem.GetFile(FilePrefix + fileName).TextContents;
@@ -60,6 +82,9 @@ public class CompoundFileSystem : INotifyCollectionChanged
         );
     }
 
+    /// <summary>
+    /// Import files from an import file dialog
+    /// </summary>
     public async Task ImportFiles(IEnumerable<IBrowserFile> files)
     {
         var newFiles = new List<string>();
@@ -81,9 +106,12 @@ public class CompoundFileSystem : INotifyCollectionChanged
         );
     }
 
+    /// <summary>
+    /// Save file to browser storage
+    /// </summary>
     public async Task SaveFile(string path, string text)
     {
-        FileSystem.AddFile(path, text);
+        FileSystem.AddFile(path, new MockFileData(text) { LastWriteTime = DateTimeOffset.Now });
         await LocalStorage.SetItemAsync(FilePrefix + path.TrimStart('/'), text);
 
         OnCollectionChanged(
@@ -100,11 +128,14 @@ public class CompoundFileSystem : INotifyCollectionChanged
         await SaveFile(title, text);
     }
 
-    public bool FilesExist()
-    {
-        return FileSystem.AllFiles.Any();
-    }
+    /// <summary>
+    /// True if any files exist in the file system.
+    /// </summary>
+    public bool FilesExist() => FileSystem.AllFiles.Any();
 
+    /// <summary>
+    /// Delete file from the file system and browser storage
+    /// </summary>
     public async Task DeleteFile(string path)
     {
         FileSystem.RemoveFile(path);
@@ -115,6 +146,9 @@ public class CompoundFileSystem : INotifyCollectionChanged
         );
     }
 
+    /// <summary>
+    /// Remove all files from the file system and browser storage
+    /// </summary>
     public async Task ClearFiles()
     {
         foreach (var file in FileSystem.AllFiles.ToList())
@@ -129,6 +163,9 @@ public class CompoundFileSystem : INotifyCollectionChanged
         );
     }
 
+    /// <summary>
+    /// Get all files stored in the file system
+    /// </summary>
     public IEnumerable<FileData> GetFileData()
     {
         foreach (var file in FileSystem.AllFiles.Select(f => f.TrimStart('/')))
@@ -139,6 +176,9 @@ public class CompoundFileSystem : INotifyCollectionChanged
         }
     }
 
+    /// <summary>
+    /// Events fired when files are imported/saved/deleted/cleared.
+    /// </summary>
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
     protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e) =>
