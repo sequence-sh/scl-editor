@@ -1,6 +1,6 @@
 ﻿namespace Reductech.Utilities.SCLEditor.Util;
 
-public class EditorConfiguration
+public class EditorConfiguration : INotifyPropertyChanged
 {
     /// <summary>
     /// The configuration key in local storage
