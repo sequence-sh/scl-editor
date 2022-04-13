@@ -31,18 +31,6 @@ public partial class SCLEditor : Editor
     {
         AutomaticLayout = true,
         Language        = "scl",
-        Value = @"- <list> = 
-  (a: 1 b: 'two'),
-  (a: 3 b: 'four'),
-  (a: 5 c: 'six')
-
-- <list> | EntityMapProperties To: (
-    'ColA': 'a'
-    'ColB': [ 'b', 'c' ]
-  ) | ToCSV | Print
-
-- <list> | ToJsonArray | Log
-",
         Minimap = new EditorMinimapOptions { Enabled = false }
     };
 
