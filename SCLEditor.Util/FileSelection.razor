@@ -2,12 +2,15 @@
 @using System.IO
 @using System.IO.Abstractions
 @using System.IO.Abstractions.TestingHelpers
+@using System.Collections.Specialized
 @using System.Threading
 @using BlazorDownloadFile
 @using Blazored.LocalStorage
 @using Microsoft.AspNetCore.Components
 
-<InputFile id='fileInput112' OnChange="OnInputFileChanged" hidden multiple/>
+@implements IDisposable
+
+<InputFile id='fileSelectionFileInput' OnChange="OnInputFileChanged" hidden multiple/>
   
 <MudContainer MaxWidth='MaxWidth.Large'>
 
@@ -47,7 +50,7 @@
                  Variant='Variant.Filled'
                  Color='Color.Primary'
                  StartIcon='@Icons.Filled.CloudUpload'
-                 for='fileInput112'
+                 for='fileSelectionFileInput'
                  Class='mr-2'>
         Upload File
       </MudButton>
@@ -67,24 +70,34 @@
 
 @code {
 
-  [Parameter]
-  public Func<FileData, Task> OpenFileAction { get; set; }  = null!;
-  
-  [Parameter]
-  public CompoundFileSystem FileSystem { get; set; }  = null!;
+    [Parameter]
+    public Action<FileData> OpenFileAction { get; set; } = null!;
 
-  async Task OnInputFileChanged(InputFileChangeEventArgs e)
-  {
-    var files = e.GetMultipleFiles();
+    [Parameter]
+    public CompoundFileSystem FileSystem { get; set; } = null!;
 
-    await FileSystem.ImportFiles(files);
-  }
+    async Task OnInputFileChanged(InputFileChangeEventArgs e)
+    {
+        var files = e.GetMultipleFiles();
+        await FileSystem.ImportFiles(files);
+    }
 
-  /// <inheritdoc />
-  protected override async Task OnParametersSetAsync()
-  {
-    await base.OnParametersSetAsync();
-    await FileSystem.Initialize();
-  }
+    /// <inheritdoc />
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        await FileSystem.Initialize();
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        FileSystem.CollectionChanged += FileSystem_CollectionChanged;
+    }
+
+    private void FileSystem_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+      StateHasChanged();
+
+    public void Dispose() => FileSystem.CollectionChanged -= FileSystem_CollectionChanged;
 
 }
