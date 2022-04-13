@@ -11,6 +11,8 @@ public partial class Editor : IDisposable
 
     [Parameter] public string? Title { get; set; }
 
+    [Parameter] public FileData? File { get; set; }
+
     [Parameter] public string? DefaultExtension { get; set; }
 
     [Parameter]
@@ -24,6 +26,8 @@ public partial class Editor : IDisposable
 
     [Parameter] public RenderFragment? ConfigurationMenu { get; set; }
 
+    [Parameter] public bool HeaderEnabled { get; set; } = true;
+
     [Parameter] public bool ToolbarEnabled { get; set; } = true;
 
     /// <summary>
@@ -31,8 +35,6 @@ public partial class Editor : IDisposable
     /// </summary>
     [Parameter]
     public RenderFragment? Toolbar { get; set; }
-
-    //[Parameter] public FileData? File { get; set; }
 
     public MonacoEditor Instance { get; private set; } = null!;
 
@@ -46,7 +48,7 @@ public partial class Editor : IDisposable
 
     private MudMessageBox SaveDialog { get; set; } = null!;
 
-    private async Task SaveFile()
+    public async Task SaveFile()
     {
         if (FileSystem is null)
             return;
@@ -86,6 +88,18 @@ public partial class Editor : IDisposable
         }
 
         await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (File is not null)
+            {
+                Title = File.Path;
+                await Instance.SetValue(File.Data.TextContents);
+            }
+        }
     }
 
     protected virtual void OnDidChangeModelContent() => HotChanges = true;
