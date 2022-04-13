@@ -1,10 +1,11 @@
-﻿using BlazorDownloadFile;
+﻿using System.Collections.Specialized;
+using BlazorDownloadFile;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace Reductech.Utilities.SCLEditor.Util;
 
-public class CompoundFileSystem
+public class CompoundFileSystem : INotifyCollectionChanged
 {
     public CompoundFileSystem(
         ILocalStorageService localStorage,
@@ -22,7 +23,7 @@ public class CompoundFileSystem
 
     private bool _initialized = false;
 
-    public FileData SelectedFile { get; set; } = null!;
+    public FileData? SelectedFile { get; set; }
 
     public const string FilePrefix = "SavedFile-";
 
@@ -61,6 +62,8 @@ public class CompoundFileSystem
 
     public async Task ImportFiles(IEnumerable<IBrowserFile> files)
     {
+        var newFiles = new List<string>();
+
         foreach (var browserFile in files)
         {
             using var reader = new StreamReader(browserFile.OpenReadStream());
@@ -70,13 +73,22 @@ public class CompoundFileSystem
 
             FileSystem.AddFile(browserFile.Name, mfd);
             await LocalStorage.SetItemAsync(FilePrefix + browserFile.Name, text);
+            newFiles.Add(browserFile.Name);
         }
+
+        OnCollectionChanged(
+            new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newFiles)
+        );
     }
 
     public async Task SaveFile(string path, string text)
     {
         FileSystem.AddFile(path, text);
         await LocalStorage.SetItemAsync(FilePrefix + path.TrimStart('/'), text);
+
+        OnCollectionChanged(
+            new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, path)
+        );
     }
 
     public bool FilesExist()
@@ -88,6 +100,10 @@ public class CompoundFileSystem
     {
         FileSystem.RemoveFile(path);
         await LocalStorage.RemoveItemAsync(FilePrefix + path.TrimStart('/'));
+
+        OnCollectionChanged(
+            new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, path)
+        );
     }
 
     public async Task ClearFiles()
@@ -98,6 +114,10 @@ public class CompoundFileSystem
         }
 
         await LocalStorage.ClearAsync();
+
+        OnCollectionChanged(
+            new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)
+        );
     }
 
     public IEnumerable<FileData> GetFileData()
@@ -118,4 +138,9 @@ public class CompoundFileSystem
         var text = await editor.GetValue();
         await SaveFile(title, text);
     }
+
+    public event NotifyCollectionChangedEventHandler? CollectionChanged;
+
+    protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e) =>
+        CollectionChanged?.Invoke(this, e);
 }
