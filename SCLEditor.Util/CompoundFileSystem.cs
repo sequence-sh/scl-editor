@@ -25,7 +25,7 @@ public class CompoundFileSystem : INotifyCollectionChanged
 
     public FileData? SelectedFile { get; set; }
 
-    public const string FilePrefix = "SavedFile-";
+    public const string FilePrefix = "SCLPlaygroundFile-";
 
     public async Task Initialize()
     {
@@ -91,6 +91,15 @@ public class CompoundFileSystem : INotifyCollectionChanged
         );
     }
 
+    /// <summary>
+    /// Save a file from an editor
+    /// </summary>
+    public async Task SaveFile(MonacoEditor editor, string title)
+    {
+        var text = await editor.GetValue();
+        await SaveFile(title, text);
+    }
+
     public bool FilesExist()
     {
         return FileSystem.AllFiles.Any();
@@ -122,21 +131,12 @@ public class CompoundFileSystem : INotifyCollectionChanged
 
     public IEnumerable<FileData> GetFileData()
     {
-        foreach (var file in FileSystem.AllFiles)
+        foreach (var file in FileSystem.AllFiles.Select(f => f.TrimStart('/')))
         {
             var mfd = FileSystem.GetFile(file);
 
             yield return new FileData(file, mfd);
         }
-    }
-
-    /// <summary>
-    /// Save a file from an editor
-    /// </summary>
-    public async Task SaveFile(MonacoEditor editor, string title)
-    {
-        var text = await editor.GetValue();
-        await SaveFile(title, text);
     }
 
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
