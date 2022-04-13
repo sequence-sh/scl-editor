@@ -1,46 +1,80 @@
 ﻿<MudGrid>
 
   <MudItem xs='12' lg='6'>
+    
+    <MudDynamicTabs @ref='@_editorTabsRef'
+                    Class='pt-2 ma-2'
+                    Elevation='4'
+                    Rounded='true'
+                    ApplyEffectsToContainer='true'
+                    PanelClass='px-4 py-6'
+                    AddTab='@AddEditorTab'
+                    CloseTab='@(CloseEditorTab)'
+                    @bind-ActivePanelIndex='@_editorTabIndex'
+                    AddIconToolTip='Click here to add a new tab'
+                    CloseIconToolTip='Close this tab. All data will be lost'>
 
-    <MudPaper Class="pt-2 ma-2">
-      
-@*      <Editor Configuration='@_configuration'>
-        <ConfigurationMenu>
-          <SettingsMenu>
-            <MudSwitch @bind-Checked="@_configuration.MinimapEnabled" Label="Minimap" Color='Color.Primary'/>
-          </SettingsMenu>
-        </ConfigurationMenu>
-      </Editor>*@
-      
-      <SCLEditor Configuration='@_sclConfiguration'
-                 OutputConsole='@_consoleStringBuilder'
-                 OnNewOutputMessage='@SetOutputBadge'
-                 OutputLog='@_testLoggerFactory'
-                 OnNewLogMessage='@_onNewLogMessage'
-                 DefaultExtension='scl'
-                 @ref='@_sclEditorInstance'>
-        <Toolbar>
-          @if (_sclEditorInstance.RunCancellation != null)
+      @foreach (var tab in _editorTabs)
+      {
+        var title = tab.Title.Equals("Untitled", StringComparison.InvariantCultureIgnoreCase) ? null : tab.Title;
+
+        <MudTabPanel Tag='@tab.Id' Text='@tab.Title' ID='@tab.Id'>
+          @if (tab.Extension.Equals(DefaultSCLExtension, StringComparison.InvariantCultureIgnoreCase))
           {
-            <MudIconButton Icon='@Icons.Filled.Cancel' OnClick="@_sclEditorInstance.CancelRun"/>
+            var config = tab.Configuration as SCLEditorConfiguration;
+            var instance = tab.Instance as SCLEditor;
+
+            <SCLEditor @ref='@tab.Instance'
+                       Id='@tab.Id'
+                       Title='@title'
+                       DefaultExtension='@tab.Extension'
+                       Configuration='@config'
+                       OutputConsole='@_consoleStringBuilder'
+                       OnNewOutputMessage='@SetOutputBadge'
+                       OutputLog='@_testLoggerFactory'
+                       OnNewLogMessage='@_onNewLogMessage'
+                       HeaderEnabled='false'
+                       ConstructionOptions='@tab.ConstructionOptions'>
+              <Toolbar>
+                @if (instance!.RunCancellation is null)
+                {
+                  <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick='@instance.Run'/>
+                }
+                else
+                {
+                  <MudIconButton Icon='@Icons.Filled.Stop' OnClick='@instance.CancelRun'/>
+                }
+              </Toolbar>
+              <ConfigurationMenu>
+                <SettingsMenu>
+                  <MudSwitch @bind-Checked='@config!.CompletionEnabled' Label='Code Completion' Color='Color.Primary'/>
+                  <MudSwitch @bind-Checked='@config!.DiagnosticsEnabled' Label='Error Highlighting' Color='Color.Primary'/>
+                  <MudSwitch @bind-Checked='@config!.SignatureHelpEnabled' Label='Parameter Help' Color='Color.Primary'/>
+                  <MudSwitch @bind-Checked='@config!.QuickInfoEnabled' Label='Hover Tips' Color='Color.Primary'/>
+                  <MudSwitch @bind-Checked='@config!.MinimapEnabled' Label='Minimap' Color='Color.Primary'/>
+                </SettingsMenu>
+              </ConfigurationMenu>
+            </SCLEditor>
           }
           else
           {
-            <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick="@_sclEditorInstance.Run"/>
+            <Editor @ref='@tab.Instance'
+                    Id='@tab.Id'
+                    Title='@title'
+                    DefaultExtension='@tab.Extension'
+                    Configuration='@tab.Configuration'
+                    HeaderEnabled='false'
+                    ConstructionOptions='@tab.ConstructionOptions'>
+              <ConfigurationMenu>
+                <SettingsMenu>
+                  <MudSwitch @bind-Checked='@tab.Configuration.MinimapEnabled' Label='Minimap' Color='Color.Primary'/>
+                </SettingsMenu>
+              </ConfigurationMenu>
+            </Editor>
           }
-        </Toolbar>
-        <ConfigurationMenu>
-          <SettingsMenu>
-            <MudSwitch @bind-Checked="@_sclConfiguration.CompletionEnabled" Label="Code Completion" Color='Color.Primary'/>
-            <MudSwitch @bind-Checked="@_sclConfiguration.DiagnosticsEnabled" Label="Error Highlighting" Color='Color.Primary'/>
-            <MudSwitch @bind-Checked="@_sclConfiguration.SignatureHelpEnabled" Label="Parameter Help" Color='Color.Primary'/>
-            <MudSwitch @bind-Checked="@_sclConfiguration.QuickInfoEnabled" Label="Hover Tips" Color='Color.Primary'/>
-            <MudSwitch @bind-Checked="@_sclConfiguration.MinimapEnabled" Label="Minimap" Color='Color.Primary'/>
-          </SettingsMenu>
-        </ConfigurationMenu>
-      </SCLEditor>
-
-    </MudPaper>
+        </MudTabPanel>
+      }
+    </MudDynamicTabs>
 
   </MudItem>
 
@@ -88,7 +122,7 @@
   </MudItem>
 
   <MudItem xs='12'>
-    <FileSelection @ref="_fileSelection" FileSystem='FileSystem' OpenFileAction='OpenFileAction'/>
+    <FileSelection @ref='_fileSelection' FileSystem='FileSystem' OpenFileAction='OpenFileAction'/>
   </MudItem>
 
 </MudGrid>

@@ -10,6 +10,21 @@ namespace Reductech.Utilities.SCLEditor.Util;
 /// </summary>
 public sealed partial class Playground : IDisposable
 {
+    private const string DefaultEditorContent = @"- <list> = 
+  (a: 1 b: 'two'),
+  (a: 3 b: 'four'),
+  (a: 5 c: 'six')
+
+- <list> | EntityMapProperties To: (
+    'ColA': 'a'
+    'ColB': [ 'b', 'c' ]
+  ) | ToCSV | Print
+
+- <list> | ToJsonArray | Log
+";
+
+    private const string DefaultSCLExtension = ".scl";
+
     /// <summary>
     /// The JS runtime
     /// </summary>
@@ -46,29 +61,16 @@ public sealed partial class Playground : IDisposable
 
     private MudTheme CurrentTheme { get; set; } = Themes.DefaultTheme;
 
-    /// <summary>
-    /// The _scl editor to use
-    /// </summary>
-    private MonacoEditor _sclEditor = null!;
-
-    private MonacoEditor? _fileEditor = null!;
+    private MudDynamicTabs _editorTabsRef = null!;
 
     private readonly ITestLoggerFactory _testLoggerFactory =
         TestLoggerFactory.Create(x => x.FilterByMinimumLevel(LogLevel.Information));
 
     private readonly StringBuilder _consoleStringBuilder = new();
 
-    private EditorConfiguration _configuration = new();
-
-    private SCLEditorConfiguration _sclConfiguration = new();
-
-    private SCLEditor _sclEditorInstance = null!;
-
     private PropertyChangedEventHandler _onNewLogMessage = null!;
 
     private FileSelection _fileSelection = null!;
-
-    private FileData? _openedFile = null;
 
     private async Task SetTheme(bool isDarkMode)
     {
@@ -83,6 +85,7 @@ public sealed partial class Playground : IDisposable
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        AddEditorTab();
         _onNewLogMessage = (_, _) => SetLogBadge(true);
     }
 
@@ -93,25 +96,135 @@ public sealed partial class Playground : IDisposable
         _disposed.OnNext(true);
     }
 
-    private async Task OpenFileAction(FileData arg)
+#region Tabs
+
+    private static readonly EditorConfiguration TabEditorConfiguration = new();
+
+    private static readonly SCLEditorConfiguration TabSCLEditorConfiguration = new();
+
+    private class EditorTab
     {
-        if (Path.GetExtension(arg.Path) == ".scl")
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+
+        public string Title { get; set; } = "Untitled";
+
+        public EditorConfiguration Configuration { get; init; } = TabSCLEditorConfiguration;
+
+        public string Extension { get; set; } = DefaultSCLExtension;
+
+        public Editor Instance { get; set; } = null!;
+
+        public FileData? File { get; set; }
+
+        public Func<MonacoEditor, StandaloneEditorConstructionOptions> ConstructionOptions { get; set; } =
+            (MonacoEditor _) => new()
+                {
+                    AutomaticLayout = true,
+                    Language        = "scl",
+                    Minimap = new EditorMinimapOptions { Enabled = false }
+                };
+    }
+
+    private List<EditorTab> _editorTabs = new();
+    private int _editorTabIndex = 0;
+    private bool _updateEditorTabIndex = false;
+
+    private void AddEditorTab() => AddEditorTab(null);
+
+    private void AddEditorTab(FileData? file)
+    {
+        if (file is null)
         {
-            //_title = arg.Path;
-            //_hotChanges = false;
-            await _sclEditor.SetValue(arg.Data.TextContents);
+            if (_editorTabs.Count == 0)
+                _editorTabs.Add(new EditorTab{ ConstructionOptions = (MonacoEditor _) => new()
+                {
+                    AutomaticLayout = true,
+                    Language        = "scl",
+                    Value = DefaultEditorContent,
+                    Minimap = new EditorMinimapOptions { Enabled = false }
+                }});
+            else
+                _editorTabs.Add(new EditorTab());
         }
         else
         {
-            //CloseOpenFile();
+            var extension = Path.GetExtension(file.Path);
 
-            _openedFile = arg;
+            var config = extension.Equals(DefaultSCLExtension, StringComparison.InvariantCultureIgnoreCase)
+                ? TabSCLEditorConfiguration
+                : TabEditorConfiguration;
 
-            if (_fileEditor is not null)
-                await _fileEditor.SetValue(arg.Data.TextContents);
+            var language = GetLanguageFromFileExtension(extension);
 
-            StateHasChanged();
+            _editorTabs.Add(
+                new EditorTab
+                {
+                    Title         = file.Path,
+                    Configuration = config,
+                    Extension     = extension,
+                    File          = file,
+                    ConstructionOptions = (MonacoEditor _) => new()
+                    {
+                        AutomaticLayout = true,
+                        Language = language,
+                        TabSize = new []{ "yaml", "json" }.Contains(language) ? 2 : 4,
+                        Value = file.Data.TextContents,
+                        Minimap = new EditorMinimapOptions { Enabled = false }
+                    }
+                }
+            );
         }
+
+        _updateEditorTabIndex = true;
+        StateHasChanged();
+
+        static string GetLanguageFromFileExtension(string? extension) =>
+            extension?.ToLowerInvariant().TrimStart('.') switch
+            {
+                "yml"  => "yaml",
+                "yaml" => "yaml",
+                "json" => "json",
+                "cs"   => "csharp",
+                _      => ""
+            };
+    }
+
+    private void CloseEditorTab(MudTabPanel panel)
+    {
+        var editorTab = _editorTabs.FirstOrDefault(x => x.Id == (string)panel.Tag);
+
+        if (editorTab is not null)
+            _editorTabs.Remove(editorTab);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (_updateEditorTabIndex)
+        {
+            _editorTabIndex = _editorTabs.Count - 1;
+            StateHasChanged();
+            _updateEditorTabIndex = false;
+        }
+    }
+
+    private static Func<MonacoEditor, StandaloneEditorConstructionOptions>
+        SCLConstructionOptions { get; set; } = (MonacoEditor _) => new()
+    {
+        AutomaticLayout = true,
+        Language        = "scl",
+        Minimap = new EditorMinimapOptions { Enabled = false }
+    };
+
+#endregion Tabs
+
+    private void OpenFileAction(FileData file)
+    {
+        var alreadyOpen = _editorTabs.FirstOrDefault(t => t.Title.Equals(file.Path));
+
+        if (alreadyOpen is null)
+            AddEditorTab(file);
+        else
+            _editorTabsRef.ActivatePanel(alreadyOpen.Id);
     }
 
     private int _activeTabIndex;
@@ -159,6 +272,7 @@ public sealed partial class Playground : IDisposable
             _outputBadge = null;
             _outputDot   = false;
         }
+
         StateHasChanged();
     }
 
@@ -180,6 +294,7 @@ public sealed partial class Playground : IDisposable
             _logBadge = null;
             _logDot   = false;
         }
+
         StateHasChanged();
     }
 
