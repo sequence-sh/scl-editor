@@ -1,7 +1,6 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using MudBlazor;
-using Reductech.Sequence.Connectors.FileSystem.Steps;
 
 namespace Reductech.Utilities.SCLEditor.Util;
 
@@ -96,7 +95,7 @@ public sealed partial class Playground : IDisposable
         _disposed.OnNext(true);
     }
 
-#region Tabs
+#region EditorTabs
 
     private static readonly EditorConfiguration TabEditorConfiguration = new();
 
@@ -116,13 +115,17 @@ public sealed partial class Playground : IDisposable
 
         public FileData? File { get; set; }
 
-        public Func<MonacoEditor, StandaloneEditorConstructionOptions> ConstructionOptions { get; set; } =
+        public Func<MonacoEditor, StandaloneEditorConstructionOptions> ConstructionOptions
+        {
+            get;
+            set;
+        } =
             (MonacoEditor _) => new()
-                {
-                    AutomaticLayout = true,
-                    Language        = "scl",
-                    Minimap = new EditorMinimapOptions { Enabled = false }
-                };
+            {
+                AutomaticLayout = true,
+                Language        = "scl",
+                Minimap         = new EditorMinimapOptions { Enabled = false }
+            };
     }
 
     private List<EditorTab> _editorTabs = new();
@@ -136,13 +139,18 @@ public sealed partial class Playground : IDisposable
         if (file is null)
         {
             if (_editorTabs.Count == 0)
-                _editorTabs.Add(new EditorTab{ ConstructionOptions = (MonacoEditor _) => new()
-                {
-                    AutomaticLayout = true,
-                    Language        = "scl",
-                    Value = DefaultEditorContent,
-                    Minimap = new EditorMinimapOptions { Enabled = false }
-                }});
+                _editorTabs.Add(
+                    new EditorTab
+                    {
+                        ConstructionOptions = (MonacoEditor _) => new()
+                        {
+                            AutomaticLayout = true,
+                            Language        = "scl",
+                            Value           = DefaultEditorContent,
+                            Minimap         = new EditorMinimapOptions { Enabled = false }
+                        }
+                    }
+                );
             else
                 _editorTabs.Add(new EditorTab());
         }
@@ -150,7 +158,10 @@ public sealed partial class Playground : IDisposable
         {
             var extension = Path.GetExtension(file.Path);
 
-            var config = extension.Equals(DefaultSCLExtension, StringComparison.InvariantCultureIgnoreCase)
+            var config = extension.Equals(
+                DefaultSCLExtension,
+                StringComparison.InvariantCultureIgnoreCase
+            )
                 ? TabSCLEditorConfiguration
                 : TabEditorConfiguration;
 
@@ -166,10 +177,10 @@ public sealed partial class Playground : IDisposable
                     ConstructionOptions = (MonacoEditor _) => new()
                     {
                         AutomaticLayout = true,
-                        Language = language,
-                        TabSize = new []{ "yaml", "json" }.Contains(language) ? 2 : 4,
-                        Value = file.Data.TextContents,
-                        Minimap = new EditorMinimapOptions { Enabled = false }
+                        Language        = language,
+                        TabSize         = new[] { "yaml", "json" }.Contains(language) ? 2 : 4,
+                        Value           = file.Data.TextContents,
+                        Minimap         = new EditorMinimapOptions { Enabled = false }
                     }
                 }
             );
@@ -197,6 +208,14 @@ public sealed partial class Playground : IDisposable
             _editorTabs.Remove(editorTab);
     }
 
+    private void RefreshTabTitle(EditorTab tab)
+    {
+        tab.Title = tab.Instance.Title!;
+        StateHasChanged();
+    }
+
+#endregion EditorTabs
+
     protected override void OnAfterRender(bool firstRender)
     {
         if (_updateEditorTabIndex)
@@ -207,16 +226,6 @@ public sealed partial class Playground : IDisposable
         }
     }
 
-    private static Func<MonacoEditor, StandaloneEditorConstructionOptions>
-        SCLConstructionOptions { get; set; } = (MonacoEditor _) => new()
-    {
-        AutomaticLayout = true,
-        Language        = "scl",
-        Minimap = new EditorMinimapOptions { Enabled = false }
-    };
-
-#endregion Tabs
-
     private void OpenFileAction(FileData file)
     {
         var alreadyOpen = _editorTabs.FirstOrDefault(t => t.Title.Equals(file.Path));
@@ -226,6 +235,8 @@ public sealed partial class Playground : IDisposable
         else
             _editorTabsRef.ActivatePanel(alreadyOpen.Id);
     }
+
+#region OutputTabs
 
     private int _activeTabIndex;
 
@@ -315,4 +326,6 @@ public sealed partial class Playground : IDisposable
         var text = string.Join("\n", _testLoggerFactory.Sink.LogEntries.Select(x => x.Message));
         return text;
     }
+
+#endregion OutputTabs
 }

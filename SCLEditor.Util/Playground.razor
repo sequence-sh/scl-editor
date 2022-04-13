@@ -34,7 +34,8 @@
                        OutputLog='@_testLoggerFactory'
                        OnNewLogMessage='@_onNewLogMessage'
                        HeaderEnabled='false'
-                       ConstructionOptions='@tab.ConstructionOptions'>
+                       ConstructionOptions='@tab.ConstructionOptions'
+                       OnFileSave='() => RefreshTabTitle(tab)'>
               <Toolbar>
                 @if (instance!.RunCancellation is null)
                 {
@@ -64,7 +65,8 @@
                     DefaultExtension='@tab.Extension'
                     Configuration='@tab.Configuration'
                     HeaderEnabled='false'
-                    ConstructionOptions='@tab.ConstructionOptions'>
+                    ConstructionOptions='@tab.ConstructionOptions'
+                    OnFileSave='() => RefreshTabTitle(tab)'>
               <ConfigurationMenu>
                 <SettingsMenu>
                   <MudSwitch @bind-Checked='@tab.Configuration.MinimapEnabled' Label='Minimap' Color='Color.Primary'/>
