@@ -3,10 +3,10 @@ namespace Reductech.Utilities.SCLEditor.Util;
 /// <summary>
 /// Configuration for the SCL editor
 /// </summary>
-public class SCLEditorConfiguration : EditorConfiguration
+public class EditorConfigurationSCL : EditorConfiguration
 {
     /// <inheritdoc/>
-    public override string ConfigurationKey => nameof(SCLEditorConfiguration);
+    public override string ConfigurationKey => nameof(EditorConfigurationSCL);
 
     private bool _completionEnabled = true;
 
@@ -79,5 +79,4 @@ public class SCLEditorConfiguration : EditorConfiguration
             OnPropertyChanged(nameof(DiagnosticsEnabled));
         }
     }
-
 }
