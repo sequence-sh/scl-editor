@@ -31,7 +31,7 @@ public partial class SCLEditor : Editor
     {
         AutomaticLayout = true,
         Language        = "scl",
-        Minimap = new EditorMinimapOptions { Enabled = false }
+        Minimap         = new EditorMinimapOptions { Enabled = false }
     };
 
     internal CancellationTokenSource? RunCancellation { get; private set; }
@@ -125,7 +125,7 @@ public partial class SCLEditor : Editor
         StateHasChanged(); // Update the Run / Stop button
 
         var loggerSink = OutputLog.CreateLogger("SCL");
-        var logger     = new LoggyLog(loggerSink);
+        var logger     = new ObservableLogger(loggerSink);
 
         if (OnNewLogMessage is not null)
             logger.PropertyChanged += OnNewLogMessage;

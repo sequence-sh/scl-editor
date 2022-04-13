@@ -2,11 +2,11 @@
 
 namespace Reductech.Utilities.SCLEditor.Util;
 
-public class LoggyLog : ILogger, INotifyPropertyChanged
+public class ObservableLogger : ILogger, INotifyPropertyChanged
 {
     private readonly ILogger _logger;
 
-    public LoggyLog(ILogger logger) => _logger = logger;
+    public ObservableLogger(ILogger logger) => _logger = logger;
 
     public void Log<TState>(
         LogLevel logLevel,
