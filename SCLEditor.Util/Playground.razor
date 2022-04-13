@@ -4,10 +4,10 @@
     
     <MudDynamicTabs @ref='@_editorTabsRef'
                     Class='pt-2 ma-2'
-                    Elevation='4'
+                    Elevation='2'
                     Rounded='true'
                     ApplyEffectsToContainer='true'
-                    PanelClass='px-4 py-6'
+                    PanelClass='pt-4'
                     AddTab='@AddEditorTab'
                     CloseTab='@(CloseEditorTab)'
                     @bind-ActivePanelIndex='@_editorTabIndex'
@@ -21,29 +21,25 @@
         <MudTabPanel Tag='@tab.Id' Text='@tab.Title' ID='@tab.Id'>
           @if (tab.Extension.Equals(DefaultSCLExtension, StringComparison.InvariantCultureIgnoreCase))
           {
-            var config = tab.Configuration as SCLEditorConfiguration;
-            var instance = tab.Instance as SCLEditor;
+            var config = tab.Configuration as EditorConfigurationSCL;
 
-            <SCLEditor @ref='@tab.Instance'
-                       Id='@tab.Id'
-                       Title='@title'
-                       DefaultExtension='@tab.Extension'
-                       Configuration='@config'
-                       OutputConsole='@_consoleStringBuilder'
-                       OnNewOutputMessage='@SetOutputBadge'
-                       OutputLog='@_testLoggerFactory'
-                       OnNewLogMessage='@_onNewLogMessage'
-                       HeaderEnabled='false'
-                       ConstructionOptions='@tab.ConstructionOptions'
-                       OnFileSave='() => RefreshTabTitle(tab)'>
+            <Editor @ref='@tab.Instance'
+                    Id='@tab.Id'
+                    Title='@title'
+                    DefaultExtension='@tab.Extension'
+                    Configuration='@tab.Configuration'
+                    HeaderEnabled='false'
+                    ConstructionOptions='@tab.ConstructionOptions'
+                    OnFileSave='() => RefreshTabTitle(tab)'
+                    OnEditorInitialized='async (editor) => { await tab.Runner.Init(editor); }'>
               <Toolbar>
-                @if (instance!.RunCancellation is null)
+                @if (tab.Runner.RunCancellation is null)
                 {
-                  <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick='@instance.Run'/>
+                  <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick='@tab.Runner.Run'/>
                 }
                 else
                 {
-                  <MudIconButton Icon='@Icons.Filled.Stop' OnClick='@instance.CancelRun'/>
+                  <MudIconButton Icon='@Icons.Filled.Stop' OnClick='@tab.Runner.CancelRun'/>
                 }
               </Toolbar>
               <ConfigurationMenu>
@@ -55,7 +51,7 @@
                   <MudSwitch @bind-Checked='@config!.MinimapEnabled' Label='Minimap' Color='Color.Primary'/>
                 </SettingsMenu>
               </ConfigurationMenu>
-            </SCLEditor>
+            </Editor>
           }
           else
           {

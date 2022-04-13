@@ -97,21 +97,19 @@ public sealed partial class Playground : IDisposable
 
 #region EditorTabs
 
-    private static readonly EditorConfiguration TabEditorConfiguration = new();
-
-    private static readonly SCLEditorConfiguration TabSCLEditorConfiguration = new();
-
     private class EditorTab
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         public string Title { get; set; } = "Untitled";
 
-        public EditorConfiguration Configuration { get; init; } = TabSCLEditorConfiguration;
+        public EditorConfiguration Configuration { get; init; } = new EditorConfigurationSCL();
 
         public string Extension { get; set; } = DefaultSCLExtension;
 
         public Editor Instance { get; set; } = null!;
+
+        public EditorSCLHelper? Runner { get; set; }
 
         public FileData? File { get; set; }
 
@@ -119,13 +117,12 @@ public sealed partial class Playground : IDisposable
         {
             get;
             set;
-        } =
-            (MonacoEditor _) => new()
-            {
-                AutomaticLayout = true,
-                Language        = "scl",
-                Minimap         = new EditorMinimapOptions { Enabled = false }
-            };
+        } = _ => new()
+        {
+            AutomaticLayout = true,
+            Language        = "scl",
+            Minimap         = new EditorMinimapOptions { Enabled = false }
+        };
     }
 
     private List<EditorTab> _editorTabs = new();
@@ -136,34 +133,43 @@ public sealed partial class Playground : IDisposable
 
     private void AddEditorTab(FileData? file)
     {
+        var runner = new EditorSCLHelper(Runtime, HttpClientFactory, _testLoggerFactory)
+        {
+            ConsoleStream       = _consoleStringBuilder,
+            OnNewConsoleMessage = SetOutputBadge,
+            OnNewLogMessage     = _onNewLogMessage,
+            OnStateHasChanged   = StateHasChanged
+        };
+
         if (file is null)
         {
             if (_editorTabs.Count == 0)
                 _editorTabs.Add(
                     new EditorTab
                     {
-                        ConstructionOptions = (MonacoEditor _) => new()
+                        ConstructionOptions = _ => new()
                         {
                             AutomaticLayout = true,
                             Language        = "scl",
                             Value           = DefaultEditorContent,
                             Minimap         = new EditorMinimapOptions { Enabled = false }
-                        }
+                        },
+                        Runner = runner
                     }
                 );
             else
-                _editorTabs.Add(new EditorTab());
+                _editorTabs.Add(new EditorTab { Runner = runner });
         }
         else
         {
             var extension = Path.GetExtension(file.Path);
 
-            var config = extension.Equals(
+            var isScl = extension.Equals(
                 DefaultSCLExtension,
                 StringComparison.InvariantCultureIgnoreCase
-            )
-                ? TabSCLEditorConfiguration
-                : TabEditorConfiguration;
+            );
+
+            var config = isScl ? new EditorConfigurationSCL() : new EditorConfiguration();
 
             var language = GetLanguageFromFileExtension(extension);
 
@@ -174,14 +180,15 @@ public sealed partial class Playground : IDisposable
                     Configuration = config,
                     Extension     = extension,
                     File          = file,
-                    ConstructionOptions = (MonacoEditor _) => new()
+                    ConstructionOptions = _ => new()
                     {
                         AutomaticLayout = true,
                         Language        = language,
                         TabSize         = new[] { "yaml", "json" }.Contains(language) ? 2 : 4,
                         Value           = file.Data.TextContents,
                         Minimap         = new EditorMinimapOptions { Enabled = false }
-                    }
+                    },
+                    Runner = isScl ? runner : null
                 }
             );
         }
