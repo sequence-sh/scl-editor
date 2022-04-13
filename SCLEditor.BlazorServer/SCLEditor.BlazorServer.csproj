@@ -4,6 +4,8 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>SCLEditor.Blazor</AssemblyName>
+    <RootNamespace>Reductech.Utilities.SCLEditor.BlazorServer</RootNamespace>
   </PropertyGroup>
 
 <ItemGroup>
