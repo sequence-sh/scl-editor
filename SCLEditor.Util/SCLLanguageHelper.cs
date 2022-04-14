@@ -2,31 +2,21 @@
 
 namespace Reductech.Utilities.SCLEditor.Util;
 
-public class EditorSCLHelper
+public class SCLLanguageHelper : ILanguageHelper
 {
     private readonly IJSRuntime _runtime;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ITestLoggerFactory _loggerFactory;
 
-    //private readonly CompoundFileSystem _fileSystem;
-
-    public EditorSCLHelper(
-            IJSRuntime runtime,
-            IHttpClientFactory httpClientFactory,
-            ITestLoggerFactory loggerFactory)
-        //CompoundFileSystem fileSystem)
+    public SCLLanguageHelper(
+        IJSRuntime runtime,
+        IHttpClientFactory httpClientFactory,
+        ITestLoggerFactory loggerFactory)
     {
         _runtime           = runtime;
         _httpClientFactory = httpClientFactory;
         _loggerFactory     = loggerFactory;
-        //_fileSystem        = fileSystem;
     }
-
-    //public Editor EditorInstance { get; set; } = null!;
-
-    //public MonacoEditor MonacoEditor { get; set; } = null!;
-
-    //public EditorConfigurationSCL Configuration { get; set; } = new();
 
     public StringBuilder ConsoleStream { get; set; } = new();
 
@@ -50,25 +40,22 @@ public class EditorSCLHelper
 
     private SCLCodeHelper _sclCodeHelper = null!;
 
-    private bool _notInit = true;
-
-    //private MonacoEditor _editor = null!;
     private Editor _editor = null!;
 
-    public async Task Init(Editor editor)
+    public async Task OnInitializedAsync(Editor editor)
     {
         _editor = editor;
 
         if (_editor.FileSystem is null)
             throw new ArgumentNullException(
                 nameof(_editor.FileSystem),
-                $"{nameof(_editor.FileSystem)} is required to initializse the {nameof(EditorSCLHelper)}."
+                $"{nameof(_editor.FileSystem)} is required to initializse the {nameof(SCLLanguageHelper)}."
             );
 
         if (_editor.Configuration is not EditorConfigurationSCL config)
             throw new ArgumentNullException(
                 nameof(_editor.Configuration),
-                $"{nameof(_editor.Configuration)} is required for the {nameof(EditorSCLHelper)}."
+                $"{nameof(_editor.Configuration)} is required for the {nameof(SCLLanguageHelper)}."
             );
 
         Console.SetOut(new StringWriter(ConsoleStream));
@@ -82,49 +69,50 @@ public class EditorSCLHelper
         _stepFactoryStore = stepFactoryStoreResult.Value;
 
         _sclCodeHelper = new SCLCodeHelper(_stepFactoryStore, config);
-
-        var objRef = DotNetObjectReference.Create(_sclCodeHelper);
-
-        //Function Defined in DefineSCLLanguage.js
-        await _runtime.InvokeVoidAsync("registerSCL", objRef);
-
-        var model = await _editor.Instance.GetModel();
-        await MonacoEditorBase.SetModelLanguage(model, "scl");
-
-        await _editor.Instance.AddAction(
-            "runSCL",
-            "Run SCL",
-            new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_R },
-            null,
-            null,
-            "SCL",
-            1.5,
-            // ReSharper disable once AsyncVoidLambda
-            async (_, _) => await Run()
-        );
-
-        await _editor.Instance.AddAction(
-            "formatscl",
-            "Format SCL",
-            new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_F },
-            null,
-            null,
-            "SCL",
-            1.5,
-            // ReSharper disable once AsyncVoidLambda
-            async (_, _) => await FormatSCL()
-        );
-
-        _notInit = false;
     }
 
-    internal async Task Run()
+    public async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_notInit)
-            throw new Exception(
-                $"{nameof(EditorSCLHelper)} is not initialized. Run the {nameof(Init)} method first."
+        if (firstRender)
+        {
+            var objRef = DotNetObjectReference.Create(_sclCodeHelper);
+
+            //Function Defined in DefineSCLLanguage.js
+            await _runtime.InvokeVoidAsync("registerSCL", objRef);
+
+            var model = await _editor.Instance.GetModel();
+            await MonacoEditorBase.SetModelLanguage(model, "scl");
+
+            await _editor.Instance.AddAction(
+                "runSCL",
+                "Run SCL",
+                new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_R },
+                null,
+                null,
+                "SCL",
+                1.5,
+                // ReSharper disable once AsyncVoidLambda
+                async (_, _) => await Run()
             );
 
+            await _editor.Instance.AddAction(
+                "formatscl",
+                "Format SCL",
+                new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_F },
+                null,
+                null,
+                "SCL",
+                1.5,
+                // ReSharper disable once AsyncVoidLambda
+                async (_, _) => await FormatSCL()
+            );
+        }
+    }
+
+    public void OnDidChangeModelContent() { }
+
+    public async Task Run()
+    {
         if (OnRunStarted is not null)
             await OnRunStarted.Invoke();
 
@@ -191,20 +179,15 @@ public class EditorSCLHelper
             await OnRunComplete.Invoke();
     }
 
-    internal void CancelRun()
+    public void CancelRun()
     {
         RunCancellation?.Cancel();
         RunCancellation = null;
         OnRunCancelled?.Invoke();
     }
 
-    internal async Task FormatSCL()
+    public async Task FormatSCL()
     {
-        if (_notInit)
-            throw new Exception(
-                $"{nameof(EditorSCLHelper)} is not initialized. Run the {nameof(Init)} method first."
-            );
-
         var sclText = await _editor.Instance.GetValue();
 
         var selections = await _editor.Instance.GetSelections();
@@ -214,5 +197,10 @@ public class EditorSCLHelper
         var edits = Formatter.FormatDocument(sclText, _stepFactoryStore).ToList();
 
         await _editor.Instance.ExecuteEdits(uri, edits, selections);
+    }
+
+    public void Dispose()
+    {
+        CancelRun();
     }
 }
