@@ -87,14 +87,14 @@ public partial class Editor : IDisposable
 
     protected override async Task OnInitializedAsync()
     {
-        if (LanguageHelper is not null)
-            await LanguageHelper.OnInitializedAsync(this);
-
         if (Configuration is not null)
         {
             Configuration.PropertyChanged += Configuration_PropertyChanged;
             _isConfigPropChangeRegistered =  true;
         }
+
+        if (LanguageHelper is not null)
+            await LanguageHelper.OnInitializedAsync(this);
 
         await base.OnInitializedAsync();
     }
@@ -111,9 +111,6 @@ public partial class Editor : IDisposable
                 Title = File.Path;
                 await Instance.SetValue(File.Data.TextContents);
             }
-
-            if (OnEditorInitialized is not null)
-                await OnEditorInitialized.Invoke(this);
         }
     }
 
