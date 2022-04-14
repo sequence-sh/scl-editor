@@ -11,7 +11,7 @@ public class SCLCodeHelper
     /// <summary>
     /// Create a new SCL Code Helper
     /// </summary>
-    public SCLCodeHelper(StepFactoryStore stepFactoryStore, SCLEditorConfiguration configuration)
+    public SCLCodeHelper(StepFactoryStore stepFactoryStore, EditorConfigurationSCL configuration)
     {
         StepFactoryStore = stepFactoryStore;
         Configuration    = configuration;
@@ -25,7 +25,7 @@ public class SCLCodeHelper
     /// <summary>
     /// The editor configuration
     /// </summary>
-    public SCLEditorConfiguration Configuration { get; }
+    public EditorConfigurationSCL Configuration { get; }
 
     /// <summary>
     /// Gets code completion from a completion request
@@ -122,10 +122,9 @@ public class SCLCodeHelper
         var code = await editor.GetValue();
 
         var diagnostics =
-                DiagnosticsHelper.GetDiagnostics(code, StepFactoryStore)
-                    .Select(x => new VSDiagnostic(x))
-                    .ToList()
-            ;
+            DiagnosticsHelper.GetDiagnostics(code, StepFactoryStore)
+                .Select(x => new VSDiagnostic(x))
+                .ToList();
 
         await runtime.InvokeAsync<string>("setDiagnostics", diagnostics, uri);
     }

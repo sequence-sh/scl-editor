@@ -40,6 +40,8 @@ public partial class Editor : IDisposable
 
     public MonacoEditor Instance { get; private set; } = null!;
 
+    [Parameter] public Func<Editor, Task>? OnEditorInitialized { get; set; }
+
     /// <summary>
     /// The File System
     /// </summary>
@@ -90,6 +92,9 @@ public partial class Editor : IDisposable
             Configuration.PropertyChanged += Configuration_PropertyChanged;
             _isConfigPropChangeRegistered =  true;
         }
+
+        if (OnEditorInitialized is not null)
+            await OnEditorInitialized.Invoke(this);
 
         await base.OnInitializedAsync();
     }
