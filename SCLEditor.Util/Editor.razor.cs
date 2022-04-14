@@ -93,9 +93,6 @@ public partial class Editor : IDisposable
             _isConfigPropChangeRegistered =  true;
         }
 
-        if (OnEditorInitialized is not null)
-            await OnEditorInitialized.Invoke(this);
-
         await base.OnInitializedAsync();
     }
 
@@ -108,6 +105,9 @@ public partial class Editor : IDisposable
                 Title = File.Path;
                 await Instance.SetValue(File.Data.TextContents);
             }
+
+            if (OnEditorInitialized is not null)
+                await OnEditorInitialized.Invoke(this);
         }
     }
 
