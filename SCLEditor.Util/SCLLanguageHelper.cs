@@ -42,14 +42,16 @@ public class SCLLanguageHelper : ILanguageHelper
 
     private Editor _editor = null!;
 
+    #pragma warning disable CS1998
     public async Task OnInitializedAsync(Editor editor)
+        #pragma warning restore CS1998
     {
         _editor = editor;
 
         if (_editor.FileSystem is null)
             throw new ArgumentNullException(
                 nameof(_editor.FileSystem),
-                $"{nameof(_editor.FileSystem)} is required to initializse the {nameof(SCLLanguageHelper)}."
+                $"{nameof(_editor.FileSystem)} is required to initialize the {nameof(SCLLanguageHelper)}."
             );
 
         if (_editor.Configuration is not EditorConfigurationSCL config)
