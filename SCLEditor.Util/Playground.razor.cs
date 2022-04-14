@@ -186,7 +186,7 @@ public sealed partial class Playground : IDisposable
 
             var config = isScl ? new EditorConfigurationSCL() : new EditorConfiguration();
 
-            var language = GetLanguageFromFileExtension(extension);
+            var language = Editor.GetLanguageFromFileExtension(extension);
 
             _editorTabs.Add(
                 new EditorTab
@@ -199,7 +199,7 @@ public sealed partial class Playground : IDisposable
                     {
                         AutomaticLayout = true,
                         Language        = language,
-                        TabSize         = new[] { "yaml", "json" }.Contains(language) ? 2 : 4,
+                        TabSize         = Editor.GetLanguageTabSize(language),
                         Value           = file.Data.TextContents,
                         Minimap         = new EditorMinimapOptions { Enabled = false }
                     },
@@ -210,16 +210,6 @@ public sealed partial class Playground : IDisposable
 
         _updateEditorTabIndex = true;
         StateHasChanged();
-
-        static string GetLanguageFromFileExtension(string? extension) =>
-            extension?.ToLowerInvariant().TrimStart('.') switch
-            {
-                "yml"  => "yaml",
-                "yaml" => "yaml",
-                "json" => "json",
-                "cs"   => "csharp",
-                _      => ""
-            };
     }
 
     private void CloseEditorTab(MudTabPanel panel)
