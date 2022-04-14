@@ -43,10 +43,18 @@ public partial class SCLEditor : Editor
     private SCLCodeHelper _sclCodeHelper = null!;
 
     /// <inheritdoc />
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await base.OnInitializedAsync();
+        await base.OnAfterRenderAsync(firstRender);
 
+        if (firstRender)
+        {
+            await SetupSCL();
+        }
+    }
+
+    private async Task SetupSCL()
+    {
         if (FileSystem is null)
             throw new ArgumentNullException(
                 nameof(FileSystem),

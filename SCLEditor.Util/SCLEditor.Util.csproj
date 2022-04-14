@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+    <BlazorEnableTimeZoneSupport>true</BlazorEnableTimeZoneSupport>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 

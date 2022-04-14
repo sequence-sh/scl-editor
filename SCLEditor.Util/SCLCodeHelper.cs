@@ -40,6 +40,11 @@ public class SCLCodeHelper
         if (!Configuration.CompletionEnabled)
             return new VSCompletionResponse(new List<VSCompletionItem>(), true);
 
+        if (vsCompletionRequest.Position is null)
+        {
+            return new VSCompletionResponse(new List<VSCompletionItem>(), true);
+        }
+
         var position = vsCompletionRequest.Position.AsLinePosition();
 
         var result = CompletionHelper.GetCompletionResponse(code, position, StepFactoryStore);
@@ -69,6 +74,9 @@ public class SCLCodeHelper
         await Task.CompletedTask;
 
         if (!Configuration.SignatureHelpEnabled)
+            return VSSignatureResponse.Empty;
+
+        if (vsSignatureHelpRequest.Position is null)
             return VSSignatureResponse.Empty;
 
         var response = SignatureHelpHelper.GetSignatureHelpResponse(
