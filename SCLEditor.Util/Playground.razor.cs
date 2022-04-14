@@ -110,7 +110,7 @@ public sealed partial class Playground : IDisposable
 
         public Editor Instance { get; set; } = null!;
 
-        public EditorSCLHelper? Runner { get; set; }
+        public SCLLanguageHelper? SCLHelper { get; set; }
 
         public FileData? File { get; set; }
 
@@ -134,7 +134,7 @@ public sealed partial class Playground : IDisposable
 
     private void AddEditorTab(FileData? file)
     {
-        var runner = new EditorSCLHelper(Runtime, HttpClientFactory, _testLoggerFactory)
+        var languageHelper = new SCLLanguageHelper(Runtime, HttpClientFactory, _testLoggerFactory)
         {
             ConsoleStream       = _consoleStringBuilder,
             OnNewConsoleMessage = SetOutputBadge,
@@ -169,11 +169,11 @@ public sealed partial class Playground : IDisposable
                             Value           = DefaultEditorContent,
                             Minimap         = new EditorMinimapOptions { Enabled = false }
                         },
-                        Runner = runner
+                        SCLHelper = languageHelper
                     }
                 );
             else
-                _editorTabs.Add(new EditorTab { Runner = runner });
+                _editorTabs.Add(new EditorTab { SCLHelper = languageHelper });
         }
         else
         {
@@ -203,7 +203,7 @@ public sealed partial class Playground : IDisposable
                         Value           = file.Data.TextContents,
                         Minimap         = new EditorMinimapOptions { Enabled = false }
                     },
-                    Runner = isScl ? runner : null
+                    SCLHelper = isScl ? languageHelper : null
                 }
             );
         }

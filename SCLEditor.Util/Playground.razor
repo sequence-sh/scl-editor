@@ -31,15 +31,15 @@
                     HeaderEnabled='false'
                     ConstructionOptions='@tab.ConstructionOptions'
                     OnFileSave='() => RefreshTabTitle(tab)'
-                    OnEditorInitialized='async (editor) => { await tab.Runner.Init(editor); }'>
+                    LanguageHelper='@tab.SCLHelper'>
               <Toolbar>
-                @if (tab.Runner.RunCancellation is null)
+                @if (tab.SCLHelper.RunCancellation is null)
                 {
-                  <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick='@tab.Runner.Run'/>
+                  <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick='@tab.SCLHelper.Run'/>
                 }
                 else
                 {
-                  <MudIconButton Icon='@Icons.Filled.Stop' OnClick='@tab.Runner.CancelRun'/>
+                  <MudIconButton Icon='@Icons.Filled.Stop' OnClick='@tab.SCLHelper.CancelRun'/>
                 }
               </Toolbar>
               <ConfigurationMenu>
