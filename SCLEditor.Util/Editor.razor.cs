@@ -38,9 +38,9 @@ public partial class Editor : IDisposable
 
     [Parameter] public Action? OnFileSave { get; set; }
 
-    public MonacoEditor Instance { get; private set; } = null!;
+    [Parameter] public ILanguageHelper? LanguageHelper { get; set; }
 
-    [Parameter] public Func<Editor, Task>? OnEditorInitialized { get; set; }
+    public MonacoEditor Instance { get; private set; } = null!;
 
     /// <summary>
     /// The File System
@@ -87,20 +87,23 @@ public partial class Editor : IDisposable
 
     protected override async Task OnInitializedAsync()
     {
+        if (LanguageHelper is not null)
+            await LanguageHelper.OnInitializedAsync(this);
+
         if (Configuration is not null)
         {
             Configuration.PropertyChanged += Configuration_PropertyChanged;
             _isConfigPropChangeRegistered =  true;
         }
 
-        if (OnEditorInitialized is not null)
-            await OnEditorInitialized.Invoke(this);
-
         await base.OnInitializedAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (LanguageHelper is not null)
+            await LanguageHelper.OnAfterRenderAsync(firstRender);
+
         if (firstRender)
         {
             if (File is not null)
@@ -111,7 +114,11 @@ public partial class Editor : IDisposable
         }
     }
 
-    protected virtual void OnDidChangeModelContent() => HotChanges = true;
+    protected virtual void OnDidChangeModelContent()
+    {
+        LanguageHelper?.OnDidChangeModelContent();
+        HotChanges = true;
+    }
 
     private void Configuration_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
