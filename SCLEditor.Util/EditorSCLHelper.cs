@@ -136,7 +136,7 @@ public class EditorSCLHelper
         OnStateHasChanged?.Invoke();
 
         var loggerSink = _loggerFactory.CreateLogger("SCL");
-        var logger     = new LoggyLog(loggerSink);
+        var logger     = new ObservableLogger(loggerSink);
 
         if (OnNewLogMessage is not null)
             logger.PropertyChanged += OnNewLogMessage;
