@@ -31,7 +31,9 @@
                     HeaderEnabled='false'
                     ConstructionOptions='@tab.ConstructionOptions'
                     OnFileSave='() => RefreshTabTitle(tab)'
-                    LanguageHelper='@tab.SCLHelper'>
+                    LanguageHelper='@tab.SCLHelper'
+                    FileSystem='@FileSystem'
+                    >
               <Toolbar>
                 @if (tab.SCLHelper.RunCancellation is null)
                 {

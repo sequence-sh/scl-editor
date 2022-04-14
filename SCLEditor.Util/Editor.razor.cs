@@ -45,12 +45,16 @@ public partial class Editor : IDisposable
     /// <summary>
     /// The File System
     /// </summary>
-    [Inject]
+    [Parameter]
     public CompoundFileSystem? FileSystem { get; set; }
 
     protected bool HotChanges = false;
 
     private MudMessageBox SaveDialog { get; set; } = null!;
+
+    public delegate void ModelContentChangeEventHandler(ModelContentChangedEvent e);
+
+    public event ModelContentChangeEventHandler? ModelContentChanged;
 
     public async Task SaveFile()
     {
@@ -101,8 +105,12 @@ public partial class Editor : IDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+
         if (LanguageHelper is not null)
+        {
             await LanguageHelper.OnAfterRenderAsync(firstRender);
+        }
 
         if (firstRender)
         {
@@ -114,10 +122,11 @@ public partial class Editor : IDisposable
         }
     }
 
-    protected virtual void OnDidChangeModelContent()
+    protected virtual void OnDidChangeModelContent(ModelContentChangedEvent e)
     {
         LanguageHelper?.OnDidChangeModelContent();
         HotChanges = true;
+        ModelContentChanged?.Invoke(e);
     }
 
     private void Configuration_PropertyChanged(object? sender, PropertyChangedEventArgs e)
