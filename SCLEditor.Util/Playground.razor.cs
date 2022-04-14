@@ -67,9 +67,11 @@ public sealed partial class Playground : IDisposable
 
     private readonly StringBuilder _consoleStringBuilder = new();
 
-    private PropertyChangedEventHandler _onNewLogMessage = null!;
-
     private FileSelection _fileSelection = null!;
+
+    private MudTextField<string> _outputTextField = null!;
+
+    private MudTextField<string> _logTextField = null!;
 
     private async Task SetTheme(bool isDarkMode)
     {
@@ -85,7 +87,6 @@ public sealed partial class Playground : IDisposable
     {
         base.OnInitialized();
         AddEditorTab();
-        _onNewLogMessage = (_, _) => SetLogBadge(true);
     }
 
     private readonly Subject<bool> _disposed = new();
@@ -137,8 +138,22 @@ public sealed partial class Playground : IDisposable
         {
             ConsoleStream       = _consoleStringBuilder,
             OnNewConsoleMessage = SetOutputBadge,
-            OnNewLogMessage     = _onNewLogMessage,
-            OnStateHasChanged   = StateHasChanged
+            OnNewLogMessage     = (_, _) => SetLogBadge(true),
+            OnStateHasChanged   = StateHasChanged,
+            OnRunComplete = async () =>
+            {
+                if (_outputTextField.InputReference?.ElementReference != null)
+                    await Runtime.InvokeVoidAsync(
+                        "scrollToEnd",
+                        _outputTextField.InputReference.ElementReference
+                    );
+
+                if (_logTextField.InputReference?.ElementReference != null)
+                    await Runtime.InvokeVoidAsync(
+                        "scrollToEnd",
+                        _logTextField.InputReference.ElementReference
+                    );
+            }
         };
 
         if (file is null)

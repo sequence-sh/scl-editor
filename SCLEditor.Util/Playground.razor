@@ -21,7 +21,7 @@
         <MudTabPanel Tag='@tab.Id' Text='@tab.Title' ID='@tab.Id'>
           @if (tab.Extension.Equals(DefaultSCLExtension, StringComparison.InvariantCultureIgnoreCase))
           {
-            var config = tab.Configuration as EditorConfigurationSCL;
+            var config = (EditorConfigurationSCL)tab.Configuration;
 
             <Editor @ref='@tab.Instance'
                     Id='@tab.Id'
@@ -44,11 +44,11 @@
               </Toolbar>
               <ConfigurationMenu>
                 <SettingsMenu>
-                  <MudSwitch @bind-Checked='@config!.CompletionEnabled' Label='Code Completion' Color='Color.Primary'/>
-                  <MudSwitch @bind-Checked='@config!.DiagnosticsEnabled' Label='Error Highlighting' Color='Color.Primary'/>
-                  <MudSwitch @bind-Checked='@config!.SignatureHelpEnabled' Label='Parameter Help' Color='Color.Primary'/>
-                  <MudSwitch @bind-Checked='@config!.QuickInfoEnabled' Label='Hover Tips' Color='Color.Primary'/>
-                  <MudSwitch @bind-Checked='@config!.MinimapEnabled' Label='Minimap' Color='Color.Primary'/>
+                  <MudSwitch @bind-Checked='@config.CompletionEnabled' Label='Code Completion' Color='Color.Primary'/>
+                  <MudSwitch @bind-Checked='@config.DiagnosticsEnabled' Label='Error Highlighting' Color='Color.Primary'/>
+                  <MudSwitch @bind-Checked='@config.SignatureHelpEnabled' Label='Parameter Help' Color='Color.Primary'/>
+                  <MudSwitch @bind-Checked='@config.QuickInfoEnabled' Label='Hover Tips' Color='Color.Primary'/>
+                  <MudSwitch @bind-Checked='@config.MinimapEnabled' Label='Minimap' Color='Color.Primary'/>
                 </SettingsMenu>
               </ConfigurationMenu>
             </Editor>
@@ -83,13 +83,15 @@
              ApplyEffectsToContainer='true'
              Class='ma-2'
              Styles='height: 40%;'
+             KeepPanelsAlive='true'
              @bind-ActivePanelIndex='@ActiveOutputTabPanel'>
 
       <MudTabPanel Text='Output'
                    BadgeData='@_outputBadge'
                    BadgeDot='@_outputDot'
                    BadgeColor='Color.Secondary'>
-        <MudTextField FullWidth='true'
+        <MudTextField @ref='@_outputTextField'
+                      FullWidth='true'
                       Value='@_consoleStringBuilder.ToString()'
                       ReadOnly='true'
                       Lines='12'
@@ -104,7 +106,8 @@
                    BadgeData='@_logBadge'
                    BadgeDot='@_logDot'
                    BadgeColor='Color.Secondary'>
-        <MudTextField FullWidth='true'
+        <MudTextField @ref='@_logTextField'
+                      FullWidth='true'
                       Value='@LogText()'
                       ReadOnly='true'
                       Lines='12'
