@@ -57,7 +57,11 @@ public partial class Editor : IDisposable
         if (FileSystem is null)
             return;
 
-        if (Title is null)
+        if (File is not null)
+        {
+            await FileSystem.SaveFile(Instance, File.Path);
+        }
+        else
         {
             var change = await SaveDialog.Show(new DialogOptions());
 
@@ -66,19 +70,19 @@ public partial class Editor : IDisposable
 
             if (Title is null)
                 return;
-        }
 
-        if (DefaultExtension is not null && !Title.EndsWith(
-                DefaultExtension,
-                StringComparison.InvariantCultureIgnoreCase
-            ))
-        {
-            Title += DefaultExtension;
+            if (DefaultExtension is not null && !Title.EndsWith(
+                    DefaultExtension,
+                    StringComparison.InvariantCultureIgnoreCase
+                ))
+            {
+                Title += DefaultExtension;
+            }
+
+            File = await FileSystem.SaveFile(Instance, Title);
         }
 
         HotChanges = false;
-
-        await FileSystem.SaveFile(Instance, Title);
 
         OnFileSave?.Invoke();
     }
@@ -142,4 +146,18 @@ public partial class Editor : IDisposable
         if (_isConfigPropChangeRegistered && Configuration is not null)
             Configuration.PropertyChanged -= Configuration_PropertyChanged;
     }
+
+    public static string GetLanguageFromFileExtension(string? extension) =>
+        extension?.ToLowerInvariant().TrimStart('.') switch
+        {
+            "yml"  => "yaml",
+            "yaml" => "yaml",
+            "json" => "json",
+            "cs"   => "csharp",
+            "scl"  => "scl",
+            _      => ""
+        };
+
+    public static int GetLanguageTabSize(string language) =>
+        new[] { "yaml", "json" }.Contains(language) ? 2 : 4;
 }
