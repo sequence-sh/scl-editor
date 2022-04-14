@@ -13,6 +13,7 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<CompoundFileSystem>();
 
 builder.Services.AddMudBlazorJsApi().AddMudServices();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
