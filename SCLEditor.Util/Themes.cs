@@ -38,6 +38,8 @@ public static class Themes
         }
     };
 
+    public static MudTheme CurrentTheme => IsDarkMode.Value ? DarkTheme : DefaultTheme;
+
     /// <summary>
     /// The Dark Mode Theme
     /// </summary>

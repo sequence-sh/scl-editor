@@ -58,8 +58,6 @@ public sealed partial class Playground : IDisposable
         set => Themes.IsDarkMode.OnNext(value);
     }
 
-    private MudTheme CurrentTheme { get; set; } = Themes.DefaultTheme;
-
     private MudDynamicTabs _editorTabsRef = null!;
 
     private readonly ITestLoggerFactory _testLoggerFactory =
@@ -75,11 +73,8 @@ public sealed partial class Playground : IDisposable
 
     private async Task SetTheme(bool isDarkMode)
     {
-        CurrentTheme = isDarkMode ? Themes.DarkTheme : Themes.DefaultTheme;
         var theme = isDarkMode ? "vs-dark" : "vs";
-
         await MonacoEditorBase.SetTheme(theme);
-
         StateHasChanged();
     }
 
@@ -245,6 +240,15 @@ public sealed partial class Playground : IDisposable
             _editorTabIndex = _editorTabs.Count - 1;
             StateHasChanged();
             _updateEditorTabIndex = false;
+        }
+
+        if (firstRender)
+        {
+            Themes.IsDarkMode
+                .TakeUntil(_disposed)
+                .Select(x => Observable.FromAsync(() => SetTheme(x)))
+                .Switch()
+                .Subscribe();
         }
     }
 
