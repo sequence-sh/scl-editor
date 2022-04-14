@@ -171,5 +171,8 @@ function registerSCL(sclHelper) {
 });
 }
 
-
-
+function scrollToEnd(element) {
+  if (element != null) {
+    element.scrollTop = element.scrollHeight;
+  }
+}
