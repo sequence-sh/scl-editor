@@ -34,6 +34,12 @@ public class EditorSCLHelper
 
     public Action? OnStateHasChanged { get; set; }
 
+    public Func<Task>? OnRunStarted { get; set; }
+
+    public Func<Task>? OnRunComplete { get; set; }
+
+    public Action? OnRunCancelled { get; set; }
+
     public PropertyChangedEventHandler? OnNewLogMessage { get; set; }
 
     public CancellationTokenSource? RunCancellation { get; private set; }
@@ -119,6 +125,9 @@ public class EditorSCLHelper
                 $"{nameof(EditorSCLHelper)} is not initialized. Run the {nameof(Init)} method first."
             );
 
+        if (OnRunStarted is not null)
+            await OnRunStarted.Invoke();
+
         var sclText = await _editor.Instance.GetValue();
 
         RunCancellation?.Cancel();
@@ -177,12 +186,16 @@ public class EditorSCLHelper
 
         ConsoleStream.AppendLine();
         OnNewConsoleMessage?.Invoke(true);
+
+        if (OnRunComplete is not null)
+            await OnRunComplete.Invoke();
     }
 
     internal void CancelRun()
     {
         RunCancellation?.Cancel();
         RunCancellation = null;
+        OnRunCancelled?.Invoke();
     }
 
     internal async Task FormatSCL()
