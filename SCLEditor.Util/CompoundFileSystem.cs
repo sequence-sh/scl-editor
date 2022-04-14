@@ -109,7 +109,7 @@ public class CompoundFileSystem : INotifyCollectionChanged
     /// <summary>
     /// Save file to browser storage
     /// </summary>
-    public async Task SaveFile(string path, string text)
+    public async Task<FileData> SaveFile(string path, string text)
     {
         FileSystem.AddFile(path, new MockFileData(text) { LastWriteTime = DateTimeOffset.Now });
         await LocalStorage.SetItemAsync(FilePrefix + path.TrimStart('/'), text);
@@ -117,15 +117,19 @@ public class CompoundFileSystem : INotifyCollectionChanged
         OnCollectionChanged(
             new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, path)
         );
+
+        var mfd = FileSystem.GetFile(path);
+
+        return new FileData(path, mfd);
     }
 
     /// <summary>
     /// Save a file from an editor
     /// </summary>
-    public async Task SaveFile(MonacoEditor editor, string title)
+    public async Task<FileData> SaveFile(MonacoEditor editor, string title)
     {
         var text = await editor.GetValue();
-        await SaveFile(title, text);
+        return await SaveFile(title, text);
     }
 
     /// <summary>
