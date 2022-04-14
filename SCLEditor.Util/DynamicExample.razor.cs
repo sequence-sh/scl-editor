@@ -28,7 +28,7 @@ public sealed partial class DynamicExample : IDisposable
         set => Themes.IsDarkMode.OnNext(value);
     }
 
-    private MudTheme CurrentTheme { get; set; } = Themes.DefaultTheme;
+    //private MudTheme CurrentTheme { get; set; } = Themes.DefaultTheme;
 
     private MonacoEditor? _outputEditor = null!;
 
@@ -77,11 +77,9 @@ public sealed partial class DynamicExample : IDisposable
 
     private async Task SetTheme(bool isDarkMode)
     {
-        CurrentTheme = isDarkMode ? Themes.DarkTheme : Themes.DefaultTheme;
+        //CurrentTheme = isDarkMode ? Themes.DarkTheme : Themes.DefaultTheme;
         var theme = isDarkMode ? "vs-dark" : "vs";
-
         await MonacoEditorBase.SetTheme(theme);
-
         StateHasChanged();
     }
 
