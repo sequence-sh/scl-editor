@@ -143,6 +143,10 @@ public partial class Editor : IDisposable
                 }
             );
         }
+        else if (e.PropertyName == nameof(EditorConfiguration.ReadOnly))
+        {
+            Instance.UpdateOptions(new GlobalEditorOptions { ReadOnly = Configuration!.ReadOnly });
+        }
     }
 
     /// <inheritdoc />

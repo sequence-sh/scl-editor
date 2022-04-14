@@ -25,6 +25,21 @@ public class EditorConfiguration : INotifyPropertyChanged
         }
     }
 
+    private bool _readOnly = false;
+
+    public bool ReadOnly
+    {
+        get => _readOnly;
+        set
+        {
+            if (value == _readOnly)
+                return;
+
+            _readOnly = value;
+            OnPropertyChanged(nameof(ReadOnly));
+        }
+    }
+
     /// <summary>
     /// Called whenever a configuration property is changed
     /// </summary>
