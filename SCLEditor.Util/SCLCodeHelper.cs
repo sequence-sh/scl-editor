@@ -114,10 +114,9 @@ public class SCLCodeHelper
         var code = await editor.GetValue();
 
         var diagnostics =
-                DiagnosticsHelper.GetDiagnostics(code, StepFactoryStore)
-                    .Select(x => new VSDiagnostic(x))
-                    .ToList()
-            ;
+            DiagnosticsHelper.GetDiagnostics(code, StepFactoryStore)
+                .Select(x => new VSDiagnostic(x))
+                .ToList();
 
         await runtime.InvokeAsync<string>("setDiagnostics", diagnostics, uri);
     }
