@@ -1,20 +1,35 @@
 ﻿namespace Reductech.Utilities.SCLEditor;
 
+/// <summary>
+/// File metadata for the in-browser file system
+/// </summary>
 public record FileData(
     string Path,
     MockFileData Data)
 {
-    public static string Truncate(string value, int maxLength)
+    /// <summary>
+    /// Creates a summary from the file's text content.
+    /// </summary>
+    public static string Truncate(string value, int maxLength, int maxLines = 2)
     {
         if (string.IsNullOrEmpty(value))
             return value;
 
-        if (value.Length <= maxLength)
-            return value;
-        else
-            return value.Substring(0, maxLength) + "...";
+        var split = value.Replace("\r", string.Empty)
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Take(maxLines)
+            .Select(
+                (s, i) => s.Length <= maxLength
+                    ? (i + 1 == maxLines ? s + "..." : s)
+                    : s[..maxLength] + "..."
+            );
+
+        return string.Join('\n', split);
     }
 
+    /// <summary>
+    /// Create human-readable file size from byte count
+    /// </summary>
     public static string CalculateSize(int bc)
     {
         if (bc > 1024 * 1024 * 1024)
@@ -29,9 +44,18 @@ public record FileData(
         return bc + "b";
     }
 
-    public string TruncatedText => Truncate(Data.TextContents, 100);
+    /// <summary>
+    /// Summary text
+    /// </summary>
+    public string TruncatedText => Truncate(Data.TextContents, 56);
 
+    /// <summary>
+    /// Byte size of the file's content
+    /// </summary>
     public int ByteCount => Data.Contents.Length;
 
+    /// <summary>
+    /// Human-readable file size of the file's content
+    /// </summary>
     public string SizeString => CalculateSize(ByteCount);
 }
