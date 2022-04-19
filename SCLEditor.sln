@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCLEditor.BlazorServer", "S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCLEditor.Util", "SCLEditor.Util\SCLEditor.Util.csproj", "{9AAD9A9B-3013-4E34-915E-785C4A73A1EA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCLEditor.Components", "SCLEditor.Components\SCLEditor.Components.csproj", "{0CC82696-AEB0-4282-BEDE-E1719004B465}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SCLEditor.React", "SCLEditor.React\SCLEditor.React.csproj", "{0CC82696-AEB0-4282-BEDE-E1719004B465}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

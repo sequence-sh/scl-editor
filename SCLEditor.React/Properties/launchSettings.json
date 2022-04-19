@@ -8,7 +8,7 @@
     }
   },
   "profiles": {
-    "SCLEditor.Components": {
+    "SCLEditor.React": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
