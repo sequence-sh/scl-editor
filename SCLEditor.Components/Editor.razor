@@ -16,7 +16,7 @@
       ConstructionOptions='@ConstructionOptions' />
 
   </div>
-  
+
   @if (ToolbarEnabled)
   {
     <MudDivider DividerType='DividerType.FullWidth' Class='mt-2' />
@@ -24,7 +24,7 @@
     <MudToolBar Dense='true' DisableGutters='true'>
       @if (FileSystem is not null)
       {
-        <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveFile' Disabled='!HotChanges'/>
+        <MudIconButton Icon='@Icons.Filled.Save' OnClick='SaveFile' Disabled='!HotChanges' />
       }
       @if (Toolbar is not null)
       {
@@ -32,7 +32,7 @@
       }
       @if (ConfigurationMenu is not null)
       {
-        <MudSpacer/>
+        <MudSpacer />
         <CascadingValue Value='@Configuration'>
           @ConfigurationMenu
         </CascadingValue>
@@ -44,7 +44,7 @@
 
 <MudMessageBox @ref="@SaveDialog" Title="Choose File Name" CancelText="Cancel">
   <MessageContent>
-    <MudTextField @bind-Value='@Title'/>
+    <MudTextField @bind-Value='@Title' />
   </MessageContent>
   <YesButton>
     <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save">Save</MudButton>

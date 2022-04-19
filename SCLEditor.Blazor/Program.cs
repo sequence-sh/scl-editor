@@ -1,4 +1,3 @@
-using System.Net.Http;
 using BlazorDownloadFile;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;

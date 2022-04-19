@@ -1,16 +1,7 @@
-﻿@using JetBrains.Annotations
-@using System.IO
-@using System.IO.Abstractions
-@using System.IO.Abstractions.TestingHelpers
-@using System.Collections.Specialized
-@using System.Threading
-@using BlazorDownloadFile
-@using Blazored.LocalStorage
-@using Microsoft.AspNetCore.Components
-
+﻿@using System.Collections.Specialized
 @implements IDisposable
 
-<InputFile id='fileSelectionFileInput' OnChange="OnInputFileChanged" hidden multiple/>
+<InputFile id='fileSelectionFileInput' OnChange="OnInputFileChanged" hidden multiple />
 
 <MudContainer MaxWidth='MaxWidth.Large'>
 
@@ -32,13 +23,13 @@
           <MudTd DataLabel='Size'>@context.SizeString</MudTd>
           <MudTd DataLabel='Config' HideSmall='true'>
             <MudTooltip Text='Open File'>
-              <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' Size='Size.Small' OnClick='() => OpenFileAction(context)'/>
+              <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' Size='Size.Small' OnClick='() => OpenFileAction(context)' />
             </MudTooltip>
             <MudTooltip Text='Download File'>
-              <MudIconButton Icon='@Icons.Material.Filled.FileDownload' Size='Size.Small' OnClick='() => FileSystem.Download(context.Path)'/>
+              <MudIconButton Icon='@Icons.Material.Filled.FileDownload' Size='Size.Small' OnClick='() => FileSystem.Download(context.Path)' />
             </MudTooltip>
             <MudTooltip Text='Delete File'>
-              <MudIconButton Icon='@Icons.Material.Filled.Delete' Size='Size.Small' OnClick='() => FileSystem.DeleteFile(context.Path)'/>
+              <MudIconButton Icon='@Icons.Material.Filled.Delete' Size='Size.Small' OnClick='() => FileSystem.DeleteFile(context.Path)' />
             </MudTooltip>
           </MudTd>
         </RowTemplate>

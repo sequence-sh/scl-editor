@@ -1,6 +1,6 @@
-﻿using RestSharp;
-using Microsoft.AspNetCore.Components.WebAssembly.Http;
+﻿using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using Reductech.Sequence.Core;
+using RestSharp;
 
 namespace Reductech.Utilities.SCLEditor.Components;
 

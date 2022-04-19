@@ -1,7 +1,7 @@
 ﻿<MudGrid>
 
   <MudItem xs='12' lg='6'>
-    
+
     <MudDynamicTabs @ref='@_editorTabsRef'
                     Class='pt-2 ma-2'
                     Elevation='2'
@@ -37,20 +37,20 @@
               <Toolbar>
                 @if (tab.SCLHelper.RunCancellation is null)
                 {
-                  <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick='@tab.SCLHelper.Run'/>
+                  <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick='@tab.SCLHelper.Run' />
                 }
                 else
                 {
-                  <MudIconButton Icon='@Icons.Filled.Stop' OnClick='@tab.SCLHelper.CancelRun'/>
+                  <MudIconButton Icon='@Icons.Filled.Stop' OnClick='@tab.SCLHelper.CancelRun' />
                 }
               </Toolbar>
               <ConfigurationMenu>
                 <SettingsMenu>
-                  <MudSwitch @bind-Checked='@config.CompletionEnabled' Label='Code Completion' Color='Color.Primary'/>
-                  <MudSwitch @bind-Checked='@config.DiagnosticsEnabled' Label='Error Highlighting' Color='Color.Primary'/>
-                  <MudSwitch @bind-Checked='@config.SignatureHelpEnabled' Label='Parameter Help' Color='Color.Primary'/>
-                  <MudSwitch @bind-Checked='@config.QuickInfoEnabled' Label='Hover Tips' Color='Color.Primary'/>
-                  <MudSwitch @bind-Checked='@config.MinimapEnabled' Label='Minimap' Color='Color.Primary'/>
+                  <MudSwitch @bind-Checked='@config.CompletionEnabled' Label='Code Completion' Color='Color.Primary' />
+                  <MudSwitch @bind-Checked='@config.DiagnosticsEnabled' Label='Error Highlighting' Color='Color.Primary' />
+                  <MudSwitch @bind-Checked='@config.SignatureHelpEnabled' Label='Parameter Help' Color='Color.Primary' />
+                  <MudSwitch @bind-Checked='@config.QuickInfoEnabled' Label='Hover Tips' Color='Color.Primary' />
+                  <MudSwitch @bind-Checked='@config.MinimapEnabled' Label='Minimap' Color='Color.Primary' />
                 </SettingsMenu>
               </ConfigurationMenu>
             </Editor>
@@ -69,7 +69,7 @@
                     OnFileSave='() => RefreshTabTitle(tab)'>
               <ConfigurationMenu>
                 <SettingsMenu>
-                  <MudSwitch @bind-Checked='@tab.Configuration.MinimapEnabled' Label='Minimap' Color='Color.Primary'/>
+                  <MudSwitch @bind-Checked='@tab.Configuration.MinimapEnabled' Label='Minimap' Color='Color.Primary' />
                 </SettingsMenu>
               </ConfigurationMenu>
             </Editor>
@@ -81,7 +81,7 @@
   </MudItem>
 
   <MudItem xs='12' lg='6'>
-    
+
     <MudTabs Elevation='2'
              Rounded='true'
              ApplyEffectsToContainer='true'
@@ -119,15 +119,15 @@
                       Adornment='Adornment.End'
                       Class='pa-4'
                       DisableUnderLine='true'
-                      OnAdornmentClick='@ClearLogs'/>
+                      OnAdornmentClick='@ClearLogs' />
       </MudTabPanel>
 
     </MudTabs>
-    
+
   </MudItem>
 
   <MudItem xs='12'>
-    <FileSelection @ref='_fileSelection' FileSystem='FileSystem' OpenFileAction='OpenFileAction'/>
+    <FileSelection @ref='_fileSelection' FileSystem='FileSystem' OpenFileAction='OpenFileAction' />
   </MudItem>
 
 </MudGrid>
