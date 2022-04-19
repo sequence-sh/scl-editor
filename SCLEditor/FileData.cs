@@ -3,9 +3,7 @@
 /// <summary>
 /// File metadata for the in-browser file system
 /// </summary>
-public record FileData(
-    string Path,
-    MockFileData Data)
+public record FileData(string Path, MockFileData Data)
 {
     /// <summary>
     /// Creates a summary from the file's text content.
