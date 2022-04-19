@@ -26,14 +26,14 @@
             <Editor @ref='@tab.Instance'
                     Id='@tab.Id'
                     Title='@title'
+                    File='@tab.File'
+                    FileSystem='@FileSystem'
                     DefaultExtension='@tab.Extension'
                     Configuration='@tab.Configuration'
                     HeaderEnabled='false'
                     ConstructionOptions='@tab.ConstructionOptions'
                     OnFileSave='() => RefreshTabTitle(tab)'
-                    LanguageHelper='@tab.SCLHelper'
-                    FileSystem='@FileSystem'
-                    >
+                    LanguageHelper='@tab.SCLHelper'>
               <Toolbar>
                 @if (tab.SCLHelper.RunCancellation is null)
                 {
@@ -60,6 +60,8 @@
             <Editor @ref='@tab.Instance'
                     Id='@tab.Id'
                     Title='@title'
+                    File='@tab.File'
+                    FileSystem='@FileSystem'
                     DefaultExtension='@tab.Extension'
                     Configuration='@tab.Configuration'
                     HeaderEnabled='false'
