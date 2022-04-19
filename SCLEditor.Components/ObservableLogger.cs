@@ -1,4 +1,5 @@
-﻿using Reductech.Sequence.Core.Internal.Logging;
+﻿using JetBrains.Annotations;
+using Reductech.Sequence.Core.Internal.Logging;
 
 namespace Reductech.Utilities.SCLEditor.Components;
 

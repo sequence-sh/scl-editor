@@ -3,7 +3,7 @@ using Reductech.Sequence.Core.Internal;
 using Reductech.Sequence.Core.Steps;
 using Reductech.Sequence.Core.Util;
 
-namespace Reductech.Utilities.SCLEditor;
+namespace Reductech.Utilities.SCLEditor.Components;
 
 /// <summary>
 /// The input to an example

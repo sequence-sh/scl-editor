@@ -1,9 +1,11 @@
 ﻿using System.Text.Json;
+using Json.Schema;
+using Reductech.Sequence.Connectors.StructuredData;
 using Reductech.Sequence.Core;
 using Reductech.Sequence.Core.Internal;
 using Reductech.Sequence.Core.Steps;
 
-namespace Reductech.Utilities.SCLEditor;
+namespace Reductech.Utilities.SCLEditor.Components;
 
 /// <summary>
 /// Default values for components commonly used in examples

@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SCLEditor\SCLEditor.csproj" />
+    <ProjectReference Include="..\SCLEditor.Components\SCLEditor.Components.csproj" />
   </ItemGroup>
 
   <Target Name="_ResolveCopyLocalNuGetPackagePdbsAndXml" AfterTargets="ResolveReferences">

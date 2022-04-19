@@ -1,4 +1,14 @@
-﻿using Reductech.Sequence.Connectors.FileSystem.Steps;
+﻿using CSharpFunctionalExtensions;
+using Reductech.Sequence.Connectors.FileSystem;
+using Reductech.Sequence.Connectors.FileSystem.Steps;
+using Reductech.Sequence.Connectors.StructuredData;
+using Reductech.Sequence.Core;
+using Reductech.Sequence.Core.Abstractions;
+using Reductech.Sequence.Core.ExternalProcesses;
+using Reductech.Sequence.Core.Internal;
+using Reductech.Sequence.Core.Internal.Parser;
+using Reductech.Sequence.Core.Internal.Serialization;
+using Reductech.Sequence.Core.Util;
 
 namespace Reductech.Utilities.SCLEditor.Components;
 

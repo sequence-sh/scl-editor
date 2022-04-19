@@ -1,4 +1,6 @@
-﻿namespace Reductech.Utilities.SCLEditor.Components;
+﻿using JetBrains.Annotations;
+
+namespace Reductech.Utilities.SCLEditor.Components;
 
 public class EditorConfiguration : INotifyPropertyChanged
 {
