@@ -23,7 +23,9 @@ export function SCLPlayground() {
         require.config({ paths: { vs: '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });
         addScript('_content/BlazorMonaco/jsInterop.js', () =>
           addScript('_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js', () =>
-            addScript('_content/SCLEditor.Util/DefineSCLLanguage.js', () => setScriptsLoaded(true))
+            addScript('_content/SCLEditor.Components/DefineSCLLanguage.js', () =>
+              setScriptsLoaded(true)
+            )
           )
         );
       });

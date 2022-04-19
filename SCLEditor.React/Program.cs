@@ -3,7 +3,7 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
-using Reductech.Utilities.SCLEditor.Util;
+using Reductech.Utilities.SCLEditor.Components;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 

@@ -8,12 +8,12 @@
     <RootNamespace>Reductech.Utilities.SCLEditor.BlazorServer</RootNamespace>
   </PropertyGroup>
 
-<ItemGroup>
-  <PackageReference Include="MudBlazor" Version="6.0.7" />
-</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="6.0.7" />
+  </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SCLEditor.Util\SCLEditor.Util.csproj" />
+    <ProjectReference Include="..\SCLEditor.Components\SCLEditor.Components.csproj" />
   </ItemGroup>
 
 </Project>
