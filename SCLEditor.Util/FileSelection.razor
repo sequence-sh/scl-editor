@@ -21,14 +21,14 @@
         <HeaderContent>
           <MudTh>Path</MudTh>
           <MudTh>Text Preview</MudTh>
-          <MudTh>LastModified</MudTh>
+          <MudTh>Last Modified</MudTh>
           <MudTh>Size</MudTh>
           <MudTh Style='width: 120px;'></MudTh>
         </HeaderContent>
         <RowTemplate>
           <MudTd DataLabel='Path'>@context.Path</MudTd>
-          <MudTd DataLabel='Text'>@context.TruncatedText</MudTd>
-          <MudTd DataLabel='LastModified'>@context.Data.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss")</MudTd>
+          <MudTd DataLabel='Text Preview' Style='white-space: pre;'>@context.TruncatedText</MudTd>
+          <MudTd DataLabel='Last Modified'>@context.Data.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss")</MudTd>
           <MudTd DataLabel='Size'>@context.SizeString</MudTd>
           <MudTd DataLabel='Config' HideSmall='true'>
             <MudTooltip Text='Open File'>
@@ -90,6 +90,7 @@
     if (firstRender)
     {
       await FileSystem.Initialize();
+      StateHasChanged();
     }
   }
 
