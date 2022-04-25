@@ -1,1 +1,10 @@
-<Playground />
+<MudThemeProvider Theme='@Themes.CurrentTheme' />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<Playground IsDarkMode='@IsDarkMode' />
+
+@code {
+  [Parameter]
+  public bool IsDarkMode { get; set; } = false;
+}

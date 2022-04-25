@@ -4,6 +4,10 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Reductech.Utilities.SCLEditor.React</AssemblyName>
+    <RootNamespace>Reductech.Utilities.SCLEditor.React</RootNamespace>
+    <!-- <RunAOTCompilation>true</RunAOTCompilation> -->
+    <!-- <PublishTrimmed>True</PublishTrimmed> -->
   </PropertyGroup>
 
   <ItemGroup>
