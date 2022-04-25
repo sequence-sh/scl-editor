@@ -16,10 +16,10 @@
     />
   </head>
   <body>
-  <noscript>You need to enable JavaScript to run this app.</noscript>
-  <div>
-    <div id="scl-playground-root"></div>
-  </div>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div>
+      <div id="scl-playground-root"></div>
+    </div>
 
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
@@ -29,14 +29,12 @@
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
     <script src="_content/BlazorMonaco/jsInterop.js"></script>
     <script src="_content/SCLEditor.Components/DefineSCLLanguage.js"></script>
-    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
-  <script>
-      Blazor.start();
-        //.then(() => {
-        //  const parentElement = document.querySelector('#scl-playground-root');
-        //  return Blazor.rootComponents.add(parentElement, 'scl-playground-react', {});
-        //})
-        //.catch((error) => console.error(error));
+    <script src="_framework/blazor.webassembly.js" autostart="true"></script>
+    <script>
+      window.sclPlaygroundInit = function (component, params) {
+        const parentElement = document.querySelector('#scl-playground-root');
+        window.Blazor.rootComponents.add(parentElement, component, {});
+      };
     </script>
   </body>
 </html>
