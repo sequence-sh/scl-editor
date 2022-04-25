@@ -5,12 +5,12 @@ namespace Reductech.Utilities.SCLEditor.Util;
 public class SCLLanguageHelper : ILanguageHelper
 {
     private readonly IJSRuntime _runtime;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IHttpClientFactory? _httpClientFactory;
     private readonly ITestLoggerFactory _loggerFactory;
 
     public SCLLanguageHelper(
         IJSRuntime runtime,
-        IHttpClientFactory httpClientFactory,
+        IHttpClientFactory? httpClientFactory,
         ITestLoggerFactory loggerFactory)
     {
         _runtime           = runtime;
@@ -47,12 +47,6 @@ public class SCLLanguageHelper : ILanguageHelper
         #pragma warning restore CS1998
     {
         _editor = editor;
-
-        if (_editor.FileSystem is null)
-            throw new ArgumentNullException(
-                nameof(_editor.FileSystem),
-                $"{nameof(_editor.FileSystem)} is required to initialize the {nameof(SCLLanguageHelper)}."
-            );
 
         if (_editor.Configuration is not EditorConfigurationSCL config)
             throw new ArgumentNullException(
@@ -143,12 +137,20 @@ public class SCLLanguageHelper : ILanguageHelper
         }
         else
         {
+            List<(string, object)> injected = new();
+
+            if (_editor.FileSystem?.FileSystem is not null)
+            {
+                injected.Add((ConnectorInjection.FileSystemKey, _editor.FileSystem.FileSystem));
+            }
+
+            injected.Add((ConnectorInjection.CompressionKey, _compression));
+
             var externalContext = new ExternalContext(
                 ExternalProcessRunner.Instance,
                 new BlazorRestClientFactory(_httpClientFactory),
                 ConsoleAdapter.Instance,
-                (ConnectorInjection.FileSystemKey, _editor.FileSystem!.FileSystem),
-                (ConnectorInjection.CompressionKey, _compression)
+                injected.ToArray()
             );
 
             await using var stateMonad = new StateMonad(
