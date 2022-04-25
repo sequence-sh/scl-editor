@@ -1,8 +1,7 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
 using Xunit;
 
-namespace SCLEditor.Tests
-{
+namespace SCLEditor.Tests;
 
 public class FileSystemTests
 {
@@ -11,6 +10,4 @@ public class FileSystemTests
     {
         var fs = new MockFileSystem();
     }
-}
-
 }

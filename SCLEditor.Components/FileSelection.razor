@@ -1,0 +1,99 @@
+﻿@using System.Collections.Specialized
+@implements IDisposable
+
+<InputFile id='fileSelectionFileInput' OnChange="OnInputFileChanged" hidden multiple />
+
+<MudContainer MaxWidth='MaxWidth.Large'>
+
+  <MudGrid>
+
+    <MudItem xs='12'>
+      <MudTable Items='FileSystem.GetFileData()' FixedHeader='true' Hover='true' Breakpoint='Breakpoint.None' @bind-SelectedItem='FileSystem.SelectedFile'>
+        <HeaderContent>
+          <MudTh>Path</MudTh>
+          <MudTh>Text Preview</MudTh>
+          <MudTh>Last Modified</MudTh>
+          <MudTh>Size</MudTh>
+          <MudTh Style='width: 120px;'></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+          <MudTd DataLabel='Path'>@context.Path</MudTd>
+          <MudTd DataLabel='Text Preview' Style='white-space: pre;'>@context.TruncatedText</MudTd>
+          <MudTd DataLabel='Last Modified'>@context.Data.LastWriteTime.ToString("yyyy/MM/dd HH:mm:ss")</MudTd>
+          <MudTd DataLabel='Size'>@context.SizeString</MudTd>
+          <MudTd DataLabel='Config' HideSmall='true'>
+            <MudTooltip Text='Open File'>
+              <MudIconButton Icon='@Icons.Material.Filled.OpenInBrowser' Size='Size.Small' OnClick='() => OpenFileAction(context)' />
+            </MudTooltip>
+            <MudTooltip Text='Download File'>
+              <MudIconButton Icon='@Icons.Material.Filled.FileDownload' Size='Size.Small' OnClick='() => FileSystem.Download(context.Path)' />
+            </MudTooltip>
+            <MudTooltip Text='Delete File'>
+              <MudIconButton Icon='@Icons.Material.Filled.Delete' Size='Size.Small' OnClick='() => FileSystem.DeleteFile(context.Path)' />
+            </MudTooltip>
+          </MudTd>
+        </RowTemplate>
+      </MudTable>
+    </MudItem>
+
+    <MudItem xs='12' Style='text-align: center;'>
+      <MudButton HtmlTag='label'
+                 Variant='Variant.Filled'
+                 Color='Color.Primary'
+                 StartIcon='@Icons.Filled.CloudUpload'
+                 for='fileSelectionFileInput'
+                 Class='mr-2'>
+        Upload File
+      </MudButton>
+      <MudButton OnClick='@FileSystem.ClearFiles'
+                 Disabled='@(!FileSystem.FilesExist())'
+                 Variant='Variant.Filled'
+                 Color='Color.Error'
+                 Class='ml-2'
+                 StartIcon='@Icons.Filled.DeleteSweep'>
+        Clear Data
+      </MudButton>
+    </MudItem>
+
+  </MudGrid>
+
+</MudContainer>
+
+@code {
+
+  [Parameter]
+  public Action<FileData> OpenFileAction { get; set; } = null!;
+
+  [Parameter]
+  public CompoundFileSystem FileSystem { get; set; } = null!;
+
+  async Task OnInputFileChanged(InputFileChangeEventArgs e)
+  {
+    var files = e.GetMultipleFiles();
+    await FileSystem.ImportFiles(files);
+  }
+
+  /// <inheritdoc />
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    await base.OnAfterRenderAsync(firstRender);
+
+    if (firstRender)
+    {
+      await FileSystem.Initialize();
+      StateHasChanged();
+    }
+  }
+
+  protected override void OnInitialized()
+  {
+    base.OnInitialized();
+    FileSystem.CollectionChanged += FileSystem_CollectionChanged;
+  }
+
+  private void FileSystem_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+    StateHasChanged();
+
+  public void Dispose() => FileSystem.CollectionChanged -= FileSystem_CollectionChanged;
+
+}

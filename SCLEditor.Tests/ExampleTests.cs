@@ -12,7 +12,7 @@ using Reductech.Sequence.Core.Abstractions;
 using Reductech.Sequence.Core.Internal;
 using Reductech.Sequence.Core.Steps;
 using Reductech.Sequence.Core.TestHarness;
-using Reductech.Utilities.SCLEditor;
+using Reductech.Utilities.SCLEditor.Components;
 using Xunit;
 
 namespace SCLEditor.Tests;

@@ -1,0 +1,11 @@
+﻿global using System;
+global using System.Text;
+global using System.ComponentModel;
+global using System.Runtime.CompilerServices;
+global using BlazorMonaco;
+global using Generator.Equals;
+global using Microsoft.JSInterop;
+global using Range = BlazorMonaco.Range;
+global using MELT;
+global using Microsoft.AspNetCore.Components;
+global using Microsoft.Extensions.Logging;

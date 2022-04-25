@@ -1,0 +1,133 @@
+﻿<MudGrid>
+
+  <MudItem xs='12' lg='6'>
+
+    <MudDynamicTabs @ref='@_editorTabsRef'
+                    Class='pt-2 ma-2'
+                    Elevation='2'
+                    Rounded='true'
+                    ApplyEffectsToContainer='true'
+                    PanelClass='pt-2'
+                    AddTab='@AddEditorTab'
+                    CloseTab='@(CloseEditorTab)'
+                    @bind-ActivePanelIndex='@_editorTabIndex'
+                    AddIconToolTip='Click here to add a new tab'
+                    CloseIconToolTip='Close this tab. All data will be lost'>
+
+      @foreach (var tab in _editorTabs)
+      {
+        var title = tab.Title.Equals("Untitled", StringComparison.InvariantCultureIgnoreCase) ? null : tab.Title;
+
+        <MudTabPanel Tag='@tab.Id' Text='@tab.Title' ID='@tab.Id'>
+          @if (tab.Extension.Equals(DefaultSCLExtension, StringComparison.InvariantCultureIgnoreCase))
+          {
+            var config = (EditorConfigurationSCL)tab.Configuration;
+
+            <Editor @ref='@tab.Instance'
+                    Id='@tab.Id'
+                    Title='@title'
+                    File='@tab.File'
+                    FileSystem='@FileSystem'
+                    DefaultExtension='@tab.Extension'
+                    Configuration='@tab.Configuration'
+                    HeaderEnabled='false'
+                    ConstructionOptions='@tab.ConstructionOptions'
+                    OnFileSave='() => RefreshTabTitle(tab)'
+                    LanguageHelper='@tab.SCLHelper'>
+              <Toolbar>
+                @if (tab.SCLHelper.RunCancellation is null)
+                {
+                  <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick='@tab.SCLHelper.Run' />
+                }
+                else
+                {
+                  <MudIconButton Icon='@Icons.Filled.Stop' OnClick='@tab.SCLHelper.CancelRun' />
+                }
+              </Toolbar>
+              <ConfigurationMenu>
+                <SettingsMenu>
+                  <MudSwitch @bind-Checked='@config.CompletionEnabled' Label='Code Completion' Color='Color.Primary' />
+                  <MudSwitch @bind-Checked='@config.DiagnosticsEnabled' Label='Error Highlighting' Color='Color.Primary' />
+                  <MudSwitch @bind-Checked='@config.SignatureHelpEnabled' Label='Parameter Help' Color='Color.Primary' />
+                  <MudSwitch @bind-Checked='@config.QuickInfoEnabled' Label='Hover Tips' Color='Color.Primary' />
+                  <MudSwitch @bind-Checked='@config.MinimapEnabled' Label='Minimap' Color='Color.Primary' />
+                </SettingsMenu>
+              </ConfigurationMenu>
+            </Editor>
+          }
+          else
+          {
+            <Editor @ref='@tab.Instance'
+                    Id='@tab.Id'
+                    Title='@title'
+                    File='@tab.File'
+                    FileSystem='@FileSystem'
+                    DefaultExtension='@tab.Extension'
+                    Configuration='@tab.Configuration'
+                    HeaderEnabled='false'
+                    ConstructionOptions='@tab.ConstructionOptions'
+                    OnFileSave='() => RefreshTabTitle(tab)'>
+              <ConfigurationMenu>
+                <SettingsMenu>
+                  <MudSwitch @bind-Checked='@tab.Configuration.MinimapEnabled' Label='Minimap' Color='Color.Primary' />
+                </SettingsMenu>
+              </ConfigurationMenu>
+            </Editor>
+          }
+        </MudTabPanel>
+      }
+    </MudDynamicTabs>
+
+  </MudItem>
+
+  <MudItem xs='12' lg='6'>
+
+    <MudTabs Elevation='2'
+             Rounded='true'
+             ApplyEffectsToContainer='true'
+             Class='ma-2'
+             Styles='height: 40%;'
+             KeepPanelsAlive='true'
+             @bind-ActivePanelIndex='@ActiveOutputTabPanel'>
+
+      <MudTabPanel Text='Output'
+                   BadgeData='@_outputBadge'
+                   BadgeDot='@_outputDot'
+                   BadgeColor='Color.Secondary'>
+        <MudTextField @ref='@_outputTextField'
+                      FullWidth='true'
+                      Value='@_consoleStringBuilder.ToString()'
+                      ReadOnly='true'
+                      Lines='12'
+                      AdornmentIcon='@Icons.Filled.PlaylistRemove'
+                      Adornment='Adornment.End'
+                      Class='pa-4'
+                      DisableUnderLine='true'
+                      OnAdornmentClick='@ClearOutput' />
+      </MudTabPanel>
+
+      <MudTabPanel Text='Log'
+                   BadgeData='@_logBadge'
+                   BadgeDot='@_logDot'
+                   BadgeColor='Color.Secondary'>
+        <MudTextField @ref='@_logTextField'
+                      FullWidth='true'
+                      Value='@LogText()'
+                      ReadOnly='true'
+                      Lines='12'
+                      AdornmentIcon='@Icons.Filled.PlaylistRemove'
+                      Adornment='Adornment.End'
+                      Class='pa-4'
+                      DisableUnderLine='true'
+                      OnAdornmentClick='@ClearLogs' />
+      </MudTabPanel>
+
+    </MudTabs>
+
+  </MudItem>
+
+  <MudItem xs='12'>
+    <FileSelection @ref='_fileSelection' FileSystem='FileSystem' OpenFileAction='OpenFileAction' />
+  </MudItem>
+
+</MudGrid>

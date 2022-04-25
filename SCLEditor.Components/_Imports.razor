@@ -4,9 +4,18 @@
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components.Web.Virtualization
-@using Microsoft.AspNetCore.Components.WebAssembly.Http
 @using Microsoft.JSInterop
-@using SCLEditor.Components
-
 @using MudBlazor
-@using Reductech.Utilities.SCLEditor.Util
+@using MudBlazor.Dialog
+@using Reductech.Sequence.Core
+@using BlazorMonaco
+
+@using Microsoft.Extensions.Logging.Abstractions
+@using Reductech.Sequence.Core.ExternalProcesses
+@using Reductech.Sequence.Core.Internal
+@using System.Threading
+@using CSharpFunctionalExtensions
+@using System.IO.Abstractions.TestingHelpers
+@using Reductech.Sequence.Connectors.FileSystem
+@using Reductech.Sequence.Connectors.StructuredData
+@using Reductech.Sequence.Core.Abstractions

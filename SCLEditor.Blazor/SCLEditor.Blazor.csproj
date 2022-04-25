@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SCLEditor.Util\SCLEditor.Util.csproj" />
+    <ProjectReference Include="..\SCLEditor.Components\SCLEditor.Components.csproj" />
   </ItemGroup>
 
   <ItemGroup>
