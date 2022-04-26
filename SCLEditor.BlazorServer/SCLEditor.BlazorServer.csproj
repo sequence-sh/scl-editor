@@ -4,14 +4,28 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>SCLEditor.Blazor</AssemblyName>
+    <RootNamespace>Reductech.Utilities.SCLEditor.BlazorServer</RootNamespace>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-<ItemGroup>
-  <PackageReference Include="MudBlazor" Version="6.0.7" />
-</ItemGroup>
+  <PropertyGroup>
+    <PackageId>Reductech.Utilities.SCLEditor.BlazorServer</PackageId>
+    <Title>Sequence® Configuration Language Blazor Server Playground</Title>
+    <Product>Sequence®</Product>
+    <RepositoryUrl>https://gitlab.com/reductech/sequence/scl-editor.git</RepositoryUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Authors>Reductech</Authors>
+    <Company>Reductech</Company>
+    <Copyright>Copyright (c) 2022 Reductech Ltd</Copyright>
+  </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SCLEditor.Util\SCLEditor.Util.csproj" />
+    <PackageReference Include="MudBlazor" Version="6.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SCLEditor.Components\SCLEditor.Components.csproj" />
   </ItemGroup>
 
 </Project>

@@ -10,11 +10,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <RepositoryUrl>https://gitlab.com/reductech/edr/scl-editor</RepositoryUrl>
+    <RepositoryUrl>https://gitlab.com/reductech/sequence/scl-editor.git</RepositoryUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Authors>Reductech</Authors>
     <Company>Reductech</Company>
-    <Copyright>Copyright (c) 2020 Reductech Ltd</Copyright>
+    <Copyright>Copyright (c) 2022 Reductech Ltd</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,14 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SCLEditor\SCLEditor.csproj" />
+    <ProjectReference Include="..\SCLEditor.Components\SCLEditor.Components.csproj" />
   </ItemGroup>
-
-  <Target Name="_ResolveCopyLocalNuGetPackagePdbsAndXml" AfterTargets="ResolveReferences">
-    <ItemGroup>
-      
-      <ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths->'%(RootDir)%(Directory)%(Filename).xml')" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' != '' and Exists('%(RootDir)%(Directory)%(Filename).xml')" />
-    </ItemGroup>
-  </Target>
 
 </Project>

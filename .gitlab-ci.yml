@@ -2,6 +2,41 @@ include:
   - project: reductech/templates/cicd/dotnet
     file: .gitlab-ci.linux.yml
 
+package react dev:
+  stage: package
+  extends:
+    - .default_before_script
+    - .rules_dev_manual
+  needs:
+    - build dev
+    - test dev
+    - version check dev
+  variables:
+    CONFIG: Release
+    NUGET_PROJECT_ID: $NUGET_PROJECT_ID_DEV
+    NUGET_USERNAME: $NUGET_USER_DEV
+    NUGET_TOKEN: $NUGET_TOKEN_DEV
+  script:
+    - dotnet workload install wasm-tools
+    - apt-get update && apt-get install python3 -y
+    - dotnet publish --configuration $CONFIG --output ./publish ./SCLEditor.React/SCLEditor.React.csproj
+    - mv ./publish/wwwroot/ ./scl-playground
+  artifacts:
+    name: 'scl-playground-react-$PROJECT_VERSION'
+    paths:
+      - './scl-playground'
+    expire_in: 7 days
 
-default:
-  image: mcr.microsoft.com/dotnet/sdk:6.0
+package react release:
+  extends:
+    - package react dev
+    - .rules_release
+  needs:
+    - build release
+    - test release
+    - version check release
+  artifacts:
+    name: 'scl-playground-react-$PROJECT_VERSION'
+    paths:
+      - './scl-playground'
+    expire_in: never

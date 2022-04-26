@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <RootNamespace>Reductech.Utilities.SCLEditor.Components</RootNamespace>
+    <AssemblyName>Reductech.Utilities.SCLEditor.Components</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>0.1.0$(VersionSuffix)</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Reductech.Utilities.SCLEditor.Components</PackageId>
+    <Title>Sequence® Configuration Language Editor</Title>
+    <Description>Blazor components for an in-browser SCL editor. Based on Microsofts's Monaco editor.</Description>
+    <Product>Sequence®</Product>
+
+    <PackageProjectUrl>https://gitlab.com/reductech/sequence/scl-editor</PackageProjectUrl>
+    <RepositoryUrl>https://gitlab.com/reductech/sequence/scl-editor.git</RepositoryUrl>
+    <PackageReleaseNotes>https://gitlab.com/reductech/sequence/scl-editor/-/blob/main/CHANGELOG.md</PackageReleaseNotes>
+    <PackageTags>ediscovery;forensics;automation;orchestration;edrm;sequence;scl;blazor;monaco</PackageTags>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+
+    <Authors>Reductech</Authors>
+    <Company>Reductech</Company>
+    <Copyright>Copyright (c) 2022 Reductech Ltd</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <BlazorEnableTimeZoneSupport>true</BlazorEnableTimeZoneSupport>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BlazorDownloadFile" Version="2.3.1.1" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
+    <PackageReference Include="BlazorMonaco" Version="2.1.0" />
+    <PackageReference Include="MELT" Version="0.8.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+    <PackageReference Include="MudBlazor" Version="6.0.7" />
+    <PackageReference Include="Reductech.Sequence.Connectors.FileSystem" Version="0.14.0" />
+    <PackageReference Include="Reductech.Sequence.Connectors.StructuredData" Version="0.14.0" />
+    <PackageReference Include="Reductech.Sequence.Core" Version="0.14.0" />
+    <PackageReference Include="Reductech.Sequence.Core.LanguageServer" Version="0.14.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="16.1.25" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="16.1.25" />
+    <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\DefineSCLLanguage.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

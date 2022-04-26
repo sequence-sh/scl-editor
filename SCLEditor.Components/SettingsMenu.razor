@@ -1,0 +1,25 @@
+﻿<div>
+  <MudToggleIconButton @bind-Toggled="@_isSettingsOpen"
+                       Icon="@Icons.Filled.Settings"
+                       Color="@Color.Default"
+                       ToggledIcon="@Icons.Filled.Close"
+                       ToggledColor="@Color.Default" />
+
+  <MudPopover Open="@_isSettingsOpen"
+              Fixed="true"
+              Class="pa-2"
+              AnchorOrigin='Origin.TopCenter'
+              TransformOrigin='Origin.BottomRight'>
+    <div class="d-flex flex-column">
+      @ChildContent
+    </div>
+  </MudPopover>
+</div>
+
+@code {
+
+  [Parameter]
+  public RenderFragment ChildContent { get; set; } = null!;
+
+  private bool _isSettingsOpen = false;
+}
