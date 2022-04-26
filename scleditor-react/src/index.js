@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import Another from './Another';
-import { SCLPlayground } from './SCLPlayground';
+import SCLPlayground from './SCLPlayground';
 
 ReactDOM.render(
   <React.StrictMode>
