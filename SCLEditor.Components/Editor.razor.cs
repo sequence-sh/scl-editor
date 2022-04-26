@@ -135,6 +135,9 @@ public partial class Editor : IDisposable
 
     private void Configuration_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (Instance is null)
+            return;
+
         if (e.PropertyName == nameof(EditorConfiguration.MinimapEnabled))
         {
             Instance.UpdateOptions(

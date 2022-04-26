@@ -73,7 +73,8 @@ public class CompoundFileSystem : INotifyCollectionChanged
     /// </summary>
     public async Task Download(string fileName)
     {
-        var text = FileSystem.GetFile(FilePrefix + fileName).TextContents;
+        var file = FileSystem.GetFile(fileName);
+        var text = file.TextContents;
 
         await BlazorDownloadFileService.DownloadFileFromText(
             fileName,
