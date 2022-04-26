@@ -24,7 +24,7 @@ class SCLPlayground extends React.Component {
     if (window.sclPlaygroundComponent) {
       window.sclPlaygroundComponent.then((component) => component.dispose());
       window.sclPlaygroundComponent = null;
-      this.setState({ loading: false });
+      this.setState({ loading: true });
     }
   }
 
