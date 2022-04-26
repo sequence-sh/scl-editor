@@ -1,25 +1,30 @@
-# SCLEditor
+# SCL Editor
 
-[![pipeline status](https://gitlab.com/reductech/edr/scl-editor/badges/master/pipeline.svg)](https://gitlab.com/reductech/edr/scl-editor/-/commits/master)
-[![coverage report](https://gitlab.com/reductech/edr/scl-editor/badges/master/coverage.svg)](https://gitlab.com/reductech/edr/scl-editor/-/commits/master)
-[![Gitter](https://badges.gitter.im/reductech/community.svg)](https://gitter.im/reductech/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+Sequence Configuration Language in-browser editor.
 
-An example of a .NET Core library that uses:
+Built using [Blazor Monaco](https://github.com/serdarciplak/BlazorMonaco),
+a wrapper around Microsoft's
+[Monaco editor](https://github.com/microsoft/monaco-editor) that powers vscode.
 
-- [xUnit](https://xunit.github.io/) for testing
-- [Stryker](https://stryker-mutator.io/) for mutation testing
-- [Coverlet](https://github.com/tonerdo/coverlet) for code coverage
-- and [GitLab CI](https://docs.gitlab.com/ee/ci/README.html) for... CI.
+## Running/Testing React Components
 
-# Releases
+Build/publish the `SCLEditor.React` project, copy it to `scleditor-react` app
+and run:
 
-Can be downloaded from the [Releases page](https://gitlab.com/reductech/edr/scl-editor/-/releases).
+```powershell
+Remove-Item -rec -for ./publish, ./scleditor-react/public/_content, ./scleditor-react/public/_framework -ErrorAction SilentlyContinue
+dotnet publish --output ./publish ./SCLEditor.React/SCLEditor.React.csproj
+Move-Item ./publish/wwwroot/_content, ./publish/wwwroot/_framework ./scleditor-react/public/ -ErrorAction Stop
+Remove-Item -rec -for ./publish
+cd ./scleditor-react
+npm install
+npm run start
+```
 
-# NuGet Packages
+or just run the `.\run-react.ps1` script.
 
-Are available for download from the [Releases page](https://gitlab.com/reductech/edr/scl-editor/-/releases)
-or from the `package nuget` jobs of the CI pipelines. They're also available in:
+## Ahead-of-Time Compilation
 
-- [Reductech Nuget feed](https://gitlab.com/reductech/nuget/-/packages) for releases
-- [Reductech Nuget-dev feed](https://gitlab.com/reductech/nuget-dev/-/packages) for releases, master branch and dev builds
-
+Setting `RunAOTCompilation` to enabled for `SCLEditor.React` publishes
+a `Release` bundle of 192MB vs 74MB for the standard bundle. Compile
+time also increases 10x so it's not used at the moment.
