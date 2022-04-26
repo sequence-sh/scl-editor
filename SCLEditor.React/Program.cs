@@ -8,18 +8,16 @@ using Reductech.Utilities.SCLEditor.React;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-builder.RootComponents.Add<PlaygroundReact>("#scl-playground-root");
-
-//builder.RootComponents.RegisterForJavaScript<PlaygroundReact>(
-//    "scl-playground-react",
-//    "sclPlaygroundInit"
-//);
+builder.RootComponents.RegisterForJavaScript<PlaygroundReact>(
+    "scl-playground-react",
+    "sclPlaygroundInit"
+);
 
 builder.Services.AddBlazorDownloadFile();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<CompoundFileSystem>();
 
-builder.Services.AddMudBlazorJsApi().AddMudServices();
+builder.Services.AddMudServices();
 
 builder.Services.AddHttpClient();
 
