@@ -8,6 +8,18 @@
     <RootNamespace>Reductech.Utilities.SCLEditor.React</RootNamespace>
     <!-- <RunAOTCompilation>true</RunAOTCompilation> -->
     <!-- <PublishTrimmed>True</PublishTrimmed> -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Reductech.Utilities.SCLEditor.React</PackageId>
+    <Title>Sequence® Configuration Language Editor - React Components</Title>
+    <Product>Sequence®</Product>
+    <RepositoryUrl>https://gitlab.com/reductech/sequence/scl-editor.git</RepositoryUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Authors>Reductech</Authors>
+    <Company>Reductech</Company>
+    <Copyright>Copyright (c) 2022 Reductech Ltd</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

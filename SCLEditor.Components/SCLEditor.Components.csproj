@@ -2,9 +2,30 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <RootNamespace>Reductech.Utilities.SCLEditor.Components</RootNamespace>
+    <AssemblyName>Reductech.Utilities.SCLEditor.Components</AssemblyName>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Reductech.Utilities.SCLEditor.Components</RootNamespace>
+    <Version>0.1.0$(VersionSuffix)</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Reductech.Utilities.SCLEditor.Components</PackageId>
+    <Title>Sequence® Configuration Language Editor</Title>
+    <Description>Blazor components for an in-browser SCL editor. Based on Microsofts's Monaco editor.</Description>
+    <Product>Sequence®</Product>
+
+    <PackageProjectUrl>https://gitlab.com/reductech/sequence/scl-editor</PackageProjectUrl>
+    <RepositoryUrl>https://gitlab.com/reductech/sequence/scl-editor.git</RepositoryUrl>
+    <PackageReleaseNotes>https://gitlab.com/reductech/sequence/scl-editor/-/blob/main/CHANGELOG.md</PackageReleaseNotes>
+    <PackageTags>ediscovery;forensics;automation;orchestration;edrm;sequence;scl;blazor;monaco</PackageTags>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+
+    <Authors>Reductech</Authors>
+    <Company>Reductech</Company>
+    <Copyright>Copyright (c) 2022 Reductech Ltd</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
