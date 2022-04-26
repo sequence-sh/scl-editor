@@ -18,6 +18,7 @@ package react dev:
     NUGET_TOKEN: $NUGET_TOKEN_DEV
   script:
     - dotnet workload install wasm-tools
+    - apt-get update && apt-get install python3 -y
     - dotnet publish --configuration $CONFIG --output ./publish ./SCLEditor.React/SCLEditor.React.csproj
     - mv ./publish/wwwroot/ ./scl-playground
   artifacts:
