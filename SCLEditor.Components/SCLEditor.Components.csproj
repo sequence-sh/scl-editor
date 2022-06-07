@@ -38,20 +38,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BlazorDownloadFile" Version="2.3.1.1" />
+    <PackageReference Include="BlazorDownloadFile" Version="2.4.0.2" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
     <PackageReference Include="BlazorMonaco" Version="2.1.0" />
     <PackageReference Include="MELT" Version="0.8.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.5" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-    <PackageReference Include="MudBlazor" Version="6.0.7" />
+    <PackageReference Include="MudBlazor" Version="6.0.10" />
     <PackageReference Include="Reductech.Sequence.Connectors.FileSystem" Version="0.14.0" />
     <PackageReference Include="Reductech.Sequence.Connectors.StructuredData" Version="0.14.0" />
     <PackageReference Include="Reductech.Sequence.Core" Version="0.14.0" />
     <PackageReference Include="Reductech.Sequence.Core.LanguageServer" Version="0.14.0" />
-    <PackageReference Include="System.IO.Abstractions" Version="16.1.25" />
-    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="16.1.25" />
+    <PackageReference Include="System.IO.Abstractions" Version="17.0.15" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="17.0.15" />
     <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
