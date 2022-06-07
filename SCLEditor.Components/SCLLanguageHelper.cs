@@ -115,8 +115,24 @@ public class SCLLanguageHelper : ILanguageHelper
         }
     }
 
-    public void OnDidChangeModelContent() { }
+    /// <summary>
+    /// Called when the model content is changed
+    /// </summary>
+    public void OnDidChangeModelContent()
+    {
+        if (_editor.Configuration is EditorConfigurationSCL { DiagnosticsEnabled: true })
+        {
+            _diagnosticsDebouncer.Dispatch(
+                async () => await _sclCodeHelper.SetDiagnostics(_editor.Instance, _runtime)
+            );
+        }
+    }
 
+    private readonly Debouncer _diagnosticsDebouncer = new(TimeSpan.FromMilliseconds(200));
+
+    /// <summary>
+    /// Run the SCL
+    /// </summary>
     public async Task Run()
     {
         if (OnRunStarted is not null)
