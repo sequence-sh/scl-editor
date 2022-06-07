@@ -1,7 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
 using Reductech.Sequence.Connectors.FileSystem;
-using Reductech.Sequence.Connectors.FileSystem.Steps;
-using Reductech.Sequence.Connectors.StructuredData;
 using Reductech.Sequence.Core;
 using Reductech.Sequence.Core.Abstractions;
 using Reductech.Sequence.Core.ExternalProcesses;
@@ -12,20 +10,30 @@ using Reductech.Sequence.Core.Util;
 
 namespace Reductech.Utilities.SCLEditor.Components;
 
+/// <summary>
+/// Language Helper for the Reductech SCL language
+/// </summary>
 public class SCLLanguageHelper : ILanguageHelper
 {
     private readonly IJSRuntime _runtime;
     private readonly IHttpClientFactory? _httpClientFactory;
     private readonly ITestLoggerFactory _loggerFactory;
 
+    private readonly Func<Task<StepFactoryStore>> _createStepFactoryStore;
+
+    /// <summary>
+    /// Create a new SCLLanguageHelper
+    /// </summary>
     public SCLLanguageHelper(
         IJSRuntime runtime,
         IHttpClientFactory? httpClientFactory,
-        ITestLoggerFactory loggerFactory)
+        ITestLoggerFactory loggerFactory,
+        Func<Task<StepFactoryStore>> createStepFactoryStore)
     {
-        _runtime           = runtime;
-        _httpClientFactory = httpClientFactory;
-        _loggerFactory     = loggerFactory;
+        _runtime                = runtime;
+        _httpClientFactory      = httpClientFactory;
+        _loggerFactory          = loggerFactory;
+        _createStepFactoryStore = createStepFactoryStore;
     }
 
     public StringBuilder ConsoleStream { get; set; } = new();
@@ -57,30 +65,24 @@ public class SCLLanguageHelper : ILanguageHelper
         #pragma warning restore CS1998
     {
         _editor = editor;
-
-        if (_editor.Configuration is not EditorConfigurationSCL config)
-            throw new ArgumentNullException(
-                nameof(_editor.Configuration),
-                $"{nameof(_editor.Configuration)} is required for the {nameof(SCLLanguageHelper)}."
-            );
-
-        Console.SetOut(new StringWriter(ConsoleStream));
-
-        var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
-            ExternalContext.Default,
-            typeof(FileRead).Assembly,
-            typeof(ToCSV).Assembly
-        );
-
-        _stepFactoryStore = stepFactoryStoreResult.Value;
-
-        _sclCodeHelper = new SCLCodeHelper(_stepFactoryStore, config);
     }
 
     public async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            if (_editor.Configuration is not EditorConfigurationSCL config)
+                throw new ArgumentNullException(
+                    nameof(_editor.Configuration),
+                    $"{nameof(_editor.Configuration)} is required for the {nameof(SCLLanguageHelper)}."
+                );
+
+            Console.SetOut(new StringWriter(ConsoleStream));
+
+            _stepFactoryStore = await _createStepFactoryStore.Invoke();
+
+            _sclCodeHelper = new SCLCodeHelper(_stepFactoryStore, config);
+
             var objRef = DotNetObjectReference.Create(_sclCodeHelper);
 
             //Function Defined in DefineSCLLanguage.js

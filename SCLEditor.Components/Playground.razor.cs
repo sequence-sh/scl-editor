@@ -1,6 +1,10 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using MudBlazor;
+using Reductech.Sequence.Connectors.FileSystem.Steps;
+using Reductech.Sequence.Connectors.StructuredData;
+using Reductech.Sequence.Core.Abstractions;
+using Reductech.Sequence.Core.Internal;
 
 namespace Reductech.Utilities.SCLEditor.Components;
 
@@ -127,29 +131,46 @@ public sealed partial class Playground : IDisposable
 
     private void AddEditorTab() => AddEditorTab(null);
 
+    private static Task<StepFactoryStore> CreateStepFactoryStore()
+    {
+        var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
+            ExternalContext.Default,
+            typeof(FileRead).Assembly,
+            typeof(ToCSV).Assembly
+        );
+
+        return Task.FromResult(stepFactoryStoreResult.Value);
+    }
+
     private void AddEditorTab(FileData? file)
     {
-        var languageHelper = new SCLLanguageHelper(Runtime, HttpClientFactory, _testLoggerFactory)
-        {
-            ConsoleStream       = _consoleStringBuilder,
-            OnNewConsoleMessage = SetOutputBadge,
-            OnNewLogMessage     = (_, _) => SetLogBadge(true),
-            OnStateHasChanged   = StateHasChanged,
-            OnRunComplete = async () =>
+        var languageHelper =
+            new SCLLanguageHelper(
+                Runtime,
+                HttpClientFactory,
+                _testLoggerFactory,
+                CreateStepFactoryStore
+            )
             {
-                if (_outputTextField.InputReference?.ElementReference != null)
-                    await Runtime.InvokeVoidAsync(
-                        "scrollToEnd",
-                        _outputTextField.InputReference.ElementReference
-                    );
+                ConsoleStream       = _consoleStringBuilder,
+                OnNewConsoleMessage = SetOutputBadge,
+                OnNewLogMessage     = (_, _) => SetLogBadge(true),
+                OnStateHasChanged   = StateHasChanged,
+                OnRunComplete = async () =>
+                {
+                    if (_outputTextField.InputReference?.ElementReference != null)
+                        await Runtime.InvokeVoidAsync(
+                            "scrollToEnd",
+                            _outputTextField.InputReference.ElementReference
+                        );
 
-                if (_logTextField.InputReference?.ElementReference != null)
-                    await Runtime.InvokeVoidAsync(
-                        "scrollToEnd",
-                        _logTextField.InputReference.ElementReference
-                    );
-            }
-        };
+                    if (_logTextField.InputReference?.ElementReference != null)
+                        await Runtime.InvokeVoidAsync(
+                            "scrollToEnd",
+                            _logTextField.InputReference.ElementReference
+                        );
+                }
+            };
 
         if (file is null)
         {
@@ -223,6 +244,7 @@ public sealed partial class Playground : IDisposable
 
 #endregion EditorTabs
 
+    /// <inheritdoc />
     protected override void OnAfterRender(bool firstRender)
     {
         if (_updateEditorTabIndex)
