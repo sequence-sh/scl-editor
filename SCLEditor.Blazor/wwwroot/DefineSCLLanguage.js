@@ -42,7 +42,7 @@ async function provideSignatureHelp(model, position, sclHelper) {
 
   return {
     value: res,
-    dispose: () => {},
+    dispose: () => { },
   };
 }
 
@@ -144,8 +144,9 @@ function registerSCL(sclHelper) {
 
         // strings
         [/"([^"\\]|\\.)*$/, 'string.invalid'], // non-teminated string
-        [/"/, { token: 'string.dquote', bracket: '@open', next: '@string' }],
-        [/'/, { token: 'string.squote', bracket: '@open', next: '@string' }],
+        [/"""/, { token: 'string.multiline', bracket: '@open', next: '@stringMulti' }],
+        [/"/, { token: 'string.dquote', bracket: '@open', next: '@stringDouble' }],
+        [/'/, { token: 'string.squote', bracket: '@open', next: '@stringSingle' }],
       ],
 
       comment: [
@@ -155,12 +156,24 @@ function registerSCL(sclHelper) {
         [/[\/*]/, 'comment'],
       ],
 
-      string: [
-        [/[^\\"'']+/, 'string'],
+      stringMulti: [
+        [/"""/, { token: 'string.multiline', bracket: '@close', next: '@pop' }],
+        [/.+/, 'string'],
+        
+      ],
+
+      stringSingle: [
+        [/[^'']+/, 'string'],
+        [/@escapes/, 'string.escape'],
+        [/\\./, 'string.escape.invalid'],
+        [/'/, { token: 'string.squote', bracket: '@close', next: '@pop' }],
+      ],
+
+      stringDouble: [
+        [/[^\\"]+/, 'string'],
         [/@escapes/, 'string.escape'],
         [/\\./, 'string.escape.invalid'],
         [/"/, { token: 'string.dquote', bracket: '@close', next: '@pop' }],
-        [/'/, { token: 'string.squote', bracket: '@close', next: '@pop' }],
       ],
 
       whitespace: [
