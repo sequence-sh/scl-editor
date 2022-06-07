@@ -159,7 +159,7 @@ function registerSCL(sclHelper) {
       stringMulti: [
         [/"""/, { token: 'string.multiline', bracket: '@close', next: '@pop' }],
         [/.+/, 'string'],
-
+        
       ],
 
       stringSingle: [
