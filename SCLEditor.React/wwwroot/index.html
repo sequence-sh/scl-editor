@@ -14,9 +14,77 @@
       href="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.css"
       rel="stylesheet"
     />
+    <style>
+      #loading {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        margin-top: 30vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      #scl-playground-root {
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="loading">
+      <svg
+        width="256"
+        height="256"
+        version="1.1"
+        viewBox="0 0 256 256"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect x="6" y="6" width="104" height="51" rx="10" fill="#efa500">
+          <animate
+            id="yellow"
+            attributeName="width"
+            keyTimes="0; .303; 1"
+            values="0; 104; 104"
+            dur="5s"
+            fill="freeze"
+            repeatCount="indefinite"
+          />
+        </rect>
+        <rect x="6" y="68" width="148" height="51" rx="10" fill="#c85a16">
+          <animate
+            id="orange"
+            attributeName="width"
+            keyTimes="0; .432; 1"
+            values="0; 148; 148"
+            dur="5s"
+            fill="freeze"
+            repeatCount="indefinite"
+          />
+        </rect>
+        <rect x="6" y="132" width="240" height="51" rx="10" fill="#a9cabf">
+          <animate
+            id="mint"
+            attributeName="width"
+            keyTimes="0; .7; 1"
+            values="0; 240; 240"
+            dur="5s"
+            fill="freeze"
+            repeatCount="indefinite"
+          />
+        </rect>
+        <rect x="6" y="194" width="128" height="51" rx="10" fill="#244b5c">
+          <animate
+            id="teal"
+            attributeName="width"
+            keyTimes="0; .373; 1"
+            values="0; 128; 128"
+            dur="5s"
+            fill="freeze"
+            repeatCount="indefinite"
+          />
+        </rect>
+      </svg>
+    </div>
     <div>
       <div id="scl-playground-root"></div>
     </div>
@@ -28,12 +96,23 @@
     </script>
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
     <script src="_content/BlazorMonaco/jsInterop.js"></script>
-    <script src="_content/SCLEditor.Components/DefineSCLLanguage.js"></script>
+    <script src="_content/Reductech.Utilities.SCLEditor.Components/DefineSCLLanguage.js"></script>
     <script src="_framework/blazor.webassembly.js" autostart="true"></script>
     <script>
+      window.loadStart = Date.now();
       window.sclPlaygroundInit = function (component, params) {
         const parentElement = document.querySelector('#scl-playground-root');
         window.Blazor.rootComponents.add(parentElement, component, {});
+      };
+      window.onPlaygroundLoad = function () {
+        const elapsed = (Date.now() - window.loadStart) / 1000;
+        console.log(`Playground load: ${elapsed}s`);
+        setTimeout(() => {
+          const loadingDiv = document.querySelector('#loading');
+          loadingDiv.style.display = 'none';
+          const playgroundDiv = document.querySelector('#scl-playground-root');
+          playgroundDiv.style.display = 'block';
+        }, Math.max([0, 5 - elapsed]));
       };
     </script>
   </body>
