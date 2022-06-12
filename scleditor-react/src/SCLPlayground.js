@@ -70,7 +70,11 @@ class SCLPlayground extends React.Component {
           '_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js'
         )
       )
-      .then(() => SCLPlayground.addScript('_content/SCLEditor.Components/DefineSCLLanguage.js'))
+      .then(() =>
+        SCLPlayground.addScript(
+          '_content/Reductech.Utilities.SCLEditor.Components/DefineSCLLanguage.js'
+        )
+      )
       .then(() => SCLPlayground.addScript('_framework/blazor.webassembly.js', { autostart: false }))
       // eslint-disable-next-line no-undef
       .then(() => Blazor.start().then(callback))
