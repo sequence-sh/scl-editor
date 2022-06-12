@@ -40,3 +40,7 @@ package react release:
     paths:
       - './scl-playground'
     expire_in: never
+
+mutation testing:
+  rules:
+    - when: never
