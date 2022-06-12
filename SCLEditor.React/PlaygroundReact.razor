@@ -1,4 +1,6 @@
+@using System.Web
 @inject IJSRuntime Js
+@inject NavigationManager Nav
 
 <MudThemeProvider Theme='@Themes.CurrentTheme' DefaultScrollbar='true' />
 <MudDialogProvider />
@@ -8,7 +10,7 @@
 
 @code {
   [Parameter]
-  public bool IsDarkMode { get; set; } = false;
+  public bool IsDarkMode { get; set; }
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
@@ -20,4 +22,12 @@
     // ignore javascript errors, including if callback not found
     catch (JSException) {}
   }
+
+  protected override void OnParametersSet()
+  {
+    var query = HttpUtility.ParseQueryString(new UriBuilder(Nav.Uri).Query);
+    IsDarkMode = (query["darkMode"] ?? string.Empty).Equals("true", StringComparison.InvariantCultureIgnoreCase);
+    Themes.IsDarkMode.OnNext(IsDarkMode);
+  }
+
 }
