@@ -32,7 +32,7 @@ function blazorInit() {
       addScript('_content/BlazorMonaco/jsInterop.js');
     })
     .then(() => addScript('_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js'))
-    .then(() => addScript('_content/SCLEditor.Components/DefineSCLLanguage.js'))
+    .then(() => addScript('_content/Reductech.Utilities.SCLEditor.Components/DefineSCLLanguage.js'))
     .then(() => addScript('_framework/blazor.webassembly.js'))
     .catch((error) => console.error(error));
   // eslint-disable-next-line no-undef
