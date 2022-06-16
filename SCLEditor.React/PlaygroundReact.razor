@@ -1,4 +1,6 @@
 @using System.Web
+@using System.Reactive.Linq
+@using System.Reactive.Subjects
 @inject IJSRuntime Js
 @inject NavigationManager Nav
 
@@ -6,28 +8,46 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<Playground IsDarkMode='@IsDarkMode' />
+<Playground />
 
 @code {
-  [Parameter]
-  public bool IsDarkMode { get; set; }
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    try
+    if (firstRender)
     {
-      if (firstRender)
+      Themes.IsDarkMode
+        .TakeUntil(_disposed)
+        .Select(x => Observable.FromAsync(() => InvokeAsync(StateHasChanged)))
+        .Switch()
+        .Subscribe();
+
+      try
+      {
         await Js.InvokeVoidAsync("onPlaygroundLoad");
+      }
+      // ignore javascript errors, including if callback not found
+      catch (JSException) { }
+
     }
-    // ignore javascript errors, including if callback not found
-    catch (JSException) {}
   }
 
   protected override void OnParametersSet()
   {
     var query = HttpUtility.ParseQueryString(new UriBuilder(Nav.Uri).Query);
-    IsDarkMode = (query["darkMode"] ?? string.Empty).Equals("true", StringComparison.InvariantCultureIgnoreCase);
-    Themes.IsDarkMode.OnNext(IsDarkMode);
+    var isDarkMode = (query["darkMode"] ?? string.Empty).Equals("true", StringComparison.InvariantCultureIgnoreCase);
+    Themes.IsDarkMode.OnNext(isDarkMode);
   }
+
+  [JSInvokable]
+  public static Task SetIsDarkMode(bool isDarkMode)
+  {
+    Themes.IsDarkMode.OnNext(isDarkMode);
+    return Task.CompletedTask;
+  }
+
+  private readonly Subject<bool> _disposed = new();
+
+  public void Dispose() => _disposed.OnNext(true);
 
 }

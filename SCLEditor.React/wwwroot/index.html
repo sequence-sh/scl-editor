@@ -97,7 +97,7 @@
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
     <script src="_content/BlazorMonaco/jsInterop.js"></script>
     <script src="_content/Reductech.Utilities.SCLEditor.Components/DefineSCLLanguage.js"></script>
-    <script src="_framework/blazor.webassembly.js" autostart="true"></script>
+    <script src="js/iframeResizer.contentWindow.min.js"></script>
     <script>
       window.loadStart = Date.now();
       window.sclPlaygroundInit = function (component, params) {
@@ -105,15 +105,23 @@
         window.Blazor.rootComponents.add(parentElement, component, {});
       };
       window.onPlaygroundLoad = function () {
-        const elapsed = (Date.now() - window.loadStart) / 1000;
-        console.log(`Playground load: ${elapsed}s`);
+        const elapsed = Date.now() - window.loadStart;
+        console.log(`Playground load: ${elapsed / 1000}s`);
         setTimeout(() => {
           const loadingDiv = document.querySelector('#loading');
           loadingDiv.style.display = 'none';
           const playgroundDiv = document.querySelector('#scl-playground-root');
           playgroundDiv.style.display = 'block';
-        }, Math.max([0, 5 - elapsed]));
+        }, Math.max(0, 4500 - elapsed));
+      };
+      window.setDarkMode = function (isDarkMode) {
+        DotNet.invokeMethodAsync(
+          'Reductech.Utilities.SCLEditor.React',
+          'SetIsDarkMode',
+          isDarkMode
+        );
       };
     </script>
+    <script src="_framework/blazor.webassembly.js" autostart="true"></script>
   </body>
 </html>
