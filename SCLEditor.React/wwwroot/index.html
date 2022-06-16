@@ -114,6 +114,13 @@
           playgroundDiv.style.display = 'block';
         }, Math.max(0, 4500 - elapsed));
       };
+      window.setDarkMode = function (isDarkMode) {
+        DotNet.invokeMethodAsync(
+          'Reductech.Utilities.SCLEditor.React',
+          'SetIsDarkMode',
+          isDarkMode
+        );
+      };
     </script>
     <script src="_framework/blazor.webassembly.js" autostart="true"></script>
   </body>
