@@ -13,17 +13,73 @@ namespace Reductech.Utilities.SCLEditor.Components;
 /// </summary>
 public sealed partial class Playground : IDisposable
 {
-    private const string DefaultEditorContent = @"- <list> = 
-  (a: 1 b: 'two'),
-  (a: 3 b: 'four'),
-  (a: 5 c: 'six')
+    private const string DefaultEditorContent = @"# This is a comment, it's ignored when running SCL
+# If you get stuck writing SCL in the Playground, use Ctrl + Space for a hint
 
-- <list> | EntityMapProperties To: (
-    'ColA': 'a'
-    'ColB': [ 'b', 'c' ]
-  ) | ToCSV | Print
+# Variables in SCL are defined using angle brackets <>
+# This is a variable, a data placeholder:
+- <greeting> = 'hello'
 
-- <list> | ToJsonArray | Log
+# Steps are 'units of work' or actions in an application
+# This is a step that will make the value of <greeting> upper case
+- <greeting> = ChangeCase of: <greeting> to: 'Upper'
+
+# Here is a step that will print the value to the 'Output' tab:
+- Print <greeting>
+
+# And this is a step that will log the value to the 'Log' tab.
+# Logging in Sequence is highly configurable, instead of the 'Log' tab
+# it could go to a file, a database, an Elastic instance, etc.
+- Log <greeting>
+
+# Data in SCL is represented as Entities which can be defined using round brackets ().
+# An entity is a collection of property names and values, or key-value pairs. The
+# property name precedes a colon ':' and the property value follows - name: 'value'.
+- <entity> = (name: 'value1' key: 'value2')
+
+# To get a property value from an entity, use the EntityGetValue step:
+- <value> = EntityGetValue Entity: <entity> Property: 'name'
+- Print <value> # will print 'value1'
+
+# EntityGetValue also has a shorthand notation - the period '.'
+- Print <entity>.name
+
+# Lists (or Arrays as we call them) in SCL can be defined using a comma, or
+# square brackets []. Here is a list of entities:
+- <list> = (a: 1 b: 'two'), (a: 3 b: 'four'), (a: 5 c: 'six')
+
+# To access items in a list, use ArrayElementAtIndex step, or the square bracket
+# shorthand []:
+- Print ArrayElementAtIndex <list> 2 # prints (a: 3 b: 'four')
+- Print <list>[2] # does exactly the same and prints (a: 3 b: 'four')
+
+# Many steps are available to work with entities and arrays.
+- Print EntityGetProperties <entity> # will print out a list of properties: [""name"", ""key""]
+- Print ArrayLength <list> # will print out 3
+
+# There are also many steps available to work with text/strings. An example:
+- Print StringReplace In: 'A long sentence' Find: 'long' Replace: 'short'
+
+# The pipe character | is used to chain steps into sequences. The output of the
+# previous step is used as the input for the next. Here is a sequence of steps
+# that takes the list of entites, converts into JSON and writes it to a file:
+- <list> | ToJsonArray | WriteToFile Path: 'my-list.json'
+
+# Sequence is designed to be extensible via connectors. The playground has the
+# File System and Structured Data connectors installed (many others are available).
+# The Strutured Data connector has steps to convert entities to/from various data
+# formats. Here is a sequence of steps that reads the json file, converts it to
+# entities, maps the properties to different names, and export to a CSV file:
+- <myfile> = 'my-list.json'
+- <mynewfile> = StringReplace In: <myfile> Find: 'json' Replace: 'csv'
+- FileRead <myfile> | FromJsonArray | EntityMapProperties To: (
+    'ColA': 'a'          # Property 'a' will be renamed to 'ColA'
+    'ColB': [ 'b', 'c' ] # Both 'b' and 'c' get renamed to 'ColB'
+  ) | ToCSV | WriteToFile <mynewfile>
+
+# Steps and parameters in SCL can have one or more aliases. Above, 'FileRead' is
+# used, but here is the same step, but using its alias 'ReadFromFile':
+- ReadFromFile <mynewfile> | Print
 ";
 
     private const string DefaultSCLExtension = ".scl";
