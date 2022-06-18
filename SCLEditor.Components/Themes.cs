@@ -8,13 +8,13 @@ namespace Reductech.Utilities.SCLEditor.Components;
 /// </summary>
 public static class Themes
 {
-    //Reductech Color
-
-    //language=css prefix=body{color: postfix=}
-    public static string Color2 = "#a9cabf";
+    //Reductech Colors
 
     //language=css prefix=body{color: postfix=}
     public static string Color1 = "#c85a16";
+
+    //language=css prefix=body{color: postfix=}
+    public static string Color2 = "#a9cabf";
 
     //language=css prefix=body{color: postfix=}
     public static string Color3 = "#efa500";
@@ -47,21 +47,21 @@ public static class Themes
     {
         Palette = new Palette()
         {
-            Primary                  = Color1,
-            Secondary                = Color2,
-            Tertiary                 = Color3,
+            Primary                  = Color3,
+            Secondary                = Color1,
+            Tertiary                 = Color2,
             Black                    = Color4,
-            Background               = "#32333d",
+            Background               = "#1b1b1d",
             BackgroundGrey           = "#27272f",
             Surface                  = "#373740",
             DrawerBackground         = "#27272f",
             DrawerText               = "rgba(255,255,255, 0.50)",
             DrawerIcon               = "rgba(255,255,255, 0.50)",
             AppbarBackground         = Color4,
-            AppbarText               = "rgba(255,255,255, 0.70)",
-            TextPrimary              = "rgba(255,255,255, 0.70)",
-            TextSecondary            = "rgba(255,255,255, 0.50)",
-            ActionDefault            = "#adadb1",
+            AppbarText               = "rgba(255,255,255, 0.85)",
+            TextPrimary              = "rgba(255,255,255, 0.85)",
+            TextSecondary            = "rgba(255,255,255, 0.60)",
+            ActionDefault            = "#ccccd1",
             ActionDisabled           = "rgba(255,255,255, 0.26)",
             ActionDisabledBackground = "rgba(255,255,255, 0.12)",
             Divider                  = "rgba(255,255,255, 0.12)",
