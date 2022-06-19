@@ -14,7 +14,12 @@ namespace Reductech.Utilities.SCLEditor.Components;
 public sealed partial class Playground : IDisposable
 {
     private const string DefaultEditorContent = @"# This is a comment, it's ignored when running SCL
-# If you get stuck writing SCL in the Playground, use Ctrl + Space for a hint
+# If you get stuck when using the Playground, use Ctrl + Space for a hint
+
+# Steps in SCL start with a dash '-' or a pipeline '|'. Just like bullet
+# points in a list or arrays in YAML:
+- <sum> = 1 + 1
+- Print <sum>
 
 # Variables in SCL are defined using angle brackets <>
 # This is a variable, a data placeholder:
@@ -54,7 +59,7 @@ public sealed partial class Playground : IDisposable
 - Print <list>[2] # does exactly the same and prints (a: 3 b: 'four')
 
 # Many steps are available to work with entities and arrays.
-- Print EntityGetProperties <entity> # will print out a list of properties: [""name"", ""key""]
+- Print EntityGetProperties <entity> # will print out a list of properties: ['name', 'key']
 - Print ArrayLength <list> # will print out 3
 
 # There are also many steps available to work with text/strings. An example:
@@ -63,11 +68,11 @@ public sealed partial class Playground : IDisposable
 # The pipe character | is used to chain steps into sequences. The output of the
 # previous step is used as the input for the next. Here is a sequence of steps
 # that takes the list of entites, converts into JSON and writes it to a file:
-- <list> | ToJsonArray | WriteToFile Path: 'my-list.json'
+- <list> | ToJsonArray | FileWrite Path: 'my-list.json'
 
 # Sequence is designed to be extensible via connectors. The playground has the
 # File System and Structured Data connectors installed (many others are available).
-# The Strutured Data connector has steps to convert entities to/from various data
+# The Strutured Data connector has steps to convert entities To/From various data
 # formats. Here is a sequence of steps that reads the json file, converts it to
 # entities, maps the properties to different names, and export to a CSV file:
 - <myfile> = 'my-list.json'
@@ -75,7 +80,7 @@ public sealed partial class Playground : IDisposable
 - FileRead <myfile> | FromJsonArray | EntityMapProperties To: (
     'ColA': 'a'          # Property 'a' will be renamed to 'ColA'
     'ColB': [ 'b', 'c' ] # Both 'b' and 'c' get renamed to 'ColB'
-  ) | ToCSV | WriteToFile <mynewfile>
+  ) | ToCSV | FileWrite <mynewfile>
 
 # Steps and parameters in SCL can have one or more aliases. Above, 'FileRead' is
 # used, but here is the same step, but using its alias 'ReadFromFile':
