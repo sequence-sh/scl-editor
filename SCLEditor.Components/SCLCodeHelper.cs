@@ -1,4 +1,5 @@
 ﻿using Reductech.Sequence.Core.Internal;
+using Reductech.Sequence.Core.Internal.Documentation;
 using Reductech.Sequence.Core.LanguageServer;
 using Reductech.Utilities.SCLEditor.Components.Objects;
 
@@ -48,7 +49,12 @@ public class SCLCodeHelper
 
         var position = vsCompletionRequest.Position.AsLinePosition();
 
-        var result = CompletionHelper.GetCompletionResponse(code, position, StepFactoryStore);
+        var result = CompletionHelper.GetCompletionResponse(
+            code,
+            position,
+            StepFactoryStore,
+            DocumentationOptions.DefaultDocumentationOptionsMonaco
+        );
 
         return new(result);
     }
@@ -83,7 +89,8 @@ public class SCLCodeHelper
         var response = SignatureHelpHelper.GetSignatureHelpResponse(
             code,
             vsSignatureHelpRequest.Position.AsLinePosition(),
-            StepFactoryStore
+            StepFactoryStore,
+            DocumentationOptions.DefaultDocumentationOptionsMonaco
         );
 
         return new(response);
