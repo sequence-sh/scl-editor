@@ -8,7 +8,7 @@
     <AssemblyName>Reductech.Utilities.SCLEditor.Components</AssemblyName>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.1.0$(VersionSuffix)</Version>
+    <Version>0.16.0$(VersionSuffix)</Version>
   </PropertyGroup>
 
   <PropertyGroup>
