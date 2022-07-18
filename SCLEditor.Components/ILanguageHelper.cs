@@ -8,3 +8,5 @@ public interface ILanguageHelper : IDisposable
 
     public void OnDidChangeModelContent();
 }
+
+public interface IEditorWrapper { }

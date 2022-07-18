@@ -1,0 +1,53 @@
+﻿
+
+<div>
+  <div class='px-2'>
+
+    @if (HeaderEnabled && Title is not null)
+    {
+      <MudText Typo='Typo.h5' Class='pb-2 pl-3'>
+        @Title
+      </MudText>
+    }
+
+    <MonacoDiffEditor Id="@Id"
+                      @ref='@Instance'
+                      CssClass='nested-monaco-editor'
+                      ConstructionOptions='@ConstructionOptions'
+
+    />
+
+  </div>
+
+  @if (ToolbarEnabled)
+  {
+    <MudDivider DividerType='DividerType.FullWidth' Class='mt-2' />
+
+    <MudToolBar Dense='true' DisableGutters='true'>
+      @if (Toolbar is not null)
+      {
+        @Toolbar
+      }
+      @if (ConfigurationMenu is not null)
+      {
+        <MudSpacer />
+        <CascadingValue Value='@Configuration'>
+          @ConfigurationMenu
+        </CascadingValue>
+      }
+    </MudToolBar>
+  }
+
+</div>
+
+
+
+
+
+<style>
+  .nested-monaco-editor {
+    text-align: initial;
+    height: 500px;
+  }
+</style>
+
