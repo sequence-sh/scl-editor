@@ -2,6 +2,10 @@ include:
   - project: reductech/templates/cicd/dotnet
     file: .gitlab-ci.linux.yml
 
+version check dev:
+  variables:
+    PROJECT_PATH: ./*/SCLEditor.Components.csproj
+
 package react dev:
   stage: package
   extends:
