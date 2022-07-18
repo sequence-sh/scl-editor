@@ -2,6 +2,10 @@ include:
   - project: reductech/templates/cicd/dotnet
     file: .gitlab-ci.linux.yml
 
+version check dev:
+  script:
+    - echo 'skipped'
+
 package react dev:
   stage: package
   extends:
