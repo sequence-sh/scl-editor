@@ -3,8 +3,8 @@ include:
     file: .gitlab-ci.linux.yml
 
 version check dev:
-  script:
-    - echo 'skipped'
+  variables:
+    PROJECT_PATH: ./*/SCLEditor.Components.csproj
 
 package react dev:
   stage: package
