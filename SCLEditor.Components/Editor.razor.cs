@@ -11,7 +11,10 @@ public partial class Editor : IDisposable
     /// Unique Id for this editor
     /// </summary>
     [Parameter]
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    [EditorRequired]
+    #pragma warning disable CS8618
+    public string Id { get; set; }
+    #pragma warning restore CS8618
 
     /// <summary>
     /// Title for this editor
