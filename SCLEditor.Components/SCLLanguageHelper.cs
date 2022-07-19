@@ -16,7 +16,7 @@ namespace Reductech.Utilities.SCLEditor.Components;
 public class SCLLanguageHelper : ILanguageHelper
 {
     private readonly IJSRuntime _runtime;
-    private readonly IHttpClientFactory? _httpClientFactory;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ITestLoggerFactory _loggerFactory;
 
     private readonly Func<Task<StepFactoryStore>> _createStepFactoryStore;
@@ -26,95 +26,125 @@ public class SCLLanguageHelper : ILanguageHelper
     /// </summary>
     public SCLLanguageHelper(
         IJSRuntime runtime,
-        IHttpClientFactory? httpClientFactory,
+        IHttpClientFactory httpClientFactory,
         ITestLoggerFactory loggerFactory,
-        Func<Task<StepFactoryStore>> createStepFactoryStore)
+        Func<Task<StepFactoryStore>> createStepFactoryStore,
+        StringBuilder consoleStream)
     {
         _runtime                = runtime;
         _httpClientFactory      = httpClientFactory;
         _loggerFactory          = loggerFactory;
         _createStepFactoryStore = createStepFactoryStore;
+        ConsoleStream           = consoleStream;
     }
 
-    public StringBuilder ConsoleStream { get; set; } = new();
-
-    public Action<bool>? OnNewConsoleMessage { get; set; }
-
-    public Action? OnStateHasChanged { get; set; }
-
-    public Func<Task>? OnRunStarted { get; set; }
-
-    public Func<Task>? OnRunComplete { get; set; }
-
-    public Action? OnRunCancelled { get; set; }
-
-    public PropertyChangedEventHandler? OnNewLogMessage { get; set; }
-
+    /// <summary>
+    /// Cancellation token for the currently running sequence
+    /// </summary>
     public CancellationTokenSource? RunCancellation { get; private set; }
 
     private readonly ICompression _compression = new CompressionAdapter();
-
     private StepFactoryStore _stepFactoryStore = null!;
 
     private SCLCodeHelper _sclCodeHelper = null!;
 
-    private Editor _editor = null!;
+    /// <summary>
+    /// Stream of messages to the console
+    /// </summary>
+    public StringBuilder ConsoleStream { get; }
 
-    #pragma warning disable CS1998
-    public async Task OnInitializedAsync(Editor editor)
-        #pragma warning restore CS1998
+    /// <summary>
+    /// Called when new console messages are sent
+    /// </summary>
+    public event EventHandler? OnNewConsoleMessage;
+
+    /// <summary>
+    /// Called when the state changes
+    /// </summary>
+    public event EventHandler? OnStateChanged;
+
+    /// <summary>
+    /// Called when a run starts
+    /// </summary>
+    public event EventHandler? OnRunStarted;
+
+    /// <summary>
+    /// Called when a run completes
+    /// </summary>
+    public event EventHandler? OnRunComplete;
+
+    /// <summary>
+    /// Called when a run is cancelled
+    /// </summary>
+    public event EventHandler? OnRunCancelled;
+
+    /// <summary>
+    /// Called when there is a new log message
+    /// </summary>
+    public event EventHandler? OnLogMessage;
+
+    /// <summary>
+    /// The editor wrapper
+    /// </summary>
+    public IEditorWrapper Editor
     {
-        _editor = editor;
+        get
+        {
+            if (_editor is null)
+            {
+                throw new Exception("This SCL language helper has not been set up");
+            }
+
+            return _editor;
+        }
     }
 
-    public async Task OnAfterRenderAsync(bool firstRender)
+    private IEditorWrapper? _editor;
+
+    /// <inheritdoc />
+    public async Task InitialSetup(IEditorWrapper editorWrapper)
     {
-        if (firstRender)
+        if (_editor is not null)
         {
-            if (_editor.Configuration is not EditorConfigurationSCL config)
-                throw new ArgumentNullException(
-                    nameof(_editor.Configuration),
-                    $"{nameof(_editor.Configuration)} is required for the {nameof(SCLLanguageHelper)}."
-                );
-
-            Console.SetOut(new StringWriter(ConsoleStream));
-
-            _stepFactoryStore = await _createStepFactoryStore.Invoke();
-
-            _sclCodeHelper = new SCLCodeHelper(_stepFactoryStore, config);
-
-            var objRef = DotNetObjectReference.Create(_sclCodeHelper);
-
-            //Function Defined in DefineSCLLanguage.js
-            await _runtime.InvokeVoidAsync("registerSCL", objRef);
-
-            var model = await _editor.Instance.GetModel();
-            await MonacoEditorBase.SetModelLanguage(model, "scl");
-
-            await _editor.Instance.AddAction(
-                "runSCL",
-                "Run SCL",
-                new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_R },
-                null,
-                null,
-                "SCL",
-                1.5,
-                // ReSharper disable once AsyncVoidLambda
-                async (_, _) => await Run()
-            );
-
-            await _editor.Instance.AddAction(
-                "formatscl",
-                "Format SCL",
-                new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_F },
-                null,
-                null,
-                "SCL",
-                1.5,
-                // ReSharper disable once AsyncVoidLambda
-                async (_, _) => await FormatSCL()
-            );
+            throw new Exception("This SCL Language Helper has already been set up.");
         }
+
+        _editor = editorWrapper;
+
+        Console.SetOut(new StringWriter(ConsoleStream));
+        _stepFactoryStore = await _createStepFactoryStore.Invoke();
+        _sclCodeHelper    = new SCLCodeHelper(_stepFactoryStore, Editor.Configuration);
+        var objRef = DotNetObjectReference.Create(_sclCodeHelper);
+
+        //Function Defined in DefineSCLLanguage.js
+        await _runtime.InvokeVoidAsync("registerSCL", objRef);
+
+        var model = await Editor.GetModelAsync();
+        await MonacoEditorBase.SetModelLanguage(model, "scl");
+
+        await Editor.AddActionAsync(
+            "runSCL",
+            "Run SCL",
+            new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_R },
+            null,
+            null,
+            "SCL",
+            1.5,
+            // ReSharper disable once AsyncVoidLambda
+            async (_, _) => await Run()
+        );
+
+        await Editor.AddActionAsync(
+            "formatscl",
+            "Format SCL",
+            new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_F },
+            null,
+            null,
+            "SCL",
+            1.5,
+            // ReSharper disable once AsyncVoidLambda
+            async (_, _) => await FormatSCL()
+        );
     }
 
     /// <summary>
@@ -122,11 +152,10 @@ public class SCLLanguageHelper : ILanguageHelper
     /// </summary>
     public void OnDidChangeModelContent()
     {
-        if (_editor.Configuration is EditorConfigurationSCL { DiagnosticsEnabled: true })
+        if (Editor.Configuration.DiagnosticsEnabled)
         {
-            _diagnosticsDebouncer.Dispatch(
-                async () => await _sclCodeHelper.SetDiagnostics(_editor.Instance, _runtime)
-            );
+            async void Action() => await Editor.SetDiagnostics(_runtime, _stepFactoryStore);
+            _diagnosticsDebouncer.Dispatch(Action);
         }
     }
 
@@ -137,27 +166,25 @@ public class SCLLanguageHelper : ILanguageHelper
     /// </summary>
     public async Task Run()
     {
-        if (OnRunStarted is not null)
-            await OnRunStarted.Invoke();
+        OnRunStarted?.Invoke(this, EventArgs.Empty);
 
-        var sclText = await _editor.Instance.GetValue();
+        var sclText = await Editor.GetCodeAsync();
 
         RunCancellation?.Cancel();
         var cts = new CancellationTokenSource();
         RunCancellation = cts;
-        OnStateHasChanged?.Invoke();
+        OnStateChanged?.Invoke(this, EventArgs.Empty);
 
         var loggerSink = _loggerFactory.CreateLogger("SCL");
         var logger     = new ObservableLogger(loggerSink);
 
-        if (OnNewLogMessage is not null)
-            logger.PropertyChanged += OnNewLogMessage;
+        OnLogMessage?.Invoke(this, EventArgs.Empty);
 
         var stepResult = SCLParsing.TryParseStep(sclText)
             .Bind(x => x.TryFreeze(SCLRunner.RootCallerMetadata, _stepFactoryStore));
 
         ConsoleStream.AppendLine("Sequence Running\n");
-        OnNewConsoleMessage?.Invoke(true);
+        OnNewConsoleMessage?.Invoke(this, EventArgs.Empty);
 
         if (stepResult.IsFailure)
         {
@@ -167,9 +194,9 @@ public class SCLLanguageHelper : ILanguageHelper
         {
             List<(string, object)> injected = new();
 
-            if (_editor.FileSystem?.FileSystem is not null)
+            if (Editor.FileSystem is not null)
             {
-                injected.Add((ConnectorInjection.FileSystemKey, _editor.FileSystem.FileSystem));
+                injected.Add((ConnectorInjection.FileSystemKey, Editor.FileSystem));
             }
 
             injected.Add((ConnectorInjection.CompressionKey, _compression));
@@ -202,35 +229,41 @@ public class SCLLanguageHelper : ILanguageHelper
         }
 
         RunCancellation = null;
-        OnStateHasChanged?.Invoke();
+        OnStateChanged?.Invoke(this, EventArgs.Empty);
 
         ConsoleStream.AppendLine();
-        OnNewConsoleMessage?.Invoke(true);
+        OnNewConsoleMessage?.Invoke(this, EventArgs.Empty);
 
-        if (OnRunComplete is not null)
-            await OnRunComplete.Invoke();
+        OnRunComplete?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>
+    /// Cancels SCL if it is running
+    /// </summary>
     public void CancelRun()
     {
         RunCancellation?.Cancel();
         RunCancellation = null;
-        OnRunCancelled?.Invoke();
+        OnRunCancelled?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>
+    /// Apply formatting to the SCL in the editor
+    /// </summary>
     public async Task FormatSCL()
     {
-        var sclText = await _editor.Instance.GetValue();
+        var sclText = await Editor.GetCodeAsync();
 
-        var selections = await _editor.Instance.GetSelections();
+        var selections = await Editor.GetSelectionsAsync();
 
-        var uri = (await _editor.Instance.GetModel()).Uri;
+        var uri = (await Editor.GetModelAsync()).Uri;
 
         var edits = Formatter.FormatDocument(sclText, _stepFactoryStore).ToList();
 
-        await _editor.Instance.ExecuteEdits(uri, edits, selections);
+        await Editor.ExecuteEditsAsync(uri, edits, selections);
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         CancelRun();

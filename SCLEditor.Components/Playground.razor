@@ -23,7 +23,7 @@
         <MudTabPanel Tag='@tab.Id' Text='@tab.Title' ID='@tab.Id'>
           @if (tab.Extension.Equals(DefaultSCLExtension, StringComparison.InvariantCultureIgnoreCase))
           {
-            var config = (EditorConfigurationSCL)tab.Configuration;
+            var config = tab.Configuration;
 
             <Editor @ref='@tab.Instance'
                     Id='@tab.Id'
@@ -37,9 +37,9 @@
                     OnFileSave='() => RefreshTabTitle(tab)'
                     LanguageHelper='@tab.SCLHelper'>
               <Toolbar>
-                @if (tab.SCLHelper.RunCancellation is null)
+                @if (tab.SCLHelper?.RunCancellation is null)
                 {
-                  <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick='@tab.SCLHelper.Run' />
+                  <MudIconButton Icon='@Icons.Filled.PlayArrow' OnClick='@(()=> tab?.SCLHelper?.Run())' />
                 }
                 else
                 {

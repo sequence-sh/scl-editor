@@ -7,28 +7,63 @@ namespace Reductech.Utilities.SCLEditor.Components;
 /// </summary>
 public partial class Editor : IDisposable
 {
-    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString();
+    /// <summary>
+    /// Unique Id for this editor
+    /// </summary>
+    [Parameter]
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
-    [Parameter] public string? Title { get; set; }
+    /// <summary>
+    /// Title for this editor
+    /// </summary>
+    [Parameter]
+    public string? Title { get; set; }
 
-    [Parameter] public FileData? File { get; set; }
+    /// <summary>
+    /// The File that is being edited
+    /// </summary>
+    [Parameter]
+    public FileData? File { get; set; }
 
-    [Parameter] public string? DefaultExtension { get; set; }
+    /// <summary>
+    /// Default extension for new files
+    /// </summary>
+    [Parameter]
+    public string? DefaultExtension { get; set; }
 
+    /// <summary>
+    /// Editor construction options
+    /// </summary>
     [Parameter]
     public virtual Func<MonacoEditor, StandaloneEditorConstructionOptions>
-        ConstructionOptions { get; set; } = (MonacoEditor _) => new()
+        ConstructionOptions { get; set; } = _ => new()
     {
         AutomaticLayout = true, Minimap = new EditorMinimapOptions { Enabled = false }
     };
 
-    [Parameter] public EditorConfiguration? Configuration { get; set; } = new();
+    /// <summary>
+    /// The configuration for this editor
+    /// </summary>
+    [Parameter]
+    public EditorConfiguration Configuration { get; set; } = new();
 
-    [Parameter] public RenderFragment? ConfigurationMenu { get; set; }
+    /// <summary>
+    /// The configuration menu
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ConfigurationMenu { get; set; }
 
-    [Parameter] public bool HeaderEnabled { get; set; } = true;
+    /// <summary>
+    /// Is the header enabled
+    /// </summary>
+    [Parameter]
+    public bool HeaderEnabled { get; set; } = true;
 
-    [Parameter] public bool ToolbarEnabled { get; set; } = true;
+    /// <summary>
+    /// Is the toolbar enabled
+    /// </summary>
+    [Parameter]
+    public bool ToolbarEnabled { get; set; } = true;
 
     /// <summary>
     /// Additional items to render in the toolbar
@@ -36,10 +71,23 @@ public partial class Editor : IDisposable
     [Parameter]
     public RenderFragment? Toolbar { get; set; }
 
-    [Parameter] public Action? OnFileSave { get; set; }
+    /// <summary>
+    /// Called when a file is saved
+    /// </summary>
+    [Parameter]
+    public Action? OnFileSave { get; set; }
 
-    [Parameter] public ILanguageHelper? LanguageHelper { get; set; }
+    /// <summary>
+    /// The languageHelper
+    /// </summary>
+    [EditorRequired]
+    [Parameter]
+    public ILanguageHelper LanguageHelper { get; set; } = null!;
 
+    /// <summary>
+    /// The instance of the Monaco editor.
+    /// Set by reference
+    /// </summary>
     public MonacoEditor Instance { get; private set; } = null!;
 
     /// <summary>
@@ -48,14 +96,20 @@ public partial class Editor : IDisposable
     [Parameter]
     public CompoundFileSystem? FileSystem { get; set; }
 
-    protected bool HotChanges = false;
+    /// <summary>
+    /// Whether there are hot changed
+    /// </summary>
+    protected bool HotChanges;
 
     private MudMessageBox SaveDialog { get; set; } = null!;
 
-    public delegate void ModelContentChangeEventHandler(ModelContentChangedEvent e);
+    private delegate void ModelContentChangeEventHandler(ModelContentChangedEvent e);
 
-    public event ModelContentChangeEventHandler? ModelContentChanged;
+    private event ModelContentChangeEventHandler? ModelContentChanged;
 
+    /// <summary>
+    /// Save the edited file
+    /// </summary>
     public async Task SaveFile()
     {
         if (FileSystem is null)
@@ -93,31 +147,32 @@ public partial class Editor : IDisposable
 
     private bool _isConfigPropChangeRegistered;
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (Configuration is not null)
-        {
-            Configuration.PropertyChanged += Configuration_PropertyChanged;
-            _isConfigPropChangeRegistered =  true;
-        }
-
-        if (LanguageHelper is not null)
-            await LanguageHelper.OnInitializedAsync(this);
-
-        await base.OnInitializedAsync();
-    }
-
+    /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
 
-        if (LanguageHelper is not null)
-        {
-            await LanguageHelper.OnAfterRenderAsync(firstRender);
-        }
-
         if (firstRender)
         {
+            Configuration.PropertyChanged += Configuration_PropertyChanged;
+            _isConfigPropChangeRegistered =  true;
+
+            await LanguageHelper.InitialSetup(
+                new MonacoEditorWrapper(
+                    Instance,
+                    this.Configuration,
+                    FileSystem?.FileSystem
+                )
+            );
+
+            //    .OnInitializedAsync(
+            //    new MonacoEditorWrapper(
+            //        Instance,
+            //        Configuration,
+            //        FileSystem?.FileSystem
+            //    )
+            //);
+
             if (File is not null)
             {
                 Title = File.Path;
