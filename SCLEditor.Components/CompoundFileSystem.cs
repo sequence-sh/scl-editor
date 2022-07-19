@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace Reductech.Utilities.SCLEditor.Components;
 
+/// <summary>
+/// Virtual file system to use in SCL Editor
+/// </summary>
 public class CompoundFileSystem : INotifyCollectionChanged
 {
     /// <summary>

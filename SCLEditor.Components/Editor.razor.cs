@@ -165,14 +165,6 @@ public partial class Editor : IDisposable
                 )
             );
 
-            //    .OnInitializedAsync(
-            //    new MonacoEditorWrapper(
-            //        Instance,
-            //        Configuration,
-            //        FileSystem?.FileSystem
-            //    )
-            //);
-
             if (File is not null)
             {
                 Title = File.Path;
@@ -181,18 +173,18 @@ public partial class Editor : IDisposable
         }
     }
 
+    /// <summary>
+    /// Is called when the model content is changed
+    /// </summary>
     protected virtual void OnDidChangeModelContent(ModelContentChangedEvent e)
     {
-        LanguageHelper?.OnDidChangeModelContent();
+        LanguageHelper.OnDidChangeModelContent();
         HotChanges = true;
         ModelContentChanged?.Invoke(e);
     }
 
     private void Configuration_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (Instance is null)
-            return;
-
         if (e.PropertyName == nameof(EditorConfiguration.MinimapEnabled))
         {
             Instance.UpdateOptions(
@@ -200,24 +192,29 @@ public partial class Editor : IDisposable
                 {
                     Minimap = new EditorMinimapOptions
                     {
-                        Enabled = Configuration!.MinimapEnabled
+                        Enabled = Configuration.MinimapEnabled
                     }
                 }
             );
         }
         else if (e.PropertyName == nameof(EditorConfiguration.ReadOnly))
         {
-            Instance.UpdateOptions(new GlobalEditorOptions { ReadOnly = Configuration!.ReadOnly });
+            Instance.UpdateOptions(new GlobalEditorOptions { ReadOnly = Configuration.ReadOnly });
         }
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
-        if (_isConfigPropChangeRegistered && Configuration is not null)
+        GC.SuppressFinalize(this);
+
+        if (_isConfigPropChangeRegistered)
             Configuration.PropertyChanged -= Configuration_PropertyChanged;
     }
 
+    /// <summary>
+    /// Gets the language name from a file extension
+    /// </summary>
     public static string GetLanguageFromFileExtension(string? extension) =>
         extension?.ToLowerInvariant().TrimStart('.') switch
         {
@@ -229,6 +226,9 @@ public partial class Editor : IDisposable
             _      => ""
         };
 
+    /// <summary>
+    /// Get the tab size to use for various languages
+    /// </summary>
     public static int GetLanguageTabSize(string language) =>
         new[] { "yaml", "json" }.Contains(language) ? 2 : 4;
 }
