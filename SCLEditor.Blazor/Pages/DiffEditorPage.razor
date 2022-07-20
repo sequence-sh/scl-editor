@@ -1,0 +1,42 @@
+﻿@page "/diff"
+@using Reductech.Sequence.Connectors.FileSystem.Steps
+@using Reductech.Sequence.Connectors.StructuredData
+@using Reductech.Sequence.Core.Abstractions
+@using Reductech.Sequence.Core.Internal
+
+<DiffEditor Id="@Id" OriginalLanguageHelper='OriginalLanguageHelper' ModifiedLanguageHelper='ModifiedLanguageHelper' />
+
+@code
+{
+    public string Id { get; } = Guid.NewGuid().ToString();
+
+    private SCLLanguageHelper? OriginalLanguageHelper { get; set; }
+    private SCLLanguageHelper? ModifiedLanguageHelper { get; set; }
+
+    /// <summary>
+    /// The JS runtime
+    /// </summary>
+    [Inject]
+    public IJSRuntime Runtime { get; set; } = null!;
+
+    /// <inheritdoc />
+    protected override Task OnInitializedAsync()
+    {
+        OriginalLanguageHelper = new SCLLanguageHelper(Runtime, CreateStepFactoryStore);
+        ModifiedLanguageHelper = new SCLLanguageHelper(Runtime, CreateStepFactoryStore);
+
+        return base.OnInitializedAsync();
+    }
+
+    private static Task<StepFactoryStore> CreateStepFactoryStore()
+    {
+        var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
+          ExternalContext.Default,
+          typeof(FileRead).Assembly,
+          typeof(ToCSV).Assembly
+          );
+
+        return Task.FromResult(stepFactoryStoreResult.Value);
+    }
+
+}

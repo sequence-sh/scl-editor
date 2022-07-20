@@ -8,6 +8,7 @@
   /// The name of the Example (from the uri)
   /// </summary>
   [Parameter]
-  public string ExampleName { get; set; }
+  [EditorRequired]
+  public string ExampleName { get; set; } = "";
 
 }

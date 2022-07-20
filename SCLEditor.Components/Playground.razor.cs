@@ -143,6 +143,7 @@ public sealed partial class Playground : IDisposable
         StateHasChanged();
     }
 
+    /// <inheritdoc />
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -151,6 +152,7 @@ public sealed partial class Playground : IDisposable
 
     private readonly Subject<bool> _disposed = new();
 
+    /// <inheritdoc />
     public void Dispose()
     {
         _disposed.OnNext(true);
@@ -164,13 +166,13 @@ public sealed partial class Playground : IDisposable
 
         public string Title { get; set; } = "Untitled";
 
-        public EditorConfiguration Configuration { get; init; } = new EditorConfigurationSCL();
+        public EditorConfiguration Configuration { get; init; } = new();
 
         public string Extension { get; set; } = DefaultSCLExtension;
 
         public Editor Instance { get; set; } = null!;
 
-        public SCLLanguageHelper? SCLHelper { get; set; }
+        public RunnableSCLLanguageHelper? SCLHelper { get; set; }
 
         public FileData? File { get; set; }
 
@@ -186,7 +188,7 @@ public sealed partial class Playground : IDisposable
         };
     }
 
-    private List<EditorTab> _editorTabs = new();
+    private readonly List<EditorTab> _editorTabs = new();
     private int _editorTabIndex = 0;
     private bool _updateEditorTabIndex = false;
 
@@ -205,33 +207,34 @@ public sealed partial class Playground : IDisposable
 
     private void AddEditorTab(FileData? file)
     {
-        var languageHelper =
-            new SCLLanguageHelper(
-                Runtime,
-                HttpClientFactory,
-                _testLoggerFactory,
-                CreateStepFactoryStore
-            )
-            {
-                ConsoleStream       = _consoleStringBuilder,
-                OnNewConsoleMessage = SetOutputBadge,
-                OnNewLogMessage     = (_, _) => SetLogBadge(true),
-                OnStateHasChanged   = StateHasChanged,
-                OnRunComplete = async () =>
-                {
-                    if (_outputTextField.InputReference?.ElementReference != null)
-                        await Runtime.InvokeVoidAsync(
-                            "scrollToEnd",
-                            _outputTextField.InputReference.ElementReference
-                        );
+        var languageHelper = new RunnableSCLLanguageHelper(
+            Runtime,
+            HttpClientFactory,
+            _testLoggerFactory,
+            CreateStepFactoryStore,
+            _consoleStringBuilder
+        );
 
-                    if (_logTextField.InputReference?.ElementReference != null)
-                        await Runtime.InvokeVoidAsync(
-                            "scrollToEnd",
-                            _logTextField.InputReference.ElementReference
-                        );
-                }
-            };
+        languageHelper.OnNewConsoleMessage += (_, _) => SetOutputBadge(true);
+        languageHelper.OnLogMessage        += (_, _) => SetLogBadge(true);
+        languageHelper.OnStateChanged      += (_, _) => StateHasChanged();
+
+        languageHelper.OnRunComplete += (_, _) =>
+        {
+            if (_outputTextField.InputReference?.ElementReference != null)
+                Runtime.InvokeVoidAsync(
+                        "scrollToEnd",
+                        _outputTextField.InputReference.ElementReference
+                    )
+                    .AsTask();
+
+            if (_logTextField.InputReference?.ElementReference != null)
+                Runtime.InvokeVoidAsync(
+                        "scrollToEnd",
+                        _logTextField.InputReference.ElementReference
+                    )
+                    .AsTask();
+        };
 
         if (file is null)
         {
@@ -261,7 +264,8 @@ public sealed partial class Playground : IDisposable
                 StringComparison.InvariantCultureIgnoreCase
             );
 
-            var config = isScl ? new EditorConfigurationSCL() : new EditorConfiguration();
+            var config =
+                new EditorConfiguration(); // isScl ? new EditorConfigurationSCL() : new EditorConfiguration();
 
             var language = Editor.GetLanguageFromFileExtension(extension);
 
@@ -342,6 +346,9 @@ public sealed partial class Playground : IDisposable
     private const int OutputTabIndex = 0;
     private const int LogTabIndex = 1;
 
+    /// <summary>
+    /// The index of the active output tab
+    /// </summary>
     public int ActiveOutputTabPanel
     {
         get => _activeTabIndex;

@@ -18,27 +18,27 @@
 </head>
 <body>
 
-@RenderBody()
+    @RenderBody()
 
-<div id="blazor-error-ui">
-    <environment include="Staging,Production">
-        An error has occurred. This application may no longer respond until reloaded.
-    </environment>
-    <environment include="Development">
-        An unhandled exception has occurred. See browser dev tools for details.
-    </environment>
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
 
-<script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 
-<script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
-<script>require.config({ paths: { 'vs': '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });</script>
-<script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
-<script src="_content/BlazorMonaco/jsInterop.js"></script>
-<script src='/DefineSCLLanguage.js'></script>
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
+    <script>require.config({ paths: { 'vs': '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });</script>
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
+    <script src="_content/BlazorMonaco/jsInterop.js"></script>
+    <script src="_content/Reductech.Utilities.SCLEditor.Components/DefineSCLLanguage.js"></script>
 
-<script src="_framework/blazor.server.js"></script>
+    <script src="_framework/blazor.server.js"></script>
 </body>
 </html>

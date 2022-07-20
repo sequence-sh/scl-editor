@@ -37,9 +37,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="wwwroot\DefineSCLLanguage.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Update="wwwroot\favicon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

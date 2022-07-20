@@ -13,7 +13,7 @@ public class SCLCodeHelper
     /// <summary>
     /// Create a new SCL Code Helper
     /// </summary>
-    public SCLCodeHelper(StepFactoryStore stepFactoryStore, EditorConfigurationSCL configuration)
+    public SCLCodeHelper(StepFactoryStore stepFactoryStore, EditorConfiguration configuration)
     {
         StepFactoryStore = stepFactoryStore;
         Configuration    = configuration;
@@ -27,7 +27,7 @@ public class SCLCodeHelper
     /// <summary>
     /// The editor configuration
     /// </summary>
-    public EditorConfigurationSCL Configuration { get; }
+    public EditorConfiguration Configuration { get; }
 
     /// <summary>
     /// Gets code completion from a completion request
@@ -83,8 +83,8 @@ public class SCLCodeHelper
         if (!Configuration.SignatureHelpEnabled)
             return VSSignatureResponse.Empty;
 
-        if (vsSignatureHelpRequest.Position is null)
-            return VSSignatureResponse.Empty;
+        //if (vsSignatureHelpRequest.Position is null)
+        //    return VSSignatureResponse.Empty;
 
         var response = SignatureHelpHelper.GetSignatureHelpResponse(
             code,
@@ -116,24 +116,5 @@ public class SCLCodeHelper
         );
 
         return new(result);
-    }
-
-    /// <summary>
-    /// Sets editor diagnostics
-    /// </summary>
-    public async Task SetDiagnostics(MonacoEditor editor, IJSRuntime runtime)
-    {
-        if (!Configuration.DiagnosticsEnabled)
-            return;
-
-        var uri  = (await editor.GetModel()).Uri;
-        var code = await editor.GetValue();
-
-        var diagnostics =
-            DiagnosticsHelper.GetDiagnostics(code, StepFactoryStore)
-                .Select(x => new VSDiagnostic(x))
-                .ToList();
-
-        await runtime.InvokeAsync<string>("setDiagnostics", diagnostics, uri);
     }
 }

@@ -13,10 +13,16 @@ public class Debouncer
         Interval = interval;
     }
 
+    /// <summary>
+    /// The interval to wait before actions will be performed
+    /// </summary>
     public TimeSpan Interval { get; }
 
-    private Timer? _timer = null;
+    private Timer? _timer;
 
+    /// <summary>
+    /// Queue an action to be dispatched
+    /// </summary>
     public void Dispatch(Action action)
     {
         _timer?.Dispose();
