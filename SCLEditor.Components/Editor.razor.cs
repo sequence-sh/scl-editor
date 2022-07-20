@@ -11,10 +11,7 @@ public partial class Editor : IDisposable
     /// Unique Id for this editor
     /// </summary>
     [Parameter]
-    [EditorRequired]
-    #pragma warning disable CS8618
-    public string Id { get; set; }
-    #pragma warning restore CS8618
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>
     /// Title for this editor
@@ -85,14 +82,15 @@ public partial class Editor : IDisposable
     /// </summary>
     [EditorRequired]
     [Parameter]
-    public ILanguageHelper LanguageHelper { get; set; } = null!;
+    #pragma warning disable CS8618
+    public ILanguageHelper LanguageHelper { get; set; }
 
     /// <summary>
     /// The instance of the Monaco editor.
     /// Set by reference
     /// </summary>
-    public MonacoEditor Instance { get; private set; } = null!;
-
+    public MonacoEditor Instance { get; private set; }
+    #pragma warning restore CS8618
     /// <summary>
     /// The File System
     /// </summary>
@@ -106,9 +104,15 @@ public partial class Editor : IDisposable
 
     private MudMessageBox SaveDialog { get; set; } = null!;
 
-    private delegate void ModelContentChangeEventHandler(ModelContentChangedEvent e);
+    /// <summary>
+    /// Event handler for changes to the model content
+    /// </summary>
+    public delegate void ModelContentChangeEventHandler(ModelContentChangedEvent e);
 
-    private event ModelContentChangeEventHandler? ModelContentChanged;
+    /// <summary>
+    /// Event fired when the model content is changed
+    /// </summary>
+    public event ModelContentChangeEventHandler? ModelContentChanged;
 
     /// <summary>
     /// Save the edited file
@@ -167,12 +171,6 @@ public partial class Editor : IDisposable
                     FileSystem?.FileSystem
                 )
             );
-
-            if (File is not null)
-            {
-                Title = File.Path;
-                await Instance.SetValue(File.Data.TextContents);
-            }
         }
     }
 
