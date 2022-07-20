@@ -1,66 +1,60 @@
 ﻿@page "/diff"
-@using MELT
-@using Microsoft.Extensions.Logging
 @using Reductech.Sequence.Connectors.FileSystem.Steps
 @using Reductech.Sequence.Connectors.StructuredData
 @using Reductech.Sequence.Core.Abstractions
 @using Reductech.Sequence.Core.Internal
-@using System.Text
 
-<DiffEditor Id="@Id" OriginalLanguageHelper='OriginalLanguageHelper'  ModifiedLanguageHelper='ModifiedLanguageHelper'/>
+<DiffEditor Id="@Id" OriginalLanguageHelper='OriginalLanguageHelper' ModifiedLanguageHelper='ModifiedLanguageHelper' />
 
 @code
 {
-  public string Id { get; } = Guid.NewGuid().ToString();
+    public string Id { get; } = Guid.NewGuid().ToString();
 
-  private SCLLanguageHelper? OriginalLanguageHelper { get; set; }
-  private SCLLanguageHelper? ModifiedLanguageHelper { get; set; }
+    private SCLLanguageHelper? OriginalLanguageHelper { get; set; }
+    private SCLLanguageHelper? ModifiedLanguageHelper { get; set; }
 
-  /// <summary>
-  /// The JS runtime
-  /// </summary>
-  [Inject]
-  public IJSRuntime Runtime { get; set; } = null!;
+    /// <summary>
+    /// The JS runtime
+    /// </summary>
+    [Inject]
+    public IJSRuntime Runtime { get; set; } = null!;
 
-  /// <summary>
-  /// The Dialog Service
-  /// </summary>
-  [Inject]
-  public IDialogService DialogService { get; set; } = null!;
+    /// <summary>
+    /// The Dialog Service
+    /// </summary>
+    [Inject]
+    public IDialogService DialogService { get; set; } = null!;
 
-  /// <summary>
-  /// The File System
-  /// </summary>
-  [Inject]
-  public CompoundFileSystem FileSystem { get; set; } = null!;
+    /// <summary>
+    /// The File System
+    /// </summary>
+    [Inject]
+    public CompoundFileSystem FileSystem { get; set; } = null!;
 
-  /// <summary>
-  /// The HttpClient Factory
-  /// </summary>
-  [Inject]
-  public IHttpClientFactory HttpClientFactory { get; set; } = null!;
+    /// <summary>
+    /// The HttpClient Factory
+    /// </summary>
+    [Inject]
+    public IHttpClientFactory HttpClientFactory { get; set; } = null!;
 
-  private readonly ITestLoggerFactory _testLoggerFactory =
-    TestLoggerFactory.Create(x => x.FilterByMinimumLevel(LogLevel.Information));
+    /// <inheritdoc />
+    protected override Task OnInitializedAsync()
+    {
+        OriginalLanguageHelper = new SCLLanguageHelper(Runtime, CreateStepFactoryStore);
+        ModifiedLanguageHelper = new SCLLanguageHelper(Runtime, CreateStepFactoryStore);
 
-  /// <inheritdoc />
-  protected override Task OnInitializedAsync()
-  {
-    OriginalLanguageHelper = new SCLLanguageHelper(Runtime, HttpClientFactory, _testLoggerFactory, CreateStepFactoryStore, new StringBuilder());
-    ModifiedLanguageHelper = new SCLLanguageHelper(Runtime, HttpClientFactory, _testLoggerFactory, CreateStepFactoryStore, new StringBuilder());
+        return base.OnInitializedAsync();
+    }
 
-    return base.OnInitializedAsync();
-  }
+    private static Task<StepFactoryStore> CreateStepFactoryStore()
+    {
+        var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
+          ExternalContext.Default,
+          typeof(FileRead).Assembly,
+          typeof(ToCSV).Assembly
+          );
 
-  private static Task<StepFactoryStore> CreateStepFactoryStore()
-  {
-    var stepFactoryStoreResult = StepFactoryStore.TryCreateFromAssemblies(
-      ExternalContext.Default,
-      typeof(FileRead).Assembly,
-      typeof(ToCSV).Assembly
-      );
-
-    return Task.FromResult(stepFactoryStoreResult.Value);
-  }
+        return Task.FromResult(stepFactoryStoreResult.Value);
+    }
 
 }

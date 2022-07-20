@@ -172,7 +172,7 @@ public sealed partial class Playground : IDisposable
 
         public Editor Instance { get; set; } = null!;
 
-        public SCLLanguageHelper? SCLHelper { get; set; }
+        public RunnableSCLLanguageHelper? SCLHelper { get; set; }
 
         public FileData? File { get; set; }
 
@@ -207,7 +207,7 @@ public sealed partial class Playground : IDisposable
 
     private void AddEditorTab(FileData? file)
     {
-        var languageHelper = new SCLLanguageHelper(
+        var languageHelper = new RunnableSCLLanguageHelper(
             Runtime,
             HttpClientFactory,
             _testLoggerFactory,

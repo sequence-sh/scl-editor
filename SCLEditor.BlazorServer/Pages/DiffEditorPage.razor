@@ -1,11 +1,8 @@
 ﻿@page "/diff"
-@using MELT
-@using Microsoft.Extensions.Logging
 @using Reductech.Sequence.Connectors.FileSystem.Steps
 @using Reductech.Sequence.Connectors.StructuredData
 @using Reductech.Sequence.Core.Abstractions
 @using Reductech.Sequence.Core.Internal
-@using System.Text
 
 <DiffEditor Id="@Id" OriginalLanguageHelper='OriginalLanguageHelper'  ModifiedLanguageHelper='ModifiedLanguageHelper' />
 
@@ -39,15 +36,12 @@
   /// </summary>
   [Inject]
   public IHttpClientFactory HttpClientFactory { get; set; } = null!;
-
-  private readonly ITestLoggerFactory _testLoggerFactory =
-    TestLoggerFactory.Create(x => x.FilterByMinimumLevel(LogLevel.Information));
-
+  
   /// <inheritdoc />
   protected override Task OnInitializedAsync()
   {
-    OriginalLanguageHelper = new SCLLanguageHelper(Runtime, HttpClientFactory, _testLoggerFactory, CreateStepFactoryStore, new StringBuilder());
-    ModifiedLanguageHelper = new SCLLanguageHelper(Runtime, HttpClientFactory, _testLoggerFactory, CreateStepFactoryStore, new StringBuilder());
+    OriginalLanguageHelper = new SCLLanguageHelper(Runtime, CreateStepFactoryStore);
+    ModifiedLanguageHelper = new SCLLanguageHelper(Runtime,  CreateStepFactoryStore);
 
     return base.OnInitializedAsync();
   }

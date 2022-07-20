@@ -8,7 +8,7 @@ public interface ILanguageHelper : IDisposable
     /// <summary>
     /// Called after the editor is rendered
     /// </summary>
-    public Task InitialSetup(IEditorWrapper editorWrapper);
+    public Task<bool> InitialSetup(IEditorWrapper editorWrapper);
 
     /// <summary>
     /// Called when the model content is changed
@@ -32,9 +32,11 @@ public class DefaultLanguageHelper : ILanguageHelper
     public void Dispose() { }
 
     /// <inheritdoc />
-    public Task InitialSetup(IEditorWrapper editorWrapper)
+    #pragma warning disable CS1998
+    public async Task<bool> InitialSetup(IEditorWrapper editorWrapper)
+        #pragma warning restore CS1998
     {
-        return Task.CompletedTask;
+        return true;
     }
 
     /// <inheritdoc />
