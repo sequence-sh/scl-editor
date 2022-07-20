@@ -79,7 +79,7 @@ public partial class DiffEditor : IDisposable
         set;
     } = _ => new()
     {
-        AutomaticLayout = true, Minimap = new EditorMinimapOptions { Enabled = false },
+        AutomaticLayout = true, Minimap = new EditorMinimapOptions { Enabled = false }
     };
 
     [Parameter] public string? InitialValueOriginal { get; set; }

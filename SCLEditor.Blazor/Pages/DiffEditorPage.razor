@@ -19,24 +19,6 @@
     [Inject]
     public IJSRuntime Runtime { get; set; } = null!;
 
-    /// <summary>
-    /// The Dialog Service
-    /// </summary>
-    [Inject]
-    public IDialogService DialogService { get; set; } = null!;
-
-    /// <summary>
-    /// The File System
-    /// </summary>
-    [Inject]
-    public CompoundFileSystem FileSystem { get; set; } = null!;
-
-    /// <summary>
-    /// The HttpClient Factory
-    /// </summary>
-    [Inject]
-    public IHttpClientFactory HttpClientFactory { get; set; } = null!;
-
     /// <inheritdoc />
     protected override Task OnInitializedAsync()
     {
