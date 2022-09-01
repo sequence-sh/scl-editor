@@ -26,7 +26,7 @@ public class EditorConfiguration : INotifyPropertyChanged
                 return;
 
             _minimapEnabled = value;
-            OnPropertyChanged(nameof(MinimapEnabled));
+            OnPropertyChanged();
         }
     }
 
@@ -44,7 +44,7 @@ public class EditorConfiguration : INotifyPropertyChanged
                 return;
 
             _completionEnabled = value;
-            OnPropertyChanged(nameof(CompletionEnabled));
+            OnPropertyChanged();
         }
     }
 
@@ -62,7 +62,7 @@ public class EditorConfiguration : INotifyPropertyChanged
                 return;
 
             _signatureHelpEnabled = value;
-            OnPropertyChanged(nameof(SignatureHelpEnabled));
+            OnPropertyChanged();
         }
     }
 
@@ -80,7 +80,7 @@ public class EditorConfiguration : INotifyPropertyChanged
                 return;
 
             _quickInfoEnabled = value;
-            OnPropertyChanged(nameof(QuickInfoEnabled));
+            OnPropertyChanged();
         }
     }
 
@@ -98,7 +98,7 @@ public class EditorConfiguration : INotifyPropertyChanged
                 return;
 
             _diagnosticsEnabled = value;
-            OnPropertyChanged(nameof(DiagnosticsEnabled));
+            OnPropertyChanged();
         }
     }
 
@@ -116,7 +116,7 @@ public class EditorConfiguration : INotifyPropertyChanged
                 return;
 
             _readOnly = value;
-            OnPropertyChanged(nameof(ReadOnly));
+            OnPropertyChanged();
         }
     }
 
@@ -131,4 +131,17 @@ public class EditorConfiguration : INotifyPropertyChanged
     [NotifyPropertyChangedInvocator]
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    /// <summary>
+    /// Convert to global editor options
+    /// </summary>
+    /// <returns></returns>
+    public GlobalEditorOptions ToGlobalEditorOptions()
+    {
+        return new GlobalEditorOptions()
+        {
+            ReadOnly = this.ReadOnly,
+            Minimap  = new EditorMinimapOptions() { Enabled = MinimapEnabled }
+        };
+    }
 }

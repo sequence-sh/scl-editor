@@ -186,21 +186,10 @@ public partial class Editor : IDisposable
 
     private void Configuration_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(EditorConfiguration.MinimapEnabled))
+        if (e.PropertyName is nameof(EditorConfiguration.MinimapEnabled)
+            or nameof(EditorConfiguration.ReadOnly))
         {
-            Instance.UpdateOptions(
-                new GlobalEditorOptions
-                {
-                    Minimap = new EditorMinimapOptions
-                    {
-                        Enabled = Configuration.MinimapEnabled
-                    }
-                }
-            );
-        }
-        else if (e.PropertyName == nameof(EditorConfiguration.ReadOnly))
-        {
-            Instance.UpdateOptions(new GlobalEditorOptions { ReadOnly = Configuration.ReadOnly });
+            Instance.UpdateOptions(Configuration.ToGlobalEditorOptions());
         }
     }
 
