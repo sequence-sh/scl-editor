@@ -7,6 +7,11 @@ namespace Reductech.Utilities.SCLEditor.Components;
 /// </summary>
 public class SCLLanguageHelper : ILanguageHelper
 {
+    /// <summary>
+    /// Variables to inject in SCL
+    /// </summary>
+    public IReadOnlyDictionary<VariableName, ISCLObject>? InjectedVariables { get; }
+
     private readonly IJSRuntime _runtime;
 
     private readonly Func<Task<StepFactoryStore>> _createStepFactoryStore;
@@ -16,8 +21,10 @@ public class SCLLanguageHelper : ILanguageHelper
     /// </summary>
     public SCLLanguageHelper(
         IJSRuntime runtime,
-        Func<Task<StepFactoryStore>> createStepFactoryStore)
+        Func<Task<StepFactoryStore>> createStepFactoryStore,
+        IReadOnlyDictionary<VariableName, ISCLObject>? injectedVariables = null)
     {
+        InjectedVariables       = injectedVariables;
         _runtime                = runtime;
         _createStepFactoryStore = createStepFactoryStore;
     }
@@ -59,7 +66,13 @@ public class SCLLanguageHelper : ILanguageHelper
         _editor = editorWrapper;
 
         StepFactoryStore = await _createStepFactoryStore.Invoke();
-        _sclCodeHelper   = new SCLCodeHelper(StepFactoryStore, Editor.Configuration);
+
+        _sclCodeHelper = new SCLCodeHelper(
+            StepFactoryStore,
+            Editor.Configuration,
+            InjectedVariables
+        );
+
         var objRef = DotNetObjectReference.Create(_sclCodeHelper);
 
         //Function Defined in DefineSCLLanguage.js
@@ -90,7 +103,12 @@ public class SCLLanguageHelper : ILanguageHelper
     {
         if (Editor.Configuration.DiagnosticsEnabled)
         {
-            async void Action() => await Editor.SetDiagnostics(_runtime, StepFactoryStore);
+            async void Action() => await Editor.SetDiagnostics(
+                _runtime,
+                StepFactoryStore,
+                InjectedVariables
+            );
+
             _diagnosticsDebouncer.Dispatch(Action);
         }
     }

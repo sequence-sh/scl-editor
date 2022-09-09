@@ -61,7 +61,10 @@ public interface IEditorWrapper
     /// <summary>
     /// Sets editor diagnostics
     /// </summary>
-    public async Task SetDiagnostics(IJSRuntime runtime, StepFactoryStore stepFactoryStore)
+    public async Task SetDiagnostics(
+        IJSRuntime runtime,
+        StepFactoryStore stepFactoryStore,
+        IReadOnlyDictionary<VariableName, ISCLObject>? injectedVariables = null)
     {
         if (!Configuration.DiagnosticsEnabled)
             return;
@@ -70,7 +73,7 @@ public interface IEditorWrapper
         var code = await GetCodeAsync();
 
         var diagnostics =
-            DiagnosticsHelper.GetDiagnostics(code, stepFactoryStore)
+            DiagnosticsHelper.GetDiagnostics(code, stepFactoryStore, injectedVariables)
                 .Select(x => new VSDiagnostic(x))
                 .ToList();
 

@@ -13,10 +13,14 @@ public class SCLCodeHelper
     /// <summary>
     /// Create a new SCL Code Helper
     /// </summary>
-    public SCLCodeHelper(StepFactoryStore stepFactoryStore, EditorConfiguration configuration)
+    public SCLCodeHelper(
+        StepFactoryStore stepFactoryStore,
+        EditorConfiguration configuration,
+        IReadOnlyDictionary<VariableName, ISCLObject>? injectedVariables)
     {
-        StepFactoryStore = stepFactoryStore;
-        Configuration    = configuration;
+        StepFactoryStore  = stepFactoryStore;
+        Configuration     = configuration;
+        InjectedVariables = injectedVariables;
     }
 
     /// <summary>
@@ -28,6 +32,11 @@ public class SCLCodeHelper
     /// The editor configuration
     /// </summary>
     public EditorConfiguration Configuration { get; }
+
+    /// <summary>
+    /// Variables to inject into SCL
+    /// </summary>
+    public IReadOnlyDictionary<VariableName, ISCLObject>? InjectedVariables { get; }
 
     /// <summary>
     /// Gets code completion from a completion request
@@ -53,7 +62,8 @@ public class SCLCodeHelper
             code,
             position,
             StepFactoryStore,
-            DocumentationOptions.DefaultDocumentationOptionsMonaco
+            DocumentationOptions.DefaultDocumentationOptionsMonaco,
+            InjectedVariables
         );
 
         return new(result);
@@ -112,7 +122,8 @@ public class SCLCodeHelper
         var result = QuickInfoHelper.GetQuickInfoAsync(
             code,
             vsQuickInfoRequest.Position.AsLinePosition(),
-            StepFactoryStore
+            StepFactoryStore,
+            InjectedVariables
         );
 
         return new(result);
