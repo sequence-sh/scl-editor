@@ -105,14 +105,10 @@ public partial class Editor : IDisposable
     private MudMessageBox SaveDialog { get; set; } = null!;
 
     /// <summary>
-    /// Event handler for changes to the model content
+    /// Called when the content of the model changes
     /// </summary>
-    public delegate void ModelContentChangeEventHandler(ModelContentChangedEvent e);
-
-    /// <summary>
-    /// Event fired when the model content is changed
-    /// </summary>
-    public event ModelContentChangeEventHandler? ModelContentChanged;
+    [Parameter]
+    public Action<ModelContentChangedEvent>? OnModelContentChanged { get; set; }
 
     /// <summary>
     /// Save the edited file
@@ -163,7 +159,9 @@ public partial class Editor : IDisposable
         {
             Configuration.PropertyChanged += Configuration_PropertyChanged;
             _isConfigPropChangeRegistered =  true;
+        }
 
+        if (LanguageHelper is not null)
             await LanguageHelper.InitialSetup(
                 new MonacoEditorWrapper(
                     Instance,
@@ -171,7 +169,6 @@ public partial class Editor : IDisposable
                     FileSystem?.FileSystem
                 )
             );
-        }
     }
 
     /// <summary>
@@ -181,7 +178,7 @@ public partial class Editor : IDisposable
     {
         LanguageHelper.OnDidChangeModelContent();
         HotChanges = true;
-        ModelContentChanged?.Invoke(e);
+        OnModelContentChanged?.Invoke(e);
     }
 
     private void Configuration_PropertyChanged(object? sender, PropertyChangedEventArgs e)
