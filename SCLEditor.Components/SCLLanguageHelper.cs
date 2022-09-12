@@ -60,7 +60,6 @@ public class SCLLanguageHelper : ILanguageHelper
         if (_editor is not null)
         {
             return false;
-            //throw new Exception("This SCL Language Helper has already been set up.");
         }
 
         _editor = editorWrapper;
