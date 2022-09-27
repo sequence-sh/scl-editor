@@ -60,7 +60,7 @@ function registerSCL(sclHelper) {
   window.monaco.languages.register({ id: 'scl' });
 
   window.monaco.languages.registerCompletionItemProvider('scl', {
-    triggerCharacters: [' '],
+    triggerCharacters: [' ', '<'],
 
     resolveCompletionItem: (item, token) => {
       return this.resolveCompletionItem(item, sclHelper);
