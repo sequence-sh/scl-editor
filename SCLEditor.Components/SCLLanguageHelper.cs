@@ -10,7 +10,7 @@ public class SCLLanguageHelper : ILanguageHelper
     /// <summary>
     /// Variables to inject in SCL
     /// </summary>
-    public IReadOnlyDictionary<VariableName, ISCLObject>? InjectedVariables { get; }
+    public IReadOnlyDictionary<VariableName, InjectedVariable>? InjectedVariables { get; }
 
     private readonly IJSRuntime _runtime;
 
@@ -22,7 +22,7 @@ public class SCLLanguageHelper : ILanguageHelper
     public SCLLanguageHelper(
         IJSRuntime runtime,
         Func<Task<StepFactoryStore>> createStepFactoryStore,
-        IReadOnlyDictionary<VariableName, ISCLObject>? injectedVariables = null)
+        IReadOnlyDictionary<VariableName, InjectedVariable>? injectedVariables = null)
     {
         InjectedVariables       = injectedVariables;
         _runtime                = runtime;
@@ -78,7 +78,15 @@ public class SCLLanguageHelper : ILanguageHelper
         await _runtime.InvokeVoidAsync("registerSCL", objRef);
 
         var model = await Editor.GetModelAsync();
-        await MonacoEditorBase.SetModelLanguage(model, "scl");
+
+        try
+        {
+            await MonacoEditorBase.SetModelLanguage(model, "scl");
+        }
+        catch (NullReferenceException e)
+        {
+            Console.WriteLine(e);
+        }
 
         await Editor.AddActionAsync(
             "formatscl",

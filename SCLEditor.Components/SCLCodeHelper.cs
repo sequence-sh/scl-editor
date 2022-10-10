@@ -16,7 +16,7 @@ public class SCLCodeHelper
     public SCLCodeHelper(
         StepFactoryStore stepFactoryStore,
         EditorConfiguration configuration,
-        IReadOnlyDictionary<VariableName, ISCLObject>? injectedVariables)
+        IReadOnlyDictionary<VariableName, InjectedVariable>? injectedVariables)
     {
         StepFactoryStore  = stepFactoryStore;
         Configuration     = configuration;
@@ -36,7 +36,7 @@ public class SCLCodeHelper
     /// <summary>
     /// Variables to inject into SCL
     /// </summary>
-    public IReadOnlyDictionary<VariableName, ISCLObject>? InjectedVariables { get; }
+    public IReadOnlyDictionary<VariableName, InjectedVariable>? InjectedVariables { get; }
 
     /// <summary>
     /// Gets code completion from a completion request
