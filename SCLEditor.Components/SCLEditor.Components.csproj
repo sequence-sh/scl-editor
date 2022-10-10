@@ -46,10 +46,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.8" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageReference Include="MudBlazor" Version="6.0.15" />
-    <PackageReference Include="Reductech.Sequence.Connectors.FileSystem" Version="0.18.0-a.main.2209270413" />
-    <PackageReference Include="Reductech.Sequence.Connectors.StructuredData" Version="0.18.0-a.main.2209270413" />
-    <PackageReference Include="Reductech.Sequence.Core" Version="0.18.0-a.main.2209271454" />
-    <PackageReference Include="Reductech.Sequence.Core.LanguageServer" Version="0.18.0-a.main.2209271454" />
+    <PackageReference Include="Reductech.Sequence.Connectors.FileSystem" Version="0.18.0-a.main.2210070950" />
+    <PackageReference Include="Reductech.Sequence.Connectors.StructuredData" Version="0.18.0-a.main.2210060411" />
+    <PackageReference Include="Reductech.Sequence.Core" Version="0.18.0-a.main.2210050412" />
+    <PackageReference Include="Reductech.Sequence.Core.LanguageServer" Version="0.18.0-a.main.2210050412" />
     <PackageReference Include="System.IO.Abstractions" Version="17.2.3" />
     <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="17.2.3" />
     <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />

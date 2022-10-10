@@ -64,7 +64,7 @@ public interface IEditorWrapper
     public async Task SetDiagnostics(
         IJSRuntime runtime,
         StepFactoryStore stepFactoryStore,
-        IReadOnlyDictionary<VariableName, ISCLObject>? injectedVariables = null)
+        IReadOnlyDictionary<VariableName, InjectedVariable>? injectedVariables = null)
     {
         if (!Configuration.DiagnosticsEnabled)
             return;

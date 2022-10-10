@@ -10,7 +10,7 @@ public class SCLLanguageHelper : ILanguageHelper
     /// <summary>
     /// Variables to inject in SCL
     /// </summary>
-    public IReadOnlyDictionary<VariableName, ISCLObject>? InjectedVariables { get; }
+    public IReadOnlyDictionary<VariableName, InjectedVariable>? InjectedVariables { get; }
 
     private readonly IJSRuntime _runtime;
 
@@ -22,7 +22,7 @@ public class SCLLanguageHelper : ILanguageHelper
     public SCLLanguageHelper(
         IJSRuntime runtime,
         Func<Task<StepFactoryStore>> createStepFactoryStore,
-        IReadOnlyDictionary<VariableName, ISCLObject>? injectedVariables = null)
+        IReadOnlyDictionary<VariableName, InjectedVariable>? injectedVariables = null)
     {
         InjectedVariables       = injectedVariables;
         _runtime                = runtime;
