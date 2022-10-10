@@ -78,7 +78,15 @@ public class SCLLanguageHelper : ILanguageHelper
         await _runtime.InvokeVoidAsync("registerSCL", objRef);
 
         var model = await Editor.GetModelAsync();
-        await MonacoEditorBase.SetModelLanguage(model, "scl");
+
+        try
+        {
+            await MonacoEditorBase.SetModelLanguage(model, "scl");
+        }
+        catch (NullReferenceException e)
+        {
+            Console.WriteLine(e);
+        }
 
         await Editor.AddActionAsync(
             "formatscl",
