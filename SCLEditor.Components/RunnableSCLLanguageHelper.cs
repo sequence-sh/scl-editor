@@ -121,7 +121,13 @@ public class RunnableSCLLanguageHelper : SCLLanguageHelper
         OnLogMessage?.Invoke(this, EventArgs.Empty);
 
         var stepResult = SCLParsing.TryParseStep(sclText)
-            .Bind(x => x.TryFreeze(SCLRunner.RootCallerMetadata, StepFactoryStore));
+            .Bind(
+                x => x.TryFreeze(
+                    SCLRunner.RootCallerMetadata,
+                    StepFactoryStore,
+                    new OptimizationSettings(true, true, InjectedVariables)
+                )
+            );
 
         ConsoleStream.AppendLine("Sequence Running\n");
         OnNewConsoleMessage?.Invoke(this, EventArgs.Empty);
