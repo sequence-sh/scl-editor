@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions.ValueTasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Reductech.Sequence.Connectors.FileSystem;
 using Reductech.Sequence.Connectors.FileSystem.Steps;

@@ -3,7 +3,7 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions.ValueTasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Reductech.Sequence.Connectors.FileSystem;
