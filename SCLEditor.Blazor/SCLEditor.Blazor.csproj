@@ -4,17 +4,17 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AssemblyName>SCLEditor.Blazor</AssemblyName>
-    <RootNamespace>Reductech.Utilities.SCLEditor.Blazor</RootNamespace>
+    <RootNamespace>Sequence.SCLEditor.Blazor</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Reductech.Utilities.SCLEditor.Blazor</PackageId>
+    <PackageId>Sequence.SCLEditor.Blazor</PackageId>
     <Title>Sequence® Configuration Language Blazor Playground</Title>
     <Product>Sequence®</Product>
-    <RepositoryUrl>https://gitlab.com/reductech/sequence/scl-editor.git</RepositoryUrl>
+    <RepositoryUrl>https://gitlab.com/sequence/scl-editor.git</RepositoryUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <Authors>Reductech</Authors>
+    <Authors>MarkWainwright;antonyoni</Authors>
     <Company>Reductech</Company>
     <Copyright>Copyright (c) 2022 Reductech Ltd</Copyright>
   </PropertyGroup>

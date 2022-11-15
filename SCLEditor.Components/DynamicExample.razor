@@ -1,4 +1,5 @@
-﻿<MudGrid>
+﻿@using Sequence.SCLEditor.Components.Examples
+<MudGrid>
 
   @foreach (var group in ExampleTemplate.ExampleComponent.GetInputs(_choiceData).GroupBy(x => x.Group))
   {

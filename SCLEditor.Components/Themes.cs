@@ -1,15 +1,13 @@
 ﻿using System.Reactive.Subjects;
 using MudBlazor;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// MudBlazor Themes
 /// </summary>
 public static class Themes
 {
-    //Reductech Colors
-
     //language=css prefix=body{color: postfix=}
     public static string Color1 = "#c85a16";
 

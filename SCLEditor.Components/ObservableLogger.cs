@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
-using Reductech.Sequence.Core.Internal.Logging;
+using Sequence.Core.Internal.Logging;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 public class ObservableLogger : ILogger, INotifyPropertyChanged
 {

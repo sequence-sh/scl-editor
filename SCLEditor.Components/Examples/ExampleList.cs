@@ -1,11 +1,11 @@
-﻿using Reductech.Sequence.Connectors.StructuredData;
-using Reductech.Sequence.Core;
-using Reductech.Sequence.Core.Enums;
-using Reductech.Sequence.Core.Internal;
-using Reductech.Sequence.Core.Steps;
-using Reductech.Sequence.Core.Util;
+﻿using Sequence.Connectors.StructuredData;
+using Sequence.Core;
+using Sequence.Core.Enums;
+using Sequence.Core.Internal;
+using Sequence.Core.Steps;
+using Sequence.Core.Util;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components.Examples;
 
 /// <summary>
 /// List of SCL examples

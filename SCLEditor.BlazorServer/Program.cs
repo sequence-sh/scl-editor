@@ -1,7 +1,7 @@
 using BlazorDownloadFile;
 using Blazored.LocalStorage;
 using MudBlazor.Services;
-using Reductech.Utilities.SCLEditor.Components;
+using Sequence.SCLEditor.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 

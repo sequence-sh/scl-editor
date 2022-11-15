@@ -1,6 +1,6 @@
 ﻿using System.IO.Abstractions;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// Wrapper for a monaco editor

@@ -1,6 +1,6 @@
-﻿using Reductech.Sequence.Core.LanguageServer.Objects;
+﻿using Sequence.Core.LanguageServer.Objects;
 
-namespace Reductech.Utilities.SCLEditor.Components.Objects;
+namespace Sequence.SCLEditor.Components.Objects;
 
 /// <summary>
 /// A range of characters in the monarch editor

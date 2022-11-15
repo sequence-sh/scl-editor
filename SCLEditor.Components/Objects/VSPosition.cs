@@ -1,6 +1,6 @@
-﻿using Reductech.Sequence.Core.LanguageServer.Objects;
+﻿using Sequence.Core.LanguageServer.Objects;
 
-namespace Reductech.Utilities.SCLEditor.Components.Objects;
+namespace Sequence.SCLEditor.Components.Objects;
 
 /// <summary>
 /// A position in monaco. The LineNumber and Column are both 1-indexed

@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions.ValueTasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
-using Reductech.Sequence.Connectors.FileSystem;
-using Reductech.Sequence.Core;
-using Reductech.Sequence.Core.Abstractions;
-using Reductech.Sequence.Core.Internal;
-using Reductech.Sequence.Core.Steps;
-using Reductech.Sequence.Core.TestHarness;
-using Reductech.Utilities.SCLEditor.Components;
+using Sequence.Connectors.FileSystem;
+using Sequence.Core;
+using Sequence.Core.Abstractions;
+using Sequence.Core.Internal;
+using Sequence.Core.Steps;
+using Sequence.Core.TestHarness;
+using Sequence.SCLEditor.Components;
+using Sequence.SCLEditor.Components.Examples;
 using Xunit;
 
 namespace SCLEditor.Tests;
@@ -102,7 +103,7 @@ public partial class ExampleTests
 
         result.ShouldBeSuccessful();
 
-        TestOutputHelper.WriteLine($"{exampleTemplate.Name} {optionData} -- {result.Value}");
+        this.TestOutputHelper.WriteLine($"{exampleTemplate.Name} {optionData} -- {result.Value}");
     }
 
     /// <summary>

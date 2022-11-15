@@ -1,4 +1,4 @@
-﻿namespace Reductech.Utilities.SCLEditor.Components.Objects;
+﻿namespace Sequence.SCLEditor.Components.Objects;
 
 /// <summary>
 /// A VS Code quick info request

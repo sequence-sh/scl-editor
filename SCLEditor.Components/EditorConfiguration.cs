@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// The editor configuration

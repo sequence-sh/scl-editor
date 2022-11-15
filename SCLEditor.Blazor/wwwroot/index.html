@@ -1,46 +1,50 @@
 ﻿<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SCLEditor</title>
-  <base href="/" />
-  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
-        rel="stylesheet" />
-  <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
-  <link href="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.css"
-        rel="stylesheet" />
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>SCLEditor</title>
+    <base href="/" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+      rel="stylesheet"
+    />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <link
+      href="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.css"
+      rel="stylesheet"
+    />
 
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="icon" type="image/png" href="/favicon.png" />
-</head>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+  </head>
 
-<body>
-  <div id="app">
-    <img src="/AnimatedLogo.svg"
-         alt="The Reductech Sequence Logo"
-         class="loadingImageContainer" />
-  </div>
+  <body>
+    <div id="app">
+      <img src="/AnimatedLogo.svg" alt="The Sequence Logo" class="loadingImageContainer" />
+    </div>
 
-  <div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-  </div>
-  <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <div id="blazor-error-ui">
+      An unhandled error has occurred.
+      <a href="" class="reload">Reload</a>
+      <a class="dismiss">🗙</a>
+    </div>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 
-  <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
-  <script>
-    require.config({ paths: { vs: '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });
-  </script>
-  <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
-  <script src="_content/BlazorMonaco/jsInterop.js"></script>
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
+    <script>
+      require.config({ paths: { vs: '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });
+    </script>
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
+    <script src="_content/BlazorMonaco/jsInterop.js"></script>
 
-  <script src="_content/Reductech.Utilities.SCLEditor.Components/DefineSCLLanguage.js"></script>
+    <script src="_content/Sequence.SCLEditor.Components/DefineSCLLanguage.js"></script>
 
-  <script src="_framework/blazor.webassembly.js"></script>
-</body>
+    <script src="_framework/blazor.webassembly.js"></script>
+  </body>
 </html>
 
 <style>

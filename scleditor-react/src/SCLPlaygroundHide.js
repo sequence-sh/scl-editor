@@ -82,9 +82,7 @@ class SCLPlaygroundHide extends React.Component {
         )
       )
       .then(() =>
-        SCLPlaygroundHide.addScript(
-          '_content/Reductech.Utilities.SCLEditor.Components/DefineSCLLanguage.js'
-        )
+        SCLPlaygroundHide.addScript('_content/Sequence.SCLEditor.Components/DefineSCLLanguage.js')
       )
       .then(() =>
         SCLPlaygroundHide.addScript('_framework/blazor.webassembly.js', { autostart: false })

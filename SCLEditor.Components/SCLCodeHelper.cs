@@ -1,9 +1,9 @@
-﻿using Reductech.Sequence.Core.Internal;
-using Reductech.Sequence.Core.Internal.Documentation;
-using Reductech.Sequence.Core.LanguageServer;
-using Reductech.Utilities.SCLEditor.Components.Objects;
+﻿using Sequence.Core.Internal;
+using Sequence.Core.Internal.Documentation;
+using Sequence.Core.LanguageServer;
+using Sequence.SCLEditor.Components.Objects;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// Contains JS Invokable methods for working with SCL

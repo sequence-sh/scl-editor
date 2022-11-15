@@ -1,4 +1,4 @@
-﻿namespace Reductech.Utilities.SCLEditor.Components.Objects;
+﻿namespace Sequence.SCLEditor.Components.Objects;
 
 public enum CompletionTriggerKind
 {

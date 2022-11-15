@@ -1,8 +1,8 @@
-﻿using Reductech.Sequence.Core.Internal;
-using Reductech.Sequence.Core.LanguageServer;
-using Reductech.Sequence.Core.LanguageServer.Objects;
+﻿using Sequence.Core.Internal;
+using Sequence.Core.LanguageServer;
+using Sequence.Core.LanguageServer.Objects;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 public static class Formatter
 {
