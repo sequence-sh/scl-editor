@@ -3,7 +3,7 @@
 namespace Sequence.Utilities.SCLEditor.Components;
 
 /// <summary>
-/// Language Helper for the Reductech SCL language
+/// Language Helper for the SCL language
 /// </summary>
 public class SCLLanguageHelper : ILanguageHelper
 {

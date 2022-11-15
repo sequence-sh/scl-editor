@@ -8,8 +8,6 @@ namespace Sequence.Utilities.SCLEditor.Components;
 /// </summary>
 public static class Themes
 {
-    //Reductech Colors
-
     //language=css prefix=body{color: postfix=}
     public static string Color1 = "#c85a16";
 
