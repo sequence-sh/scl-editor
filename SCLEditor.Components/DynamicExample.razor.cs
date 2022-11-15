@@ -4,14 +4,14 @@ using System.Reactive.Subjects;
 using CSharpFunctionalExtensions;
 using CSharpFunctionalExtensions.ValueTasks;
 using Microsoft.Extensions.Logging.Abstractions;
-using Reductech.Sequence.Connectors.FileSystem;
-using Reductech.Sequence.Connectors.FileSystem.Steps;
-using Reductech.Sequence.Connectors.StructuredData;
-using Reductech.Sequence.Core;
-using Reductech.Sequence.Core.Abstractions;
-using Reductech.Sequence.Core.ExternalProcesses;
-using Reductech.Sequence.Core.Internal;
-using Reductech.Sequence.Core.LanguageServer;
+using Sequence.Connectors.FileSystem;
+using Sequence.Connectors.FileSystem.Steps;
+using Sequence.Connectors.StructuredData;
+using Sequence.Core;
+using Sequence.Core.Abstractions;
+using Sequence.Core.ExternalProcesses;
+using Sequence.Core.Internal;
+using Sequence.Core.LanguageServer;
 
 namespace Reductech.Utilities.SCLEditor.Components;
 

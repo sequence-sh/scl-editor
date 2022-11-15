@@ -1,5 +1,5 @@
-﻿using Reductech.Sequence.Core;
-using Reductech.Sequence.Core.Internal;
+﻿using Sequence.Core;
+using Sequence.Core.Internal;
 
 namespace Reductech.Utilities.SCLEditor.Components;
 

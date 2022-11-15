@@ -1,4 +1,4 @@
-﻿using Reductech.Sequence.Core.LanguageServer.Objects;
+﻿using Sequence.Core.LanguageServer.Objects;
 
 namespace Reductech.Utilities.SCLEditor.Components.Objects;
 

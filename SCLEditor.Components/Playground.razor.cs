@@ -1,10 +1,10 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using MudBlazor;
-using Reductech.Sequence.Connectors.FileSystem.Steps;
-using Reductech.Sequence.Connectors.StructuredData;
-using Reductech.Sequence.Core.Abstractions;
-using Reductech.Sequence.Core.Internal;
+using Sequence.Connectors.FileSystem.Steps;
+using Sequence.Connectors.StructuredData;
+using Sequence.Core.Abstractions;
+using Sequence.Core.Internal;
 
 namespace Reductech.Utilities.SCLEditor.Components;
 
