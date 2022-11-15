@@ -1,5 +1,5 @@
 include:
-  - project: sequence/templates/cicd/dotnet
+  - project: sequence/templates/cicd
     file: .gitlab-ci.linux.yml
 
 version check dev:
