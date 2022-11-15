@@ -1,7 +1,7 @@
 ﻿using Sequence.Core;
 using Sequence.Core.Internal;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.Utilities.SCLEditor.Components.Examples;
 
 /// <summary>
 /// The Output of an example

@@ -1,4 +1,4 @@
-﻿namespace Reductech.Utilities.SCLEditor.Components;
+﻿namespace Sequence.Utilities.SCLEditor.Components;
 
 /// <summary>
 /// A diff Editor component

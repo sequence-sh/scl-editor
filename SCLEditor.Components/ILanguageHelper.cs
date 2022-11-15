@@ -1,4 +1,4 @@
-﻿namespace Reductech.Utilities.SCLEditor.Components;
+﻿namespace Sequence.Utilities.SCLEditor.Components;
 
 /// <summary>
 /// Handles interactions with the monaco editor

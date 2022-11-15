@@ -1,6 +1,6 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.Utilities.SCLEditor.Components;
 
 /// <summary>
 /// File metadata for the in-browser file system

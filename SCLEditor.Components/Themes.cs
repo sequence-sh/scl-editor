@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Subjects;
 using MudBlazor;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.Utilities.SCLEditor.Components;
 
 /// <summary>
 /// MudBlazor Themes

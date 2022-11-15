@@ -4,7 +4,7 @@ using Sequence.Core.Internal;
 using Sequence.Core.Steps;
 using Sequence.Core.Util;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.Utilities.SCLEditor.Components.Examples;
 
 /// <summary>
 /// A component used in an example

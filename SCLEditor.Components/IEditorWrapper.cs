@@ -1,9 +1,9 @@
 ﻿using System.IO.Abstractions;
 using Sequence.Core.Internal;
 using Sequence.Core.LanguageServer;
-using Reductech.Utilities.SCLEditor.Components.Objects;
+using Sequence.Utilities.SCLEditor.Components.Objects;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.Utilities.SCLEditor.Components;
 
 /// <summary>
 /// Wraps a monaco editor

@@ -1,6 +1,6 @@
 ﻿using Sequence.Core.Internal;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.Utilities.SCLEditor.Components;
 
 /// <summary>
 /// Language Helper for the Reductech SCL language

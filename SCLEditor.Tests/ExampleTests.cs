@@ -12,7 +12,8 @@ using Sequence.Core.Abstractions;
 using Sequence.Core.Internal;
 using Sequence.Core.Steps;
 using Sequence.Core.TestHarness;
-using Reductech.Utilities.SCLEditor.Components;
+using Sequence.Utilities.SCLEditor.Components;
+using Sequence.Utilities.SCLEditor.Components.Examples;
 using Xunit;
 
 namespace SCLEditor.Tests;
@@ -102,7 +103,7 @@ public partial class ExampleTests
 
         result.ShouldBeSuccessful();
 
-        TestOutputHelper.WriteLine($"{exampleTemplate.Name} {optionData} -- {result.Value}");
+        this.TestOutputHelper.WriteLine($"{exampleTemplate.Name} {optionData} -- {result.Value}");
     }
 
     /// <summary>

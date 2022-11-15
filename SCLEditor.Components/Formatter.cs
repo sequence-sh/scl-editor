@@ -2,7 +2,7 @@
 using Sequence.Core.LanguageServer;
 using Sequence.Core.LanguageServer.Objects;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.Utilities.SCLEditor.Components;
 
 public static class Formatter
 {

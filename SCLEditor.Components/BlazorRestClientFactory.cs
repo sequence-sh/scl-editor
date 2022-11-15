@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Http;
-using Sequence.Core;
 using RestSharp;
+using Sequence.Core;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.Utilities.SCLEditor.Components;
 
 public class BlazorRestClientFactory : IRestClientFactory
 {

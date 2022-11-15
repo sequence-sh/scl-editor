@@ -6,7 +6,7 @@ using Sequence.Connectors.StructuredData;
 using Sequence.Core.Abstractions;
 using Sequence.Core.Internal;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.Utilities.SCLEditor.Components;
 
 /// <summary>
 /// Playground for using SCL

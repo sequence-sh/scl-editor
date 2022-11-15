@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using CSharpFunctionalExtensions;
 using CSharpFunctionalExtensions.ValueTasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Sequence.Connectors.FileSystem;
@@ -12,8 +11,9 @@ using Sequence.Core.Abstractions;
 using Sequence.Core.ExternalProcesses;
 using Sequence.Core.Internal;
 using Sequence.Core.LanguageServer;
+using Sequence.Utilities.SCLEditor.Components.Examples;
 
-namespace Reductech.Utilities.SCLEditor.Components;
+namespace Sequence.Utilities.SCLEditor.Components;
 
 /// <summary>
 /// A page containing a dynamic scl example

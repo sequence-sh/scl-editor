@@ -1,4 +1,4 @@
-﻿namespace Reductech.Utilities.SCLEditor.Components.Objects;
+﻿namespace Sequence.Utilities.SCLEditor.Components.Objects;
 
 public class VSCompletionResolveResponse
 {
