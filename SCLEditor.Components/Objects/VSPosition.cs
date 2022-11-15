@@ -1,6 +1,6 @@
 ﻿using Sequence.Core.LanguageServer.Objects;
 
-namespace Sequence.Utilities.SCLEditor.Components.Objects;
+namespace Sequence.SCLEditor.Components.Objects;
 
 /// <summary>
 /// A position in monaco. The LineNumber and Column are both 1-indexed

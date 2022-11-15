@@ -4,16 +4,16 @@
     <TargetFramework>net6.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <RootNamespace>Sequence.Utilities.SCLEditor.Components</RootNamespace>
-    <AssemblyName>Sequence.Utilities.SCLEditor.Components</AssemblyName>
+    <RootNamespace>Sequence.SCLEditor.Components</RootNamespace>
+    <AssemblyName>Sequence.SCLEditor.Components</AssemblyName>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>0.18.0$(VersionSuffix)</Version>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Sequence.Utilities.SCLEditor.Components</PackageId>
-    <Title>Sequence® Configuration Language Editor</Title>
+    <PackageId>Sequence.SCLEditor.Components</PackageId>
+    <Title>Sequence Configuration Language Editor</Title>
     <Description>Blazor components for an in-browser SCL editor. Based on Microsofts's Monaco editor.</Description>
     <Product>Sequence®</Product>
 

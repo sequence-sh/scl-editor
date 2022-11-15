@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Subjects;
 using MudBlazor;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// MudBlazor Themes

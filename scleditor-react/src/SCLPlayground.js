@@ -71,9 +71,7 @@ class SCLPlayground extends React.Component {
         )
       )
       .then(() =>
-        SCLPlayground.addScript(
-          '_content/Reductech.Utilities.SCLEditor.Components/DefineSCLLanguage.js'
-        )
+        SCLPlayground.addScript('_content/Sequence.SCLEditor.Components/DefineSCLLanguage.js')
       )
       .then(() => SCLPlayground.addScript('_framework/blazor.webassembly.js', { autostart: false }))
       // eslint-disable-next-line no-undef

@@ -4,7 +4,7 @@ using BlazorDownloadFile;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Forms;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// Virtual file system to use in SCL Editor

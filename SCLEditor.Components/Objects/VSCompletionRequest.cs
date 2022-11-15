@@ -1,4 +1,4 @@
-﻿namespace Sequence.Utilities.SCLEditor.Components.Objects;
+﻿namespace Sequence.SCLEditor.Components.Objects;
 
 /// <summary>
 /// A visual studio code completion request

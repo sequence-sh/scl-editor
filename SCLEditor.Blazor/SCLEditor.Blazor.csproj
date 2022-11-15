@@ -4,12 +4,12 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AssemblyName>SCLEditor.Blazor</AssemblyName>
-    <RootNamespace>Sequence.Utilities.SCLEditor.Blazor</RootNamespace>
+    <RootNamespace>Sequence.SCLEditor.Blazor</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Sequence.Utilities.SCLEditor.Blazor</PackageId>
+    <PackageId>Sequence.SCLEditor.Blazor</PackageId>
     <Title>Sequence® Configuration Language Blazor Playground</Title>
     <Product>Sequence®</Product>
     <RepositoryUrl>https://gitlab.com/sequence/scl-editor.git</RepositoryUrl>

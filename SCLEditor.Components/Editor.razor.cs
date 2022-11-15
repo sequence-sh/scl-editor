@@ -1,6 +1,6 @@
 using MudBlazor;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// Razor component wrapping the Monaco editor

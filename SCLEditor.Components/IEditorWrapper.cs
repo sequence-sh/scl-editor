@@ -1,9 +1,9 @@
 ﻿using System.IO.Abstractions;
 using Sequence.Core.Internal;
 using Sequence.Core.LanguageServer;
-using Sequence.Utilities.SCLEditor.Components.Objects;
+using Sequence.SCLEditor.Components.Objects;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// Wraps a monaco editor

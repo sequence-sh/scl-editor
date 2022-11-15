@@ -1,6 +1,6 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// File metadata for the in-browser file system

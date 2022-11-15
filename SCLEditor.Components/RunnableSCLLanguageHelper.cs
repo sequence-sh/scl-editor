@@ -8,7 +8,7 @@ using Sequence.Core.Internal.Parser;
 using Sequence.Core.Internal.Serialization;
 using Sequence.Core.Util;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// SCL language helper that can also run SCL

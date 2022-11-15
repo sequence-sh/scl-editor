@@ -4,7 +4,7 @@ using Sequence.Core.Internal;
 using Sequence.Core.Steps;
 using Sequence.Core.Util;
 
-namespace Sequence.Utilities.SCLEditor.Components.Examples;
+namespace Sequence.SCLEditor.Components.Examples;
 
 /// <summary>
 /// A component used in an example

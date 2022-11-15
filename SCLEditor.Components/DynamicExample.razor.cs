@@ -11,9 +11,9 @@ using Sequence.Core.Abstractions;
 using Sequence.Core.ExternalProcesses;
 using Sequence.Core.Internal;
 using Sequence.Core.LanguageServer;
-using Sequence.Utilities.SCLEditor.Components.Examples;
+using Sequence.SCLEditor.Components.Examples;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// A page containing a dynamic scl example

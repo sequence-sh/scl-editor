@@ -3,8 +3,8 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
-using Sequence.Utilities.SCLEditor.Components;
-using Sequence.Utilities.SCLEditor.React;
+using Sequence.SCLEditor.Components;
+using Sequence.SCLEditor.React;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 

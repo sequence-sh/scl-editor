@@ -12,8 +12,8 @@ using Sequence.Core.Abstractions;
 using Sequence.Core.Internal;
 using Sequence.Core.Steps;
 using Sequence.Core.TestHarness;
-using Sequence.Utilities.SCLEditor.Components;
-using Sequence.Utilities.SCLEditor.Components.Examples;
+using Sequence.SCLEditor.Components;
+using Sequence.SCLEditor.Components.Examples;
 using Xunit;
 
 namespace SCLEditor.Tests;

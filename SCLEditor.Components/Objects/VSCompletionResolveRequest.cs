@@ -1,3 +1,3 @@
-﻿namespace Sequence.Utilities.SCLEditor.Components.Objects;
+﻿namespace Sequence.SCLEditor.Components.Objects;
 
 public record VSCompletionResolveRequest(VSCompletionItem Item);

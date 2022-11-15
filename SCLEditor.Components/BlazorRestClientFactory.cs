@@ -2,7 +2,7 @@
 using RestSharp;
 using Sequence.Core;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 public class BlazorRestClientFactory : IRestClientFactory
 {

@@ -1,4 +1,4 @@
-﻿namespace Sequence.Utilities.SCLEditor.Components;
+﻿namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// A diff Editor component

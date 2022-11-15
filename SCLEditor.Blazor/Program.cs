@@ -3,9 +3,9 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
-using Sequence.Utilities.SCLEditor.Components;
+using Sequence.SCLEditor.Components;
 
-namespace Sequence.Utilities.SCLEditor.Blazor;
+namespace Sequence.SCLEditor.Blazor;
 
 public class Program
 {

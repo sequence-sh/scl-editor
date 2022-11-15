@@ -1,6 +1,6 @@
 ﻿using Sequence.Core.LanguageServer.Objects;
 
-namespace Sequence.Utilities.SCLEditor.Components.Objects;
+namespace Sequence.SCLEditor.Components.Objects;
 
 public record VSSignatureParameter(string Label, string Name, VSString Documentation)
 {

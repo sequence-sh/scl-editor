@@ -1,7 +1,7 @@
 ﻿using Sequence.Core;
 using Sequence.Core.Internal;
 
-namespace Sequence.Utilities.SCLEditor.Components.Examples;
+namespace Sequence.SCLEditor.Components.Examples;
 
 /// <summary>
 /// The Output of an example

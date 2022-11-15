@@ -96,7 +96,7 @@
     </script>
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
     <script src="_content/BlazorMonaco/jsInterop.js"></script>
-    <script src="_content/Sequence.Utilities.SCLEditor.Components/DefineSCLLanguage.js"></script>
+    <script src="_content/Sequence.SCLEditor.Components/DefineSCLLanguage.js"></script>
     <script src="js/iframeResizer.contentWindow.min.js"></script>
     <script>
       window.loadStart = Date.now();
@@ -115,11 +115,7 @@
         }, Math.max(0, 4500 - elapsed));
       };
       window.setDarkMode = function (isDarkMode) {
-        DotNet.invokeMethodAsync(
-          'Sequence.Utilities.SCLEditor.React',
-          'SetIsDarkMode',
-          isDarkMode
-        );
+        DotNet.invokeMethodAsync('Sequence.SCLEditor.React', 'SetIsDarkMode', isDarkMode);
       };
     </script>
     <script src="_framework/blazor.webassembly.js" autostart="true"></script>

@@ -1,9 +1,9 @@
 ﻿using Sequence.Core.Internal;
 using Sequence.Core.Internal.Documentation;
 using Sequence.Core.LanguageServer;
-using Sequence.Utilities.SCLEditor.Components.Objects;
+using Sequence.SCLEditor.Components.Objects;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// Contains JS Invokable methods for working with SCL

@@ -5,13 +5,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>SCLEditor.Blazor</AssemblyName>
-    <RootNamespace>Sequence.Utilities.SCLEditor.BlazorServer</RootNamespace>
+    <RootNamespace>Sequence.SCLEditor.BlazorServer</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Sequence.Utilities.SCLEditor.BlazorServer</PackageId>
-    <Title>Sequence® Configuration Language Blazor Server Playground</Title>
+    <PackageId>Sequence.SCLEditor.BlazorServer</PackageId>
+    <Title>Sequence Configuration Language Blazor Server Playground</Title>
     <Product>Sequence®</Product>
     <RepositoryUrl>https://gitlab.com/sequence/scl-editor.git</RepositoryUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

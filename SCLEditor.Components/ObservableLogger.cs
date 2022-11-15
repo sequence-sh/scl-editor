@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Sequence.Core.Internal.Logging;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 public class ObservableLogger : ILogger, INotifyPropertyChanged
 {

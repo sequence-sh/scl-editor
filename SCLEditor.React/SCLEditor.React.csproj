@@ -4,16 +4,16 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>Sequence.Utilities.SCLEditor.React</AssemblyName>
-    <RootNamespace>Sequence.Utilities.SCLEditor.React</RootNamespace>
+    <AssemblyName>Sequence.SCLEditor.React</AssemblyName>
+    <RootNamespace>Sequence.SCLEditor.React</RootNamespace>
     <!-- <RunAOTCompilation>true</RunAOTCompilation> -->
     <!-- <PublishTrimmed>True</PublishTrimmed> -->
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Sequence.Utilities.SCLEditor.React</PackageId>
-    <Title>Sequence® Configuration Language Editor - React Components</Title>
+    <PackageId>Sequence.SCLEditor.React</PackageId>
+    <Title>Sequence Configuration Language Editor - React Components</Title>
     <Product>Sequence®</Product>
     <RepositoryUrl>https://gitlab.com/sequence/scl-editor.git</RepositoryUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

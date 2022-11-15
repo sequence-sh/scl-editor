@@ -1,6 +1,6 @@
 ﻿using Sequence.Core.Internal;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// Language Helper for the SCL language

@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace Sequence.Utilities.SCLEditor.Components;
+namespace Sequence.SCLEditor.Components;
 
 /// <summary>
 /// The editor configuration
